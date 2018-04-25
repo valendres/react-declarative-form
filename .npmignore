@@ -1,0 +1,18 @@
+# Folders
+.cache
+.vscode
+example
+node_modules
+src
+test
+
+# Files
+.editorconfig
+.gitignore
+.prettierrc
+tsconfig.json
+tslint.json
+wallaby.config.json
+webpack.config.json
+yarn-error.log
+yarn.lock

@@ -1,0 +1,87 @@
+{
+    "name": "react-form-validator",
+    "version": "0.0.1",
+    "description": "Simple react form validation",
+    "main": "./lib/index.js",
+    "repository": "valendres/react-form-validator",
+    "author": {
+        "name": "Peter Weller",
+        "email": "contact@peterweller.com.au",
+        "url": "https://github.com/valendres"
+    },
+    "license": "MIT",
+    "private": false,
+    "scripts": {
+        "clean": "rimraf dist",
+        "copy": "cpx ./package.json ./dist && cpx .npmignore ./dist",
+        "start": "webpack-dev-server --hot",
+        "test": "jest --silent",
+        "prettier": "prettier --write \"?(src|example|test)/**/*.ts?(x)\"",
+        "build": "tsc --sourceMap false",
+        "prebuild": "yarn install && yarn run clean",
+        "postbuild": "mv ./dist/src ./dist/lib",
+        "prepackage": "yarn run build && yarn run copy",
+        "package": "cd ./dist && yarn pack",
+        "precommit": "yarn run test --coverage=0 && lint-staged"
+    },
+    "lint-staged": {
+        "*.{ts,tsx,js,jsx}": [
+            "prettier --write",
+            "git add"
+        ]
+    },
+    "devDependencies": {
+        "@types/enzyme": "^3.1.10",
+        "@types/enzyme-adapter-react-16": "^1.0.2",
+        "@types/jest": "^22.2.3",
+        "@types/react": "^16.3.12",
+        "@types/react-dom": "^16.0.5",
+        "awesome-typescript-loader": "^5.0.0",
+        "cpx": "^1.5.0",
+        "enzyme": "^3.3.0",
+        "enzyme-adapter-react-16": "^1.1.1",
+        "html-webpack-plugin": "^3.2.0",
+        "husky": "^0.14.3",
+        "jest": "^22.4.3",
+        "lint-staged": "^7.0.4",
+        "open-browser-webpack-plugin": "^0.0.5",
+        "prettier": "^1.12.1",
+        "react": "^16.3.2",
+        "react-dom": "^16.3.2",
+        "react-hot-loader": "^4.1.2",
+        "rimraf": "^2.6.2",
+        "source-map-loader": "^0.2.3",
+        "ts-jest": "^22.4.4",
+        "tslint": "^5.9.1",
+        "tslint-config-airbnb": "^5.8.0",
+        "tslint-config-prettier": "^1.12.0",
+        "tslint-react": "^3.5.1",
+        "typescript": "^2.8.3",
+        "webpack": "^4.6.0",
+        "webpack-cli": "^2.0.15",
+        "webpack-dev-server": "^3.1.3",
+        "webpack-hot-middleware": "^2.22.1"
+    },
+    "peerDependencies": {
+        "react": ">=0.16.3",
+        "react-dom": "^16.3.2"
+    },
+    "dependencies": {},
+    "jest": {
+        "setupTestFrameworkScriptFile": "<rootDir>/test/setup.ts",
+        "transform": {
+            ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+        },
+        "testRegex": "(<rootDir>/src/.*|(\\.|/)(test))\\.tsx?$",
+        "moduleFileExtensions": [
+            "ts",
+            "tsx",
+            "js"
+        ],
+        "collectCoverage": false,
+        "collectCoverageFrom": [
+            "!src/**/*.test.{.ts,tsx}",
+            "src/**/*.{.ts,tsx}"
+        ]
+    }
+}

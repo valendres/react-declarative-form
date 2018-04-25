@@ -1,0 +1,12 @@
+# Dir
+node_modules
+dist
+
+# IDEs
+.vscode
+
+# logs
+*.log
+
+# Awesome typescript loader
+.cache

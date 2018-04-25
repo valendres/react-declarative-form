@@ -1,0 +1,16 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint-config-airbnb",
+        "tslint-react",
+        "tslint-config-prettier"
+    ],
+    "rules": {
+        "variable-name": [
+            true,
+            "ban-keywords",
+            "check-format",
+            "allow-pascal-case"
+        ]
+    }
+}

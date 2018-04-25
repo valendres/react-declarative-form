@@ -1,0 +1,38 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "target": "es5",
+        "lib": [
+            "dom",
+            "dom.iterable",
+            "es5",
+            "es2015",
+            "es2016"
+        ],
+        "jsx": "react",
+        "outDir": "./dist",
+        "baseUrl": "./",
+        "paths": {
+            "react-form-validator": [
+                "./src"
+            ]
+        },
+        "noImplicitReturns": false,
+        "noImplicitThis": true,
+        "noImplicitAny": true,
+        "strictNullChecks": false,
+        "noUnusedLocals": true,
+        "sourceMap": true,
+        "allowJs": false,
+        "declaration": true
+    },
+    "include": [
+        "./src/**/*",
+        "./example/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.test.ts"
+    ]
+}

@@ -83,9 +83,7 @@ describe('rule: sameAs', () => {
                     password: 'some password',
                     passwordConfirm: 'that does not match',
                 },
-                {
-                    targetKey: 'passwordConfirm',
-                },
+                'passwordConfirm',
             ),
         ).toEqual({
             key: 'sameAs',
@@ -99,9 +97,7 @@ describe('rule: sameAs', () => {
             rule(
                 'password',
                 { password: 'matching!', passwordConfirm: 'matching!' },
-                {
-                    targetKey: 'passwordConfirm',
-                },
+                'passwordConfirm',
             ),
         ).toBeUndefined();
     });

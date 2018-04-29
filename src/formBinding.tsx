@@ -2,41 +2,59 @@ import * as React from 'react';
 import { FormContext, FormApi } from './Form';
 import { ValidationResponse, ValidationContext } from './types';
 
-export interface BoundExternalProps {
-    name: string;
-    value?: any;
-    validationRules?: any;
-    validationMessages?: any;
-    onChange?: () => void;
-    onBlur?: (event: React.FormEvent<any>) => void;
-    onFocus?: (event: React.FormEvent<any>) => void;
+export interface BoundComponentInternalProps {
+    readonly name: string;
+    readonly validationRules?: any;
+    readonly validationMessages?: any;
+    readonly validationMessage?: string;
+    readonly validationContext?: ValidationContext;
+    readonly validationGroup?: string[];
+    readonly setValue?: (value: any) => void;
 }
 
-export interface BoundInternalProps {
-    value?: any;
-    setValue?: (value: any) => void;
-    validationMessage?: string;
-    validationContext?: ValidationContext;
+export interface BoundComponentExternalProps {
+    readonly value?: any;
+    readonly required?: boolean;
+    readonly onChange?: (event: any) => void;
+    readonly onBlur: (event: React.FocusEvent<any>) => void;
+    readonly onFocus?: (event: React.FocusEvent<any>) => void;
 }
 
-export interface BoundState {
-    value?: any;
-    validation?: ValidationResponse;
+export type BoundComponentProps = BoundComponentInternalProps &
+    BoundComponentExternalProps;
+
+export interface BoundComponentInstance {
+    readonly props: BoundComponentProps;
+    readonly state: BoundComponentState;
+    readonly validate: () => void;
+    readonly isValid: () => boolean;
 }
 
-export function bind<
-    ComponentProps extends BoundExternalProps & BoundInternalProps
->(WrappedComponent: React.ComponentClass<ComponentProps>) {
-    return class extends React.Component<
-        ComponentProps & BoundExternalProps,
-        BoundState
-    > {
-        static defaultProps = {
+export interface BoundComponentState {
+    readonly value?: any;
+    readonly validation?: ValidationResponse;
+}
+export function bind<ComponentProps extends BoundComponentProps>(
+    WrappedComponent: React.ComponentClass<ComponentProps>,
+) {
+    return class BoundComponent
+        extends React.Component<ComponentProps, BoundComponentState>
+        implements BoundComponentInstance {
+        formApi: FormApi;
+
+        static defaultProps: Partial<BoundComponentProps> = {
             onBlur: () => {},
             onFocus: () => {},
         };
 
-        formApi: FormApi;
+        static getDerivedStateFromProps(
+            nextProps: BoundComponentProps,
+            prevState: BoundComponentState,
+        ) {
+            return {
+                value: nextProps.value,
+            };
+        }
 
         public constructor(props: ComponentProps) {
             super(props);
@@ -45,35 +63,36 @@ export function bind<
             };
         }
 
+        public componentDidMount() {
+            this.formApi.registerComponent(this.props.name, this);
+        }
+
         public componentWillUnmount() {
             this.formApi.unregisterComponent(this.props.name);
         }
 
         public validate = () => {
-            const validation = this.formApi.getValidation(
-                this.props.name,
-                this.state.value,
-            );
             this.setState({
-                validation,
+                validation: this.getValidation(),
             });
         };
 
         public isValid = (): boolean => {
-            const validation = this.formApi.getValidation(
-                this.props.name,
-                this.state.value,
-            );
-            return validation.context === ValidationContext.Success;
+            return this.getValidation().context === ValidationContext.Success;
         };
 
         public render() {
             const { validation } = this.state;
-            const message = validation ? validation.message : undefined;
-            const context = validation ? validation.context : undefined;
+            const message =
+                this.props.validationMessage ||
+                (validation ? validation.message : undefined);
+            const context =
+                this.props.validationContext ||
+                (validation ? validation.context : undefined);
 
             const {
                 // Omit these
+                validationGroup,
                 validationMessages,
                 validationRules,
                 ...restProps
@@ -83,7 +102,6 @@ export function bind<
                 <FormContext.Consumer>
                     {(api: FormApi) => {
                         this.formApi = api;
-                        this.formApi.registerComponent(this.props.name, this);
                         return (
                             <WrappedComponent
                                 {...restProps}
@@ -100,14 +118,18 @@ export function bind<
             );
         }
 
+        getValidation = (value: any = this.state.value): ValidationResponse => {
+            const { name, required } = this.props;
+            return this.formApi.getValidation(name, value, required);
+        };
+
         setValue = (value: any) => {
             const { name } = this.props;
-            const validation = this.formApi.getValidation(name, value);
             console.log(`Wrapped component: "${name}" changed to "${value}"`);
             this.setState(
                 {
                     value,
-                    validation,
+                    validation: this.getValidation(value),
                 },
                 () => {
                     this.formApi.handleChange(name, value);
@@ -115,7 +137,7 @@ export function bind<
             );
         };
 
-        handleBlur = (event?: React.FormEvent<any>): void => {
+        handleBlur = (event?: React.FocusEvent<any>): void => {
             const { name } = this.props;
             const { value } = this.state;
             console.log(`Wrapped component: "${name}" blurred with "${value}"`);
@@ -123,7 +145,7 @@ export function bind<
             this.props.onBlur(event);
         };
 
-        handleFocus = (event?: React.FormEvent<any>): void => {
+        handleFocus = (event?: React.FocusEvent<any>): void => {
             const { name } = this.props;
             const { value } = this.state;
             console.log(`Wrapped component: "${name}" focused with "${value}"`);

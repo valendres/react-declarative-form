@@ -2,11 +2,13 @@ import * as React from 'react';
 import * as classNames from 'classnames';
 import {
     bind,
-    BoundInternalProps,
+    BoundComponentInternalProps,
     ValidationContext,
 } from 'react-form-validator';
 
-export interface TextFieldProps extends BoundInternalProps {
+export interface TextFieldProps
+    extends React.HTMLProps<HTMLInputElement>,
+        BoundComponentInternalProps {
     name: string;
     label?: string;
     onChange?: (event: React.FormEvent<HTMLInputElement>) => void;

@@ -17,11 +17,19 @@ export class App extends React.Component<AppProps> {
             <div>
                 <Form ref={this.formRef} onSubmit={this.handleSubmit}>
                     <TextField
-                        name="first-name"
-                        label="First name"
-                        validationRules={{ minValue: 5, maxValue: 10 }}
-                        validationMessages={{ minValue: 'too low...' }}
-                        type="number"
+                        name="password"
+                        label="Password"
+                        validationRules={{ minValue: 8, maxValue: 32 }}
+                        validationGroup={['password-confirm']}
+                        type="password"
+                        required
+                    />
+                    <TextField
+                        name="password-confirm"
+                        label="Confirm password"
+                        validationRules={{ sameAs: 'password' }}
+                        type="password"
+                        required
                     />
                 </Form>
             </div>

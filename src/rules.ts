@@ -45,11 +45,11 @@ export const defaultValidationRules: ValidationRuleMap = {
     },
 
     // Cross field validation
-    sameAs: (key: string, values: any, criteria: any) => {
+    sameAs: (key: string, values: any, targetKey: any) => {
         if (
             isDefined(key, values) &&
             isDefined(key, values) &&
-            values[key] !== values[criteria.targetKey]
+            values[key] !== values[targetKey]
         ) {
             return {
                 key: 'sameAs',

@@ -1,10 +1,14 @@
 import * as React from 'react';
 import { FormContext, FormApi } from './Form';
-import { ValidationResponse, ValidationContext } from './types';
+import {
+    ValidationResponse,
+    ValidationContext,
+    BaseValidationRules,
+} from './types';
 
 export interface BoundComponentInternalProps {
     readonly name: string;
-    readonly validationRules?: any;
+    readonly validationRules?: BaseValidationRules;
     readonly validationMessages?: any;
     readonly validationMessage?: string;
     readonly validationContext?: ValidationContext;
@@ -16,7 +20,7 @@ export interface BoundComponentExternalProps {
     readonly value?: any;
     readonly required?: boolean;
     readonly onChange?: (event: any) => void;
-    readonly onBlur: (event: React.FocusEvent<any>) => void;
+    readonly onBlur?: (event: React.FocusEvent<any>) => void;
     readonly onFocus?: (event: React.FocusEvent<any>) => void;
 }
 

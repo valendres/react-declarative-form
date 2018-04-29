@@ -1,18 +1,17 @@
 import {
     ValidationRule,
-    ValidationRules,
     ValidationMessages,
     ValidationResponse,
     ValidationContext,
     ValidationRuleMap,
     ValidationMessageGenerator,
 } from './types';
-import { defaultValidationRules } from './rules';
+import { baseValidationRules } from './rules';
 
 /**
  * Validation rules to be used by validator
  */
-let validationRules = defaultValidationRules;
+let validationRules = baseValidationRules;
 
 /**
  * Returns current validation rules in use
@@ -45,7 +44,9 @@ export const addValidationRule = (name: string, rule: ValidationRule): void => {
 export const validate = (
     valueKey: string,
     values: any = {},
-    targetRules: ValidationRules = {},
+    targetRules: {
+        readonly [name: string]: any;
+    } = {},
     customMessages: ValidationMessages = {},
 ): ValidationResponse => {
     const { required, ...restRules } = targetRules;

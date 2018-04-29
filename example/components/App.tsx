@@ -19,7 +19,10 @@ export class App extends React.Component<AppProps> {
                     <TextField
                         name="password"
                         label="Password"
-                        validationRules={{ minValue: 8, maxValue: 32 }}
+                        validationRules={{
+                            minValue: 5,
+                            maxValue: 32,
+                        }}
                         validationGroup={['password-confirm']}
                         type="password"
                         required
@@ -27,7 +30,7 @@ export class App extends React.Component<AppProps> {
                     <TextField
                         name="password-confirm"
                         label="Confirm password"
-                        validationRules={{ sameAs: 'password' }}
+                        validationRules={{ eqTarget: 'password' }}
                         type="password"
                         required
                     />

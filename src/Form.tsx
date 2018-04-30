@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ValidationResponse } from './types';
+import { ValidationResponse, ValueMap } from './types';
 import { validate } from './validator';
 import { BoundComponentInstance } from './formBinding';
 
@@ -10,20 +10,18 @@ export interface FormApi {
     unregisterComponent: Form['unregisterComponent'];
     validate: Form['validate'];
     getValidation: Form['getValidation'];
-    // getValue: Form['getValue'];
-    // setValue: Form['setValue'];
     handleChange: Form['handleChange'];
     handleBlur: Form['handleBlur'];
     handleFocus: Form['handleFocus'];
 }
 
 export interface FormProps {
-    onChange?: () => void;
-    onBlur?: () => void;
-    onFocus?: () => void;
-    onSubmit?: () => void;
-    onValidSubmit?: () => void;
-    onInvalidSubmit?: () => void;
+    onChange?: (name: string, value: any) => void;
+    onBlur?: (name: string, value: any) => void;
+    onFocus?: (name: string, value: any) => void;
+    onSubmit?: (values: ValueMap) => void;
+    onValidSubmit?: (values: ValueMap) => void;
+    onInvalidSubmit?: (values: ValueMap) => void;
 }
 
 export class Form extends React.Component<FormProps> {
@@ -49,20 +47,13 @@ export class Form extends React.Component<FormProps> {
         this.handleSubmit();
     };
 
-    public reset = () => {
-        this.setState({
-            values: {},
-            validations: {},
-        });
-    };
-
     public getValue = (name: string) => {
         return this.componentRefs[name].state.value;
     };
 
-    public getValues = () => {
+    public getValues = (): ValueMap => {
         return Object.keys(this.componentRefs).reduce(
-            (values: any, name: string) => {
+            (values: ValueMap, name: string) => {
                 values[name] = this.getValue(name);
                 return values;
             },
@@ -86,7 +77,10 @@ export class Form extends React.Component<FormProps> {
     };
 
     public isValid = (): boolean => {
-        return true;
+        return !Object.keys(this.componentRefs).some((name: string) => {
+            const component = this.componentRefs[name];
+            return !component.isValid();
+        });
     };
 
     public render() {
@@ -106,8 +100,6 @@ export class Form extends React.Component<FormProps> {
         const api: FormApi = {
             registerComponent: this.registerComponent,
             unregisterComponent: this.unregisterComponent,
-            // setValue: this.setValue,
-            // getValue: this.getValue,
             validate: this.validate,
             getValidation: this.getValidation,
             handleChange: this.handleChange,
@@ -200,20 +192,6 @@ export class Form extends React.Component<FormProps> {
         return [];
     };
 
-    // private setValue = (key: string, value: any) => {
-    //     this.setState({
-    //         ...this.state,
-    //         values: {
-    //             ...this.state.values,
-    //             [key]: value,
-    //         },
-    //         validations: {
-    //             ...this.state.validations,
-    //             [key]: this.getValidation(key, value),
-    //         },
-    //     });
-    // };
-
     private handleChange = (name: string, value: any) => {
         // Cross validate if necessary
         this.getRelatedComponents(name).forEach((relName: string) => {
@@ -221,35 +199,41 @@ export class Form extends React.Component<FormProps> {
             this.componentRefs[relName].validate();
         });
 
-        this.props.onChange();
         console.log(`Form: "${name}" changed to "${value}"`);
+        this.props.onChange(name, value);
     };
 
     private handleBlur = (name: string, value: any) => {
-        this.props.onBlur();
         console.log(`Form: "${name}" blurred with "${value}"`);
+        this.props.onBlur(name, value);
     };
 
     private handleFocus = (name: string, value: any) => {
-        this.props.onFocus();
         console.log(`Form: "${name}" focused with "${value}"`);
+        this.props.onFocus(name, value);
     };
 
-    private handleSubmit = () => {
-        this.props.onSubmit();
+    private handleSubmit = (event?: React.FormEvent<HTMLFormElement>) => {
+        if (event) {
+            event.preventDefault();
+        }
+        const values = this.getValues();
+        console.log('Form: submitted field with values', values);
         if (this.isValid()) {
-            this.handleValidSubmit();
+            this.handleValidSubmit(values);
         } else {
-            this.handleInvalidSubmit();
+            this.handleInvalidSubmit(values);
         }
     };
 
-    private handleValidSubmit = () => {
-        this.props.onValidSubmit();
+    private handleValidSubmit = (values: ValueMap) => {
+        console.log('Form: submission was valid');
+        this.props.onValidSubmit(values);
     };
 
-    private handleInvalidSubmit = () => {
-        this.props.onInvalidSubmit();
+    private handleInvalidSubmit = (values: ValueMap) => {
+        console.log('Form: submission was invalid');
+        this.props.onInvalidSubmit(values);
         this.validate();
     };
 }

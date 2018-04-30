@@ -14,6 +14,7 @@ export interface BoundComponentInternalProps {
     readonly validationContext?: ValidationContext;
     readonly validationGroup?: string[];
     readonly setValue?: (value: any) => void;
+    readonly pristine?: boolean;
 }
 
 export interface BoundComponentExternalProps {
@@ -35,6 +36,7 @@ export interface BoundComponentInstance {
 }
 
 export interface BoundComponentState {
+    readonly pristine: boolean;
     readonly value?: any;
     readonly validation?: ValidationResponse;
 }
@@ -56,7 +58,10 @@ export function bind<ComponentProps extends BoundComponentProps>(
             prevState: BoundComponentState,
         ) {
             return {
-                value: nextProps.value,
+                value:
+                    nextProps.value !== undefined
+                        ? nextProps.value
+                        : prevState.value,
             };
         }
 
@@ -64,6 +69,7 @@ export function bind<ComponentProps extends BoundComponentProps>(
             super(props);
             this.state = {
                 value: props.value,
+                pristine: true,
             };
         }
 
@@ -78,11 +84,18 @@ export function bind<ComponentProps extends BoundComponentProps>(
         public validate = () => {
             this.setState({
                 validation: this.getValidation(),
+                pristine: false,
             });
         };
 
         public isValid = (): boolean => {
-            return this.getValidation().context === ValidationContext.Success;
+            const consumerValid = this.props.validationContext
+                ? this.props.validationContext !== ValidationContext.Danger
+                : true;
+            const computedValid =
+                this.getValidation().context === ValidationContext.Success;
+
+            return consumerValid && computedValid;
         };
 
         public render() {
@@ -93,6 +106,10 @@ export function bind<ComponentProps extends BoundComponentProps>(
             const context =
                 this.props.validationContext ||
                 (validation ? validation.context : undefined);
+            const pristine =
+                'pristine' in this.props
+                    ? this.props.pristine
+                    : this.state.pristine;
 
             const {
                 // Omit these
@@ -110,6 +127,7 @@ export function bind<ComponentProps extends BoundComponentProps>(
                             <WrappedComponent
                                 {...restProps}
                                 value={this.state.value}
+                                pristine={pristine}
                                 validationMessage={message}
                                 validationContext={context}
                                 setValue={this.setValue}
@@ -134,6 +152,7 @@ export function bind<ComponentProps extends BoundComponentProps>(
                 {
                     value,
                     validation: this.getValidation(value),
+                    pristine: false,
                 },
                 () => {
                     this.formApi.handleChange(name, value);

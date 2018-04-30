@@ -27,6 +27,8 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
             setValue,
             validationContext,
             validationMessage,
+            pristine,
+            required,
             ...restProps
         } = this.props;
         const inputId = `${name}`;
@@ -43,16 +45,20 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
                 )}
                 <input
                     {...restProps}
-                    className={classNames('form-control', {
-                        'is-invalid': isInvalid,
-                        'is-valid': isValid,
-                    })}
+                    className={classNames(
+                        'form-control',
+                        !pristine && {
+                            'is-invalid': isInvalid,
+                            'is-valid': isValid,
+                        },
+                    )}
                     id={inputId}
                     name={inputId}
                     value={value || ''}
                     onChange={this.handleChange}
                 />
-                {isInvalid &&
+                {!pristine &&
+                    isInvalid &&
                     validationMessage && (
                         <span className="invalid-feedback">
                             {validationMessage}

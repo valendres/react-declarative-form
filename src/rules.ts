@@ -11,11 +11,11 @@ import * as isPort from 'validator/lib/isPort';
 import * as isUppercase from 'validator/lib/isUppercase';
 import * as isUrl from 'validator/lib/isURL';
 
-import { ValidationContext, ValidationRuleMap } from './types';
+import { ValidationContext, ValidationRuleMap, ValueMap } from './types';
 import { isDefined } from './utils';
 
 const miscValidationRules: ValidationRuleMap = {
-    required: (key: string, values: any) => {
+    required: (key: string, values: ValueMap) => {
         if (!isDefined(key, values)) {
             return {
                 key: 'required',
@@ -27,7 +27,7 @@ const miscValidationRules: ValidationRuleMap = {
 };
 
 const numericValidationRules: ValidationRuleMap = {
-    minValue: (key: string, values: any, minValue: number) => {
+    minValue: (key: string, values: ValueMap, minValue: number) => {
         if (isDefined(key, values) && values[key] < minValue) {
             return {
                 key: 'minValue',
@@ -36,7 +36,7 @@ const numericValidationRules: ValidationRuleMap = {
             };
         }
     },
-    maxValue: (key: string, values: any, maxValue: number) => {
+    maxValue: (key: string, values: ValueMap, maxValue: number) => {
         if (isDefined(key, values) && values[key] > maxValue) {
             return {
                 key: 'maxValue',
@@ -45,7 +45,7 @@ const numericValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isDivisibleBy: (key: string, values: any, num: number) => {
+    isDivisibleBy: (key: string, values: ValueMap, num: number) => {
         if (
             isDefined(key, values) &&
             !isDivisibleBy(String(values[key]), num)
@@ -57,7 +57,7 @@ const numericValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isInteger: (key: string, values: any) => {
+    isInteger: (key: string, values: ValueMap) => {
         if (isDefined(key, values) && !isInteger(String(values[key]))) {
             return {
                 key: 'isInteger',
@@ -66,7 +66,7 @@ const numericValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isDecimal: (key: string, values: any) => {
+    isDecimal: (key: string, values: ValueMap) => {
         if (isDefined(key, values) && !isDecimal(String(values[key]))) {
             return {
                 key: 'isDecimal',
@@ -75,7 +75,7 @@ const numericValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isNumeric: (key: string, values: any) => {
+    isNumeric: (key: string, values: ValueMap) => {
         if (isDefined(key, values) && !isNumeric(String(values[key]))) {
             return {
                 key: 'isNumeric',
@@ -87,7 +87,7 @@ const numericValidationRules: ValidationRuleMap = {
 };
 
 const stringValidationRules: ValidationRuleMap = {
-    minLength: (key: string, values: any, minLength: number) => {
+    minLength: (key: string, values: ValueMap, minLength: number) => {
         if (isDefined(key, values) && String(values[key]).length < minLength) {
             return {
                 key: 'minLength',
@@ -96,7 +96,7 @@ const stringValidationRules: ValidationRuleMap = {
             };
         }
     },
-    maxLength: (key: string, values: any, maxLength: number) => {
+    maxLength: (key: string, values: ValueMap, maxLength: number) => {
         if (isDefined(key, values) && String(values[key]).length > maxLength) {
             return {
                 key: 'maxLength',
@@ -105,8 +105,8 @@ const stringValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isLength: (key: string, values: any, length: number) => {
-        if (isDefined(key, values) && String(values[key]).length === length) {
+    isLength: (key: string, values: ValueMap, length: number) => {
+        if (isDefined(key, values) && String(values[key]).length !== length) {
             return {
                 key: 'isLength',
                 context: ValidationContext.Danger,
@@ -114,7 +114,7 @@ const stringValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isLowercase: (key: string, values: any) => {
+    isLowercase: (key: string, values: ValueMap) => {
         if (isDefined(key, values) && !isLowercase(String(values[key]))) {
             return {
                 key: 'isLowercase',
@@ -123,7 +123,7 @@ const stringValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isUppercase: (key: string, values: any) => {
+    isUppercase: (key: string, values: ValueMap) => {
         if (isDefined(key, values) && !isUppercase(String(values[key]))) {
             return {
                 key: 'isUppercase',
@@ -135,7 +135,7 @@ const stringValidationRules: ValidationRuleMap = {
 };
 
 const regexValidationRules: ValidationRuleMap = {
-    matches: (key: string, values: any, pattern: RegExp) => {
+    matches: (key: string, values: ValueMap, pattern: RegExp) => {
         if (isDefined(key, values) && !pattern.test(values[key])) {
             return {
                 key: 'matches',
@@ -144,7 +144,7 @@ const regexValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isEmail: (key: string, values: any) => {
+    isEmail: (key: string, values: ValueMap) => {
         if (isDefined(key, values) && !isEmail(String(values[key]))) {
             return {
                 key: 'isEmail',
@@ -153,7 +153,7 @@ const regexValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isUrl: (key: string, values: any) => {
+    isUrl: (key: string, values: ValueMap) => {
         if (isDefined(key, values) && !isUrl(String(values[key]))) {
             return {
                 key: 'isUrl',
@@ -162,7 +162,7 @@ const regexValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isCreditCard: (key: string, values: any) => {
+    isCreditCard: (key: string, values: ValueMap) => {
         if (isDefined(key, values) && !isCreditCard(String(values[key]))) {
             return {
                 key: 'isCreditCard',
@@ -171,7 +171,7 @@ const regexValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isHexColor: (key: string, values: any) => {
+    isHexColor: (key: string, values: ValueMap) => {
         if (isDefined(key, values) && !isHexColor(String(values[key]))) {
             return {
                 key: 'isHexColor',
@@ -180,7 +180,7 @@ const regexValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isIP: (key: string, values: any) => {
+    isIP: (key: string, values: ValueMap) => {
         if (isDefined(key, values) && !isIP(String(values[key]))) {
             return {
                 key: 'isIP',
@@ -189,7 +189,7 @@ const regexValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isPort: (key: string, values: any) => {
+    isPort: (key: string, values: ValueMap) => {
         if (isDefined(key, values) && !isPort(String(values[key]))) {
             return {
                 key: 'isPort',
@@ -201,7 +201,7 @@ const regexValidationRules: ValidationRuleMap = {
 };
 
 const crossFieldValidationRules: ValidationRuleMap = {
-    eqTarget: (key: string, values: any, targetKey: string) => {
+    eqTarget: (key: string, values: ValueMap, targetKey: string) => {
         if (
             isDefined(key, values) &&
             isDefined(targetKey, values) &&
@@ -214,11 +214,11 @@ const crossFieldValidationRules: ValidationRuleMap = {
             };
         }
     },
-    gtTarget: (key: string, values: any, targetKey: string) => {
+    gtTarget: (key: string, values: ValueMap, targetKey: string) => {
         if (
             isDefined(key, values) &&
             isDefined(targetKey, values) &&
-            Number(values[key]) > Number(values[targetKey])
+            Number(values[targetKey]) > Number(values[key])
         ) {
             return {
                 key: 'gt',
@@ -227,11 +227,11 @@ const crossFieldValidationRules: ValidationRuleMap = {
             };
         }
     },
-    gteTarget: (key: string, values: any, targetKey: string) => {
+    gteTarget: (key: string, values: ValueMap, targetKey: string) => {
         if (
             isDefined(key, values) &&
             isDefined(targetKey, values) &&
-            Number(values[key]) >= Number(values[targetKey])
+            Number(values[targetKey]) >= Number(values[key])
         ) {
             return {
                 key: 'gte',
@@ -240,11 +240,11 @@ const crossFieldValidationRules: ValidationRuleMap = {
             };
         }
     },
-    ltTarget: (key: string, values: any, targetKey: string) => {
+    ltTarget: (key: string, values: ValueMap, targetKey: string) => {
         if (
             isDefined(key, values) &&
             isDefined(targetKey, values) &&
-            Number(values[key]) < Number(values[targetKey])
+            Number(values[targetKey]) < Number(values[key])
         ) {
             return {
                 key: 'ltTarget',
@@ -253,11 +253,11 @@ const crossFieldValidationRules: ValidationRuleMap = {
             };
         }
     },
-    lteTarget: (key: string, values: any, targetKey: string) => {
+    lteTarget: (key: string, values: ValueMap, targetKey: string) => {
         if (
             isDefined(key, values) &&
             isDefined(targetKey, values) &&
-            Number(values[key]) <= Number(values[targetKey])
+            Number(values[targetKey]) <= Number(values[key])
         ) {
             return {
                 key: 'lteTarget',

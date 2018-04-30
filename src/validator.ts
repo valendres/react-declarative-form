@@ -5,6 +5,7 @@ import {
     ValidationContext,
     ValidationRuleMap,
     ValidationMessageGenerator,
+    ValueMap,
 } from './types';
 import { baseValidationRules } from './rules';
 
@@ -43,7 +44,7 @@ export const addValidationRule = (name: string, rule: ValidationRule): void => {
  */
 export const validate = (
     valueKey: string,
-    values: any = {},
+    values: ValueMap = {},
     targetRules: {
         readonly [name: string]: any;
     } = {},

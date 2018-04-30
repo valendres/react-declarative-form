@@ -1,6 +1,6 @@
 import { addValidationRule, getValidationRules, validate } from './/validator';
 import { baseValidationRules } from './/rules';
-import { ValidationContext } from './/types';
+import { ValidationContext, ValueMap } from './/types';
 
 describe('validation rules', () => {
     it('should use default validation rules', () => {
@@ -10,7 +10,7 @@ describe('validation rules', () => {
 
     it('should should allow additional validation rules to be defined', () => {
         const customRuleKey = 'customValidationRule';
-        const customRule = (key: string, values: any, criteria: any) => {
+        const customRule = (key: string, values: ValueMap, criteria: any) => {
             return {
                 context: ValidationContext.Danger,
             };
@@ -33,7 +33,7 @@ describe('func: validate', () => {
     beforeAll(() => {
         addValidationRule(
             validationKey,
-            (key: string, values: any, criteria: any) => ({
+            (key: string, values: ValueMap, criteria: any) => ({
                 context: validationContext,
                 message: validationMessage,
             }),
@@ -100,7 +100,7 @@ describe('func: validate', () => {
     it('should return custom error message generator if provided', () => {
         const inputValue = 10;
         const minValue = 50;
-        const generator = (key: string, values: any, criteria: number) => {
+        const generator = (key: string, values: ValueMap, criteria: number) => {
             return `Gen: ${values[key]} is less than ${criteria}...`;
         };
 

@@ -6,7 +6,7 @@ export enum ValidationContext {
 
 export type ValidationRule = (
     key: string,
-    values: any,
+    values: ValueMap,
     criteria?: any,
 ) => ValidationResponse;
 
@@ -87,7 +87,7 @@ export interface BaseValidationRules {
 
 export type ValidationMessageGenerator = ((
     key: string,
-    values: any,
+    values: ValueMap,
     criteria?: any,
 ) => string);
 
@@ -99,4 +99,8 @@ export interface ValidationResponse {
     readonly key?: string;
     readonly context: ValidationContext;
     readonly message?: string;
+}
+
+export interface ValueMap {
+    [name: string]: any;
 }

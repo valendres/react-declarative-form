@@ -146,8 +146,6 @@ export function bind<ComponentProps extends BoundComponentProps>(
         };
 
         setValue = (value: any) => {
-            const { name } = this.props;
-            console.log(`Wrapped component: "${name}" changed to "${value}"`);
             this.setState(
                 {
                     value,
@@ -155,24 +153,18 @@ export function bind<ComponentProps extends BoundComponentProps>(
                     pristine: false,
                 },
                 () => {
-                    this.formApi.handleChange(name, value);
+                    this.formApi.handleChange(this.props.name, value);
                 },
             );
         };
 
         handleBlur = (event?: React.FocusEvent<any>): void => {
-            const { name } = this.props;
-            const { value } = this.state;
-            console.log(`Wrapped component: "${name}" blurred with "${value}"`);
-            this.formApi.handleBlur(name, value);
+            this.formApi.handleBlur(this.props.name, this.state.value);
             this.props.onBlur(event);
         };
 
         handleFocus = (event?: React.FocusEvent<any>): void => {
-            const { name } = this.props;
-            const { value } = this.state;
-            console.log(`Wrapped component: "${name}" focused with "${value}"`);
-            this.formApi.handleFocus(name, value);
+            this.formApi.handleFocus(this.props.name, this.state.value);
             this.props.onFocus(event);
         };
     };

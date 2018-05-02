@@ -1,13 +1,16 @@
 import * as React from 'react';
-import * as classNames from 'classnames';
 import {
     bind,
     BoundComponentInternalProps,
     ValidationContext,
 } from 'react-form-validator';
 
+import MaterialTextField, {
+    TextFieldProps as MaterialTextFieldProps,
+} from 'material-ui/TextField';
+
 export interface TextFieldProps
-    extends React.HTMLProps<HTMLInputElement>,
+    extends MaterialTextFieldProps,
         BoundComponentInternalProps {
     name: string;
     label?: string;
@@ -21,7 +24,6 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
 
     render() {
         const {
-            label,
             name,
             value,
             setValue,
@@ -31,40 +33,22 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
             required,
             ...restProps
         } = this.props;
-        const inputId = `${name}`;
 
-        const isInvalid = validationContext === ValidationContext.Danger;
-        const isValid = validationContext === ValidationContext.Success;
+        const inputId = `${name}`;
+        const hasError = validationContext === ValidationContext.Danger;
 
         return (
-            <div className="form-group">
-                {label && (
-                    <label className="control-label" htmlFor={inputId}>
-                        {label}
-                    </label>
-                )}
-                <input
-                    {...restProps}
-                    className={classNames(
-                        'form-control',
-                        !pristine && {
-                            'is-invalid': isInvalid,
-                            'is-valid': isValid,
-                        },
-                    )}
-                    id={inputId}
-                    name={inputId}
-                    value={value || ''}
-                    onChange={this.handleChange}
-                />
-                {!pristine &&
-                    isInvalid &&
-                    validationMessage && (
-                        <span className="invalid-feedback">
-                            {validationMessage}
-                        </span>
-                    )}
-            </div>
+            <MaterialTextField
+                fullWidth
+                margin="dense"
+                {...restProps}
+                id={inputId}
+                name={inputId}
+                value={value || ''}
+                onChange={this.handleChange}
+                error={!pristine && hasError}
+                helperText={!pristine && validationMessage}
+            />
         );
     }
 
@@ -74,4 +58,6 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
     };
 }
 
-export const TextField = bind<TextFieldProps>(UnboundTextField);
+export const TextField: React.ComponentClass<TextFieldProps> = bind<
+    TextFieldProps
+>(UnboundTextField);

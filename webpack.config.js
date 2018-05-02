@@ -11,11 +11,7 @@ module.exports = {
         stats: 'errors-only',
     },
     mode: 'development',
-    entry: [
-        'react-hot-loader/patch',
-        'webpack-hot-middleware/client',
-        './example/index',
-    ],
+    entry: ['react-hot-loader/patch', './example/index'],
     output: {
         path: path.resolve(__dirname, 'dist'),
         publicPath: '/',
@@ -39,6 +35,18 @@ module.exports = {
     ],
     module: {
         rules: [
+            {
+                test: /\.(woff2?|eot|ttf)$/i,
+                loader: 'file-loader',
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    'style-loader',
+                    { loader: 'css-loader', options: { importLoaders: 1 } },
+                    'postcss-loader',
+                ],
+            },
             {
                 test: /\.tsx?$/,
                 exclude: ['/node_modules/', 'dist'],

@@ -1,9 +1,11 @@
 import * as React from 'react';
 import * as zxcvbn from 'zxcvbn';
 import { Form, ValueMap, ValidationContext } from 'react-form-validator';
-import { Button } from './Button';
-import { Col } from './Col';
-import { Row } from './Row';
+import Button from 'material-ui/Button';
+import Grid from 'material-ui/Grid';
+import Typography from 'material-ui/Typography';
+import Tooltip from 'material-ui/Tooltip';
+import { LinearProgress } from 'material-ui/Progress';
 import { TextField } from './Textfield';
 
 const getPasswordStrength = (password: string) => {
@@ -11,25 +13,36 @@ const getPasswordStrength = (password: string) => {
         return;
     }
 
-    switch (zxcvbn(password).score) {
-        case 0:
-            return 'Too guessable: risky password.';
-        case 1:
-            return 'Very guessable: protection from throttled online attacks.';
-        case 2:
-            return 'Somewhat guessable: protection from unthrottled online attacks.';
-        case 3:
-            return 'Safely unguessable: moderate protection from offline slow-hash scenario.';
-        case 4:
-            return 'Very unguessable: strong protection from offline slow-hash scenario.';
-    }
+    const score = zxcvbn(password).score;
+    const message = (() => {
+        switch (score) {
+            case 0:
+                return 'Too guessable: risky password.';
+            case 1:
+                return 'Very guessable: protection from throttled online attacks.';
+            case 2:
+                return 'Somewhat guessable: protection from unthrottled online attacks.';
+            case 3:
+                return 'Safely unguessable: moderate protection from offline slow-hash scenario.';
+            case 4:
+                return 'Very unguessable: strong protection from offline slow-hash scenario.';
+        }
+    })();
+
+    return {
+        score,
+        message,
+    };
 };
 
 export interface AppProps {}
 
 export interface AppState {
     password?: string;
-    passwordStrength?: string;
+    passwordStrength?: {
+        score: number;
+        message: string;
+    };
 }
 
 export class App extends React.Component<AppProps, AppState> {
@@ -44,21 +57,27 @@ export class App extends React.Component<AppProps, AppState> {
     public render() {
         const { password, passwordStrength } = this.state;
 
+        const passwordStrengthPercent = passwordStrength
+            ? (passwordStrength.score + 1) * 20
+            : 0;
+        const passwordStrengthTooltip = passwordStrength
+            ? passwordStrength.message
+            : 'Enter a password to determine strength';
+
         return (
-            <div
-                style={{
-                    maxWidth: '600px',
-                    margin: '1.5rem',
-                }}
-            >
+            <div>
+                <Typography variant="title">Create an account</Typography>
                 <Form
                     ref={this.formRef}
                     onValidSubmit={this.handleFormValidSubmit}
+                    onInvalidSubmit={this.handleFormInvalidSubmit}
                     onChange={this.handleFormChange}
+                    style={{
+                        maxWidth: '600px',
+                    }}
                 >
-                    <h1>Create an account</h1>
-                    <Row>
-                        <Col>
+                    <Grid container spacing={16}>
+                        <Grid item sm={6} xs={12}>
                             <TextField
                                 name="username"
                                 label="Username"
@@ -67,8 +86,8 @@ export class App extends React.Component<AppProps, AppState> {
                                 pristine={false}
                                 required
                             />
-                        </Col>
-                        <Col>
+                        </Grid>
+                        <Grid item sm={6} xs={12}>
                             <TextField
                                 name="email"
                                 label="Email"
@@ -83,10 +102,8 @@ export class App extends React.Component<AppProps, AppState> {
                                 }}
                                 required
                             />
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
+                        </Grid>
+                        <Grid item sm={6} xs={12}>
                             <TextField
                                 name="password"
                                 label="Password"
@@ -99,8 +116,8 @@ export class App extends React.Component<AppProps, AppState> {
                                 type="password"
                                 required
                             />
-                        </Col>
-                        <Col>
+                        </Grid>
+                        <Grid item sm={6} xs={12}>
                             <TextField
                                 name="password-confirm"
                                 label="Confirm password"
@@ -111,28 +128,35 @@ export class App extends React.Component<AppProps, AppState> {
                                 type="password"
                                 required
                             />
-                        </Col>
-                    </Row>
-                    <Row>
-                        {passwordStrength && (
-                            <Col>
-                                <strong>Password strength:</strong>{' '}
-                                {passwordStrength}
-                            </Col>
-                        )}
-                    </Row>
-                    <Button
-                        label="Internal submit"
-                        type="submit"
-                        style={Button.Style.Primary}
-                    />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Tooltip
+                                title={passwordStrengthTooltip}
+                                placement="right"
+                            >
+                                <div
+                                    style={{
+                                        width: '150px',
+                                        maxWidth: '100%',
+                                        marginBottom: '1.5rem',
+                                    }}
+                                >
+                                    <Typography>Password strength</Typography>
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={passwordStrengthPercent}
+                                    />
+                                </div>
+                            </Tooltip>
+                        </Grid>
+                    </Grid>
+                    <Button type="submit" variant="raised" color="primary">
+                        Internal submit
+                    </Button>
                 </Form>
-                <Button
-                    label="External submit"
-                    type="submit"
-                    style={Button.Style.Link}
-                    onClick={this.handleSubmitButtonClick}
-                />
+                <Button type="submit" onClick={this.handleSubmitButtonClick}>
+                    External submit
+                </Button>
             </div>
         );
     }
@@ -150,7 +174,11 @@ export class App extends React.Component<AppProps, AppState> {
     };
 
     private handleFormValidSubmit = (values: ValueMap) => {
-        console.log('Successfully submitted form :)');
+        console.log('Successfully submitted form :)', values);
+    };
+
+    private handleFormInvalidSubmit = (values: ValueMap) => {
+        console.log('Failed to submit, form is invalid :(', values);
     };
 
     private handleSubmitButtonClick = () => {

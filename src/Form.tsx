@@ -22,6 +22,7 @@ export interface FormProps {
     onSubmit?: (values: ValueMap) => void;
     onValidSubmit?: (values: ValueMap) => void;
     onInvalidSubmit?: (values: ValueMap) => void;
+    style?: any;
 }
 
 export class Form extends React.Component<FormProps> {
@@ -195,21 +196,17 @@ export class Form extends React.Component<FormProps> {
     private handleChange = (name: string, value: any) => {
         // Cross validate if necessary
         this.getRelatedComponents(name).forEach((relName: string) => {
-            console.log(`Validating related component: ${relName}`);
             this.componentRefs[relName].validate();
         });
 
-        console.log(`Form: "${name}" changed to "${value}"`);
         this.props.onChange(name, value);
     };
 
     private handleBlur = (name: string, value: any) => {
-        console.log(`Form: "${name}" blurred with "${value}"`);
         this.props.onBlur(name, value);
     };
 
     private handleFocus = (name: string, value: any) => {
-        console.log(`Form: "${name}" focused with "${value}"`);
         this.props.onFocus(name, value);
     };
 
@@ -218,7 +215,6 @@ export class Form extends React.Component<FormProps> {
             event.preventDefault();
         }
         const values = this.getValues();
-        console.log('Form: submitted field with values', values);
         if (this.isValid()) {
             this.handleValidSubmit(values);
         } else {
@@ -227,12 +223,10 @@ export class Form extends React.Component<FormProps> {
     };
 
     private handleValidSubmit = (values: ValueMap) => {
-        console.log('Form: submission was valid');
         this.props.onValidSubmit(values);
     };
 
     private handleInvalidSubmit = (values: ValueMap) => {
-        console.log('Form: submission was invalid');
         this.props.onInvalidSubmit(values);
         this.validate();
     };

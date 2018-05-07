@@ -50,11 +50,18 @@ export const validate = (
     } = {},
     customMessages: ValidationMessages = {},
 ): ValidationResponse => {
-    const { required, ...restRules } = targetRules;
+    const { required, custom, ...restRules } = targetRules;
 
     // Execute required rule first (if it exists)
     if (required) {
         const response = validationRules.required(valueKey, values);
+        if (response) return response;
+    }
+
+    // Execute custom validation rule second (if it exists)
+    if (custom) {
+        const response = custom(valueKey, values);
+        // Only return if there is a response to return
         if (response) return response;
     }
 

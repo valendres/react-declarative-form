@@ -83,6 +83,9 @@ export interface BaseValidationRules {
 
     /** Input value is <= to target input value */
     lteTarget?: string;
+
+    /** Custom validation rule. It is executed before other rules */
+    custom?: ValidationRule;
 }
 
 export type ValidationMessageGenerator = ((

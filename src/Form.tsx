@@ -36,7 +36,7 @@ export class Form extends React.Component<FormProps> {
     };
 
     private componentRefs: {
-        [name: string]: BoundComponentInstance;
+        [componentName: string]: BoundComponentInstance;
     };
 
     public constructor(props: FormProps) {
@@ -44,18 +44,28 @@ export class Form extends React.Component<FormProps> {
         this.componentRefs = {};
     }
 
+    /**
+     * Programatically submit form
+     */
     public submit = () => {
         this.handleSubmit();
     };
 
-    public getValue = (name: string) => {
-        return this.componentRefs[name].state.value;
+    /**
+     * Retrieves the current value for a component
+     * @param {string} componentName name of the component
+     */
+    public getValue = (componentName: string) => {
+        return this.componentRefs[componentName].state.value;
     };
 
+    /**
+     * Retrieves current values for all components
+     */
     public getValues = (): ValueMap => {
         return Object.keys(this.componentRefs).reduce(
-            (values: ValueMap, name: string) => {
-                values[name] = this.getValue(name);
+            (values: ValueMap, componentName: string) => {
+                values[componentName] = this.getValue(componentName);
                 return values;
             },
             {},
@@ -63,45 +73,60 @@ export class Form extends React.Component<FormProps> {
     };
 
     /**
-     * Valdiates specified field(s). If no field names are provided,
-     * all fields within the form will be valdiated.
+     * Valdiates specified component(s). If no component names are provided,
+     * all components within the form will be valdiated.
      */
-    public validate = (name?: string | string[]) => {
-        (name !== undefined
-            ? Array.isArray(name)
-                ? name
-                : [name]
+    public validate = (componentName?: string | string[]): void => {
+        (componentName !== undefined
+            ? Array.isArray(componentName)
+                ? componentName
+                : [componentName]
             : Object.keys(this.componentRefs)
-        ).forEach((name: string) => {
-            this.componentRefs[name].validate();
+        ).forEach((componentName: string) => {
+            this.componentRefs[componentName].validate();
         });
     };
 
+    /**
+     * Executes validation rules on all component
+     * @returns true if all all components are valid
+     */
     public isValid = (): boolean => {
-        return !Object.keys(this.componentRefs).some((name: string) => {
-            const component = this.componentRefs[name];
-            return !component.isValid();
-        });
+        return !Object.keys(this.componentRefs).some(
+            (componentName: string) => {
+                const component = this.componentRefs[componentName];
+                return !component.isValid();
+            },
+        );
     };
 
+    /**
+     * Inject a custom validation response on a form component
+     * @param {string} componentName name of the component
+     * @param {object} validation custom validation response to be injected
+     */
     public setValidation = (
-        name: string,
+        componentName: string,
         validation: ValidationResponse,
     ): void => {
-        if (name in this.componentRefs) {
-            this.componentRefs[name].setValidation(validation);
+        if (componentName in this.componentRefs) {
+            this.componentRefs[componentName].setValidation(validation);
         } else {
             console.warn(
-                `Failed to set validation for "${name}" component. It does not exist in form context.`,
+                `Failed to set validation for "${componentName}" component. It does not exist in form context.`,
             );
         }
     };
 
+    /**
+     * Injects custom validation responses for form components
+     * @param {object} validations component name / validation response map
+     */
     public setValidations = (validations: {
-        [name: string]: ValidationResponse;
+        [componentName: string]: ValidationResponse;
     }): void => {
-        Object.keys(validations).forEach((name: string) => {
-            this.setValidation(name, validations[name]);
+        Object.keys(validations).forEach((componentName: string) => {
+            this.setValidation(componentName, validations[componentName]);
         });
     };
 
@@ -138,35 +163,53 @@ export class Form extends React.Component<FormProps> {
         );
     }
 
+    /**
+     * Registers a component with the form, allowing it to be managed.
+     * @param {string} componentName name of the component
+     * @param {object} componentRef react component reference to be monitored
+     */
     private registerComponent = (
-        name: string,
+        componentName: string,
         componentRef: BoundComponentInstance,
-    ) => {
+    ): void => {
         // Only register if this form component has not been mounted yet
-        if (!(name in this.componentRefs)) {
-            this.componentRefs[name] = componentRef;
+        if (!(componentName in this.componentRefs)) {
+            this.componentRefs[componentName] = componentRef;
         } else {
-            console.error(`Duplicate form component: "${name}"`);
+            console.error(`Duplicate form component: "${componentName}"`);
         }
     };
 
-    private unregisterComponent = (name: string) => {
-        delete this.componentRefs[name];
+    /**
+     * Unregisters a component with the form, so it will no longer be managed
+     * @param {string} componentName name of the component
+     */
+    private unregisterComponent = (componentName: string): void => {
+        delete this.componentRefs[componentName];
     };
 
+    /**
+     * Executes validation object for the specified component name. If no custom value
+     * is provided, the current value will be retrieved from the form component.
+     * @param {string} componentName name of the component
+     * @param {any} value (optional) custom value to be used when validating
+     * @param {boolean} required (default: false) whether or not a value is required
+     * @returns validation response: context, message
+     */
     private getValidation = (
-        key: string,
+        componentName: string,
         value?: any,
         required: boolean = false,
     ): ValidationResponse => {
         const values = this.getValues();
-        const component = this.componentRefs[key];
+        const component = this.componentRefs[componentName];
         const { validationRules, validationMessages } = component.props;
         return validate(
-            key,
+            componentName,
             {
                 ...values,
-                [key]: value !== undefined ? value : values[key],
+                [componentName]:
+                    value !== undefined ? value : values[componentName],
             },
             {
                 required,
@@ -176,16 +219,20 @@ export class Form extends React.Component<FormProps> {
         );
     };
 
-    private buildDependencyTree = (
-        inputNames: string[],
+    /**
+     * Recursively builds a dependency map for components that are part of the
+     * validation group tree.
+     */
+    private buildDependencyMap = (
+        componentNames: string[],
         mappedNames: any = {},
     ): any => {
-        mappedNames = inputNames.reduce(
+        mappedNames = componentNames.reduce(
             (names: any, name: string) => ({ ...names, [name]: true }),
             mappedNames,
         );
 
-        return inputNames.reduce((output: any, name: string) => {
+        return componentNames.reduce((output: any, name: string) => {
             const validationGroup: string[] =
                 this.componentRefs[name].props.validationGroup || [];
             const namesToMap = validationGroup.filter(
@@ -196,7 +243,7 @@ export class Form extends React.Component<FormProps> {
             if (namesToMap.length > 0) {
                 return {
                     ...output,
-                    ...this.buildDependencyTree(namesToMap, mappedNames),
+                    ...this.buildDependencyMap(namesToMap, mappedNames),
                 };
             }
 
@@ -204,31 +251,36 @@ export class Form extends React.Component<FormProps> {
         }, mappedNames);
     };
 
-    private getRelatedComponents = (name: string) => {
-        const { validationGroup } = this.componentRefs[name].props;
+    /**
+     * Returns an of component names that should be validated when validating
+     * a specific component. Determined using the validation group tree.
+     * @returns array of componentNames
+     */
+    private getRelatedComponents = (componentName: string): string[] => {
+        const { validationGroup } = this.componentRefs[componentName].props;
         if (validationGroup) {
-            return Object.keys(
-                this.buildDependencyTree(validationGroup),
-            ).filter((dependencyName: string) => dependencyName !== name);
+            return Object.keys(this.buildDependencyMap(validationGroup)).filter(
+                (dependencyName: string) => dependencyName !== componentName,
+            );
         }
         return [];
     };
 
-    private handleChange = (name: string, value: any) => {
+    private handleChange = (componentName: string, value: any) => {
         // Cross validate if necessary
-        this.getRelatedComponents(name).forEach((relName: string) => {
+        this.getRelatedComponents(componentName).forEach((relName: string) => {
             this.componentRefs[relName].validate();
         });
 
-        this.props.onChange(name, value);
+        this.props.onChange(componentName, value);
     };
 
-    private handleBlur = (name: string, value: any) => {
-        this.props.onBlur(name, value);
+    private handleBlur = (componentName: string, value: any) => {
+        this.props.onBlur(componentName, value);
     };
 
-    private handleFocus = (name: string, value: any) => {
-        this.props.onFocus(name, value);
+    private handleFocus = (componentName: string, value: any) => {
+        this.props.onFocus(componentName, value);
     };
 
     private handleSubmit = (event?: React.FormEvent<HTMLFormElement>) => {

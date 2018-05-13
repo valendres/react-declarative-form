@@ -138,15 +138,6 @@ const stringValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isDate: (key: string, values: ValueMap) => {
-        if (isDefined(key, values) && !patterns.isEmail.test(values[key])) {
-            return {
-                key,
-                context: ValidationContext.Danger,
-                message: 'Invalid date format, expected: dd/mm/yyyy',
-            };
-        }
-    },
 };
 
 const regexValidationRules: ValidationRuleMap = {
@@ -195,10 +186,10 @@ const regexValidationRules: ValidationRuleMap = {
             };
         }
     },
-    isIP: (key: string, values: ValueMap) => {
+    isIp: (key: string, values: ValueMap) => {
         if (isDefined(key, values) && !isIP(String(values[key]))) {
             return {
-                key: 'isIP',
+                key: 'isIp',
                 context: ValidationContext.Danger,
                 message: 'Invalid IP address',
             };
@@ -210,6 +201,16 @@ const regexValidationRules: ValidationRuleMap = {
                 key: 'isPort',
                 context: ValidationContext.Danger,
                 message: 'Invalid port',
+            };
+        }
+    },
+    isDate: (key: string, values: ValueMap) => {
+        // TODO: refactor this so date format is configurable
+        if (isDefined(key, values) && !patterns.isDate.test(values[key])) {
+            return {
+                key,
+                context: ValidationContext.Danger,
+                message: 'Invalid date format, expected: dd/mm/yyyy',
             };
         }
     },

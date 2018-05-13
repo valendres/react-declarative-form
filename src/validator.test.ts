@@ -75,6 +75,21 @@ describe('func: validate', () => {
         expect(response.key).toEqual('required');
     });
 
+    it('should execute custom rule if it is defined', () => {
+        const message = 'CUSTOM VALIDATION MESSAGE';
+        const response = validate(
+            'name',
+            { name: 'somevalue' },
+            {
+                custom: () => ({
+                    context: ValidationContext.Danger,
+                    message,
+                }),
+            },
+        );
+        expect(response.message).toEqual(message);
+    });
+
     it('should stop matching after first Danger response encountered', () => {
         const response = validate(
             'age',

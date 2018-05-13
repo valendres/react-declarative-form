@@ -8,6 +8,8 @@ import {
 
 export interface BoundComponentInternalProps {
     readonly name: string;
+    readonly value?: any;
+    readonly initialValue?: any;
     readonly validationRules?: BaseValidationRules;
     readonly validationMessages?: any;
     readonly validationMessage?: string;
@@ -18,7 +20,6 @@ export interface BoundComponentInternalProps {
 }
 
 export interface BoundComponentExternalProps {
-    readonly value?: any;
     readonly required?: boolean;
     readonly onChange?: (event: any) => void;
     readonly onBlur?: (event: React.FocusEvent<any>) => void;
@@ -33,6 +34,7 @@ export interface BoundComponentInstance {
     readonly state: BoundComponentState;
     readonly validate: () => void;
     readonly isValid: () => boolean;
+    readonly setValidation: (validation: ValidationResponse) => void;
 }
 
 export interface BoundComponentState {
@@ -68,7 +70,7 @@ export function bind<ComponentProps extends BoundComponentProps>(
         public constructor(props: ComponentProps) {
             super(props);
             this.state = {
-                value: props.value,
+                value: props.value || props.initialValue,
                 pristine: true,
             };
         }
@@ -96,6 +98,12 @@ export function bind<ComponentProps extends BoundComponentProps>(
                 this.getValidation().context === ValidationContext.Success;
 
             return consumerValid && computedValid;
+        };
+
+        public setValidation = (validation: ValidationResponse): void => {
+            this.setState({
+                validation,
+            });
         };
 
         public render() {

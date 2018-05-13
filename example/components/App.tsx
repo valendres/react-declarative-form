@@ -87,9 +87,9 @@ export class App extends React.Component<AppProps, AppState> {
                             <TextField
                                 name="username"
                                 label="Username"
-                                validationContext={ValidationContext.Danger}
-                                validationMessage="For some reason this field always has an error"
-                                pristine={false}
+                                // validationContext={ValidationContext.Danger}
+                                // validationMessage="For some reason this field always has an error"
+                                // pristine={false}
                                 required
                             />
                         </Grid>
@@ -195,6 +195,12 @@ export class App extends React.Component<AppProps, AppState> {
 
     private handleFormValidSubmit = (values: ValueMap) => {
         console.log('Successfully submitted form :)', values);
+        this.formRef.current.setValidations({
+            email: {
+                context: ValidationContext.Danger,
+                message: 'already registered!',
+            },
+        });
     };
 
     private handleFormInvalidSubmit = (values: ValueMap) => {

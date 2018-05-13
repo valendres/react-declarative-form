@@ -84,6 +84,27 @@ export class Form extends React.Component<FormProps> {
         });
     };
 
+    public setValidation = (
+        name: string,
+        validation: ValidationResponse,
+    ): void => {
+        if (name in this.componentRefs) {
+            this.componentRefs[name].setValidation(validation);
+        } else {
+            console.warn(
+                `Failed to set validation for "${name}" component. It does not exist in form context.`,
+            );
+        }
+    };
+
+    public setValidations = (validations: {
+        [name: string]: ValidationResponse;
+    }): void => {
+        Object.keys(validations).forEach((name: string) => {
+            this.setValidation(name, validations[name]);
+        });
+    };
+
     public render() {
         const {
             children,
@@ -227,7 +248,7 @@ export class Form extends React.Component<FormProps> {
     };
 
     private handleInvalidSubmit = (values: ValueMap) => {
-        this.props.onInvalidSubmit(values);
         this.validate();
+        this.props.onInvalidSubmit(values);
     };
 }

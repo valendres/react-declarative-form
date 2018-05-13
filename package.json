@@ -2,7 +2,8 @@
     "name": "react-form-validator",
     "version": "0.0.1",
     "description": "Simple react form validation",
-    "main": "./lib/index.js",
+    "main": "lib/index",
+    "typings": "lib/index",
     "repository": "valendres/react-form-validator",
     "author": {
         "name": "Peter Weller",

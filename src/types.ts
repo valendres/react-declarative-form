@@ -14,7 +14,7 @@ export interface ValidationRuleMap {
     readonly [name: string]: ValidationRule;
 }
 
-export interface BaseValidationRules {
+export interface ValidationRules {
     /** Input is >= to the specified minimum value */
     minValue?: number;
 
@@ -72,7 +72,7 @@ export interface BaseValidationRules {
     /** Input value is == to target input value */
     eqTarget?: string;
 
-    /** Input value is > to target input value*/
+    /** Input value is > to target input value */
     gtTarget?: string;
 
     /** Input value is >= to target input value */
@@ -86,6 +86,8 @@ export interface BaseValidationRules {
 
     /** Custom validation rule. It is executed before other rules */
     custom?: ValidationRule;
+
+    [name: string]: any;
 }
 
 export type ValidationMessageGenerator = ((
@@ -107,3 +109,8 @@ export interface ValidationResponse {
 export interface ValueMap {
     [name: string]: any;
 }
+
+export type Diff<T extends string, U extends string> = ({ [P in T]: P } &
+    { [P in U]: never } & { [x: string]: never })[T];
+
+export type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>>;

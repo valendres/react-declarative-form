@@ -23,7 +23,8 @@
         "postbuild": "mv ./dist/src ./dist/lib",
         "prepackage": "yarn run build && yarn run copy",
         "package": "cd ./dist && yarn pack",
-        "precommit": "yarn run test --coverage=0 && lint-staged"
+        "precommit": "yarn run test --coverage=0 && lint-staged",
+        "gen:toc": "markdown-toc -i --maxdepth 5 README.md"
     },
     "lint-staged": {
         "*.{ts,tsx,js,jsx}": [
@@ -50,6 +51,7 @@
         "husky": "^0.14.3",
         "jest": "^22.4.3",
         "lint-staged": "^7.0.4",
+        "markdown-toc": "^1.2.0",
         "material-ui": "^1.0.0-beta.44",
         "open-browser-webpack-plugin": "^0.0.5",
         "postcss-loader": "^2.1.4",

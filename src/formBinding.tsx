@@ -3,60 +3,87 @@ import { FormContext, FormApi } from './Form';
 import {
     ValidationResponse,
     ValidationContext,
-    BaseValidationRules,
+    ValidationRules,
+    ValidationMessageGenerator,
 } from './types';
 
-export interface BoundComponentInternalProps {
-    readonly name: string;
-    readonly value?: any;
-    readonly initialValue?: any;
-    readonly validationRules?: BaseValidationRules;
-    readonly validationMessages?: any;
-    readonly validationMessage?: string;
-    readonly validationContext?: ValidationContext;
-    readonly validationGroup?: string[];
-    readonly setValue?: (value: any) => void;
-    readonly pristine?: boolean;
+export interface BoundComponentCommonProps {
+    /** Unique form component identifier */
+    name: string;
+
+    /** Whether or not a value is required */
+    required?: boolean;
+
+    /** Whether or not the value has been modified */
+    pristine?: boolean;
+
+    /** Validation message to be displayed as help text */
+    validationMessage?: string;
+
+    /** Validation context: danger, warning, success */
+    validationContext?: ValidationContext;
+
+    /** Should be called when component has been blurred */
+    onBlur?: React.EventHandler<any>;
+
+    /** Should be called when component has been focused */
+    onFocus?: React.EventHandler<any>;
+
+    /** Current form component value */
+    value?: any;
 }
 
-export interface BoundComponentExternalProps {
-    readonly required?: boolean;
-    readonly onChange?: (event: any) => void;
-    readonly onBlur?: (event: React.FocusEvent<any>) => void;
-    readonly onFocus?: (event: React.FocusEvent<any>) => void;
+export interface BoundComponentProps extends BoundComponentCommonProps {
+    /** Should be called when component value has changed */
+    setValue?: (value: any) => void;
 }
 
-export type BoundComponentProps = BoundComponentInternalProps &
-    BoundComponentExternalProps;
+/**
+ * These props are only used by the HOC and are not passed to the wrapped component.
+ */
+export interface BoundComponentHOCProps extends BoundComponentProps {
+    validationRules?: ValidationRules;
+    validationMessages?: {
+        [ruleKey: string]: string | ValidationMessageGenerator;
+    };
+    validationGroup?: string[];
+    initialValue?: any;
+}
+
+export type BoundComponentAllProps = BoundComponentProps &
+    BoundComponentHOCProps;
 
 export interface BoundComponentInstance {
-    readonly props: BoundComponentProps;
-    readonly state: BoundComponentState;
-    readonly validate: () => void;
-    readonly isValid: () => boolean;
-    readonly setValidation: (validation: ValidationResponse) => void;
+    props: BoundComponentAllProps;
+    state: BoundComponentState;
+    validate: () => void;
+    isValid: () => boolean;
+    setValidation: (validation: ValidationResponse) => void;
 }
 
 export interface BoundComponentState {
-    readonly pristine: boolean;
-    readonly value?: any;
-    readonly validation?: ValidationResponse;
+    pristine: boolean;
+    value?: any;
+    validation?: ValidationResponse;
 }
-export function bind<ComponentProps extends BoundComponentProps>(
+export function bind<ComponentProps extends BoundComponentAllProps>(
     WrappedComponent: React.ComponentClass<ComponentProps>,
 ) {
     return class BoundComponent
-        extends React.Component<ComponentProps, BoundComponentState>
+        extends React.Component<
+            ComponentProps & BoundComponentAllProps,
+            BoundComponentState
+        >
         implements BoundComponentInstance {
         formApi: FormApi;
 
-        static defaultProps: Partial<BoundComponentProps> = {
+        static defaultProps: Partial<BoundComponentAllProps> = {
             onBlur: () => {},
             onFocus: () => {},
         };
 
         static getDerivedStateFromProps(
-            nextProps: BoundComponentProps,
+            nextProps: BoundComponentAllProps,
             prevState: BoundComponentState,
         ) {
             return {
@@ -121,9 +148,10 @@ export function bind<ComponentProps extends BoundComponentProps>(
 
             const {
                 // Omit these
-                validationGroup,
-                validationMessages,
                 validationRules,
+                validationMessages,
+                validationGroup,
+                initialValue,
                 ...restProps
             } = this.props as any;
 

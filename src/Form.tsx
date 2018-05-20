@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { ValidationResponse, ValueMap } from './types';
+import { ValidationResponse, ValueMap, Omit } from './types';
 import { validate } from './validator';
 import { BoundComponentInstance } from './formBinding';
 
-export const FormContext = React.createContext({});
+export const FormContext = React.createContext({} as FormApi);
 
 export interface FormApi {
     registerComponent: Form['registerComponent'];
@@ -15,14 +15,49 @@ export interface FormApi {
     handleFocus: Form['handleFocus'];
 }
 
-export interface FormProps {
-    onChange?: (name: string, value: any) => void;
-    onBlur?: (name: string, value: any) => void;
-    onFocus?: (name: string, value: any) => void;
+export interface FormProps
+    extends Omit<
+            React.FormHTMLAttributes<HTMLFormElement>,
+            'onChange' | 'onBlur' | 'onFocus'
+        > {
+    /**
+     * Called when the value of a bound form component has been changed.
+     * @param {string} componentName name of the component
+     * @param {object} value new value
+     */
+    onChange?: (componentName: string, value: any) => void;
+
+    /**
+     * Called when a bound form component has been blurred.
+     * @param {string} componentName name of the component
+     * @param {object} value current value
+     */
+    onBlur?: (componentName: string, value: any) => void;
+
+    /**
+     * Called when a bound form component has been focused.
+     * @param {string} componentName name of the component
+     * @param {object} value current value
+     */
+    onFocus?: (componentName: string, value: any) => void;
+
+    /**
+     * 	Called when the form is programmatically submitted, or a button with type="submit" is clicked.
+     * @param {object} values name/value pairs for all bound form components.
+     */
     onSubmit?: (values: ValueMap) => void;
+
+    /**
+     * 	Called after onSubmit if all bound form components are valid.
+     * @param {object} values name/value pairs for all bound form components.
+     */
     onValidSubmit?: (values: ValueMap) => void;
+
+    /**
+     * Called after onSubmit at least 1 bound form component is invalid.
+     * @param {object} values name/value pairs for all bound form components.
+     */
     onInvalidSubmit?: (values: ValueMap) => void;
-    style?: any;
 }
 
 export class Form extends React.Component<FormProps> {
@@ -45,9 +80,9 @@ export class Form extends React.Component<FormProps> {
     }
 
     /**
-     * Programatically submit form
+     * Programmatically submit form
      */
-    public submit = () => {
+    public submit = (): void => {
         this.handleSubmit();
     };
 
@@ -55,7 +90,7 @@ export class Form extends React.Component<FormProps> {
      * Retrieves the current value for a component
      * @param {string} componentName name of the component
      */
-    public getValue = (componentName: string) => {
+    public getValue = (componentName: string): any => {
         return this.componentRefs[componentName].state.value;
     };
 
@@ -73,8 +108,8 @@ export class Form extends React.Component<FormProps> {
     };
 
     /**
-     * Valdiates specified component(s). If no component names are provided,
-     * all components within the form will be valdiated.
+     * Validates specified component(s). If no component names are provided,
+     * all components within the form will be validated.
      */
     public validate = (componentName?: string | string[]): void => {
         (componentName !== undefined
@@ -227,6 +262,7 @@ export class Form extends React.Component<FormProps> {
         componentNames: string[],
         mappedNames: any = {},
     ): any => {
+        // tslint:disable-next-line:no-parameter-reassignment
         mappedNames = componentNames.reduce(
             (names: any, name: string) => ({ ...names, [name]: true }),
             mappedNames,

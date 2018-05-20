@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {
     bind,
-    BoundComponentInternalProps,
+    BoundComponentProps,
     ValidationContext,
 } from 'react-form-validator';
 
@@ -11,30 +11,24 @@ import MaterialTextField, {
 
 export interface TextFieldProps
     extends MaterialTextFieldProps,
-        BoundComponentInternalProps {
+        BoundComponentProps {
     name: string;
     label?: string;
-    onChange?: (event: React.FormEvent<HTMLInputElement>) => void;
 }
 
 export class UnboundTextField extends React.Component<TextFieldProps> {
-    static defaultProps = {
-        onChange: () => {},
-    };
-
     render() {
         const {
             name,
             value,
             setValue,
+            onChange,
             validationContext,
             validationMessage,
             pristine,
-            required,
             ...restProps
         } = this.props;
 
-        const inputId = `${name}`;
         const hasError = validationContext === ValidationContext.Danger;
 
         return (
@@ -42,8 +36,8 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
                 fullWidth
                 margin="dense"
                 {...restProps}
-                id={inputId}
-                name={inputId}
+                id={name}
+                name={name}
                 value={value || ''}
                 onChange={this.handleChange}
                 error={!pristine && hasError}
@@ -52,12 +46,11 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
         );
     }
 
-    private handleChange = (event: React.FormEvent<HTMLInputElement>) => {
-        this.props.setValue(event.currentTarget.value);
-        this.props.onChange(event);
+    private handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { onChange, setValue } = this.props;
+        setValue(event.currentTarget.value);
+        if (onChange) onChange(event);
     };
 }
 
-export const TextField: React.ComponentClass<TextFieldProps> = bind<
-    TextFieldProps
->(UnboundTextField);
+export const TextField = bind<TextFieldProps>(UnboundTextField);

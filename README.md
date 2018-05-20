@@ -36,7 +36,7 @@ Each bound component registers itself with the closest `<Form />` ancestor, allo
     + [Adding custom validation rules](#adding-custom-validation-rules)
   * [Types](#types)
   * [Examples](#examples)
-    + [Example: Adding custom validation rules](#example-adding-custom-validation-rules)
+    + [Example: Adding additional validation rules](#example-adding-additional-validation-rules)
     + [Example: Form Binding HOC](#example-form-binding-hoc)
     + [Example: Form Usage](#example-form-usage)
 - [Authors](#authors)
@@ -86,10 +86,10 @@ Injects custom validation responses on form components.
 
 
 #### `bind HOC`
-Using the `bind()` higher order component allows **react-form-validator** to manage the form component state and provide validation state. Refer to [Example: Form Binding HOC](#example-form-binding-hoc) to get a better understanding of how these props can be used.
+Using the `bind()` higher order component allows **react-form-validator** to manage the form component value and validation state. Refer to [Example: Form Binding HOC](#example-form-binding-hoc) to get a better understanding of how these props can be used.
 
 ##### Wrapped component props
-These props will be available to the wrapped component. The *injected* variables will be provided to the wrapped component, even if the the the consumer did not provide them. However, a number of these props are *overridable*, meaning consumer provided values will override the bind HOC provided value.
+These props will be available to the wrapped component. The *injected* variables will always be provided to the wrapped component, even if the the the consumer did not provide them. However, a number of these props are *overridable*, meaning the consumer can override the HOC provided value.
 
 | Name                  | Type                  | Required      | Injected       | Overridable   | Description   |
 | --------------------- | --------------------- | ------------- | ------------- | ------------- | ------------- |
@@ -116,10 +116,10 @@ These props are only used by the HOC and are not passed to the wrapped component
 | `initialValue`        | any               | false     | - |
 
 ### Validation rules
-Validation rules are executed sequentially (in the order in which they are defined) until a validation response has been returned, or all rules have been executed. If no rule has returned a validation response, then ValidationContext.Success will be returned.
+Validation rules are executed sequentially (in the order in which they are defined) until a validation response has been returned, or all rules have been executed. If no rule has returned a validation response, then a response with Success context will be returned.
 
 #### Built-in validation rules
-The following validation rules are built-in. By default, they will only return ValidationContext.Danger if the a value is defined and it fails to pass the test. However, this behaviour can be customized by overriding built-in rules. See the [Adding custom validation rules](#adding-custom-validation-rules) section for more information. Additional validation rules will be provided in the future.
+The following validation rules are built-in. By default, they will only return ValidationContext.Danger if the a value is defined and it fails to pass the test. However, this behaviour can be customized by overriding built-in rules. See the [Adding additional validation rules](#adding-additional-validation-rules) section for more information. Additional built-in validation rules will be added in the future.
 
 | Name              | Criteria          | Description       |
 | ----------------- | ----------------- | ----------------- |
@@ -148,8 +148,10 @@ The following validation rules are built-in. By default, they will only return V
 | `lteTarget`       | string            | Input value is <= to target input value |
 | `custom`          | ValidationRule    | Custom validation rule. It is executed before other rules |
 
-#### Adding custom validation rules
-Adding additional validation rules can be done using the addValidationRule function. An example can be found in [Example: Adding custom validation rules](#example-adding-custom-validation-rules).
+\* ***Note:** using the custom key allows consumers to define a custom validation rule. This is useful when one-off custom validation logic is required. Ideally, validation rules should be designed for reusability.*
+
+#### Adding additional validation rules
+Adding additional validation rules can be done using the addValidationRule function. An example can be found in [Example: Adding validation rules](#example-adding-validation-rules).
 
 `addValidationRule: (key: string, rule: ValidationRule) => void`
 
@@ -187,7 +189,7 @@ interface ValueMap {
 
 ### Examples
 
-#### Example: Adding custom validation rules
+#### Example: Adding validation rules
 ```Typescript
 // validatorConfig.ts
 import {
@@ -214,6 +216,7 @@ addValidationRule(
 ```
 
 #### Example: Form Binding HOC
+Using the bind HOC with the TextField component provided by [material-ui](https://v0.material-ui.com/#/components/text-field)
 ```Typescript
 import * as React from 'react';
 import {
@@ -271,6 +274,7 @@ export const TextField = bind<TextFieldProps>(UnboundTextField);
 ```
 
 #### Example: Form Usage
+Using the bound TextField component inside a Form.
 ```Typescript
 import * as React from 'react';
 import { Form, ValueMap } from 'react-form-validator';

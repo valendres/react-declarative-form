@@ -27,13 +27,10 @@ export const getValidationRules = (): ValidationRuleMap => {
  *
  * @param rule new rule to be added
  */
-export const addValidationRule = (
-    componentName: string,
-    rule: ValidationRule,
-): void => {
+export const addValidationRule = (key: string, rule: ValidationRule): void => {
     validationRules = {
         ...validationRules,
-        [componentName]: rule,
+        [key]: rule,
     };
 };
 

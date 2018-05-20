@@ -5,8 +5,8 @@
 ### Requirements
 This library requires the following:
 * The `<Form />` component from **react-form-valdiator** is used instead of a html `<form/>`.
-* Managed form components have been created using the [`bind() HOC`](#bind-hoc). See [Form Binding HOC](#form-binding-hoc) for an example.
-* The managed form components are  descendants of a `<Form />` component. See [Form Usage](#form-usage) for an example.
+* Managed form components have been created using the [`bind() HOC`](#bind-hoc). See [Example: Form Binding HOC](#example-form-binding-hoc).
+* The managed form components are  descendants of a `<Form />` component. See [Example: Form Usage](#example-form-usage).
 
 ## Getting started
 1. Add **react-form-validator** to your project.
@@ -25,18 +25,20 @@ Each bound component registers itself with the closest `<Form />` ancestor, allo
 
 - [Documentation](#documentation)
   * [API](#api)
-    + [`<Form />`](#form-)
+    + [`<Form />`](#form)
       - [Form API](#form-api)
       - [Form Props](#form-props)
     + [`bind HOC`](#bind-hoc)
       - [Wrapped component props](#wrapped-component-props)
       - [Higher order component props](#higher-order-component-props)
-  * [Built-in validation rules](#built-in-validation-rules)
+  * [Validation rules](#validation-rules)
+    + [Built-in validation rules](#built-in-validation-rules)
+    + [Adding custom validation rules](#adding-custom-validation-rules)
   * [Types](#types)
   * [Examples](#examples)
-    + [Adding custom validation rules](#adding-custom-validation-rules)
-    + [Form Binding HOC](#form-binding-hoc)
-    + [Form Usage](#form-usage)
+    + [Example: Adding custom validation rules](#example-adding-custom-validation-rules)
+    + [Example: Form Binding HOC](#example-form-binding-hoc)
+    + [Example: Form Usage](#example-form-usage)
 - [Authors](#authors)
 
 <!-- tocstop -->
@@ -84,10 +86,10 @@ Injects custom validation responses on form components.
 
 
 #### `bind HOC`
-Using the `bind()` higher order component allows **react-form-validator** to manage the form component state and provide validation state. Refer to the [Form Binding HOC](#form-binding-hoc) example to get a better understanding of how these props can be used.
+Using the `bind()` higher order component allows **react-form-validator** to manage the form component state and provide validation state. Refer to [Example: Form Binding HOC](#example-form-binding-hoc) to get a better understanding of how these props can be used.
 
 ##### Wrapped component props
-These props will be available to the wrapped component. The *injected* variables will be provided to the wrapped component, even if the the the consumer did not provide them. However, a number of these props are *overridable*, meaning consumer provided values will override what the bind HOC provided value.
+These props will be available to the wrapped component. The *injected* variables will be provided to the wrapped component, even if the the the consumer did not provide them. However, a number of these props are *overridable*, meaning consumer provided values will override the bind HOC provided value.
 
 | Name                  | Type                  | Required      | Injected       | Overridable   | Description   |
 | --------------------- | --------------------- | ------------- | ------------- | ------------- | ------------- |
@@ -101,7 +103,7 @@ These props will be available to the wrapped component. The *injected* variables
 | `value`               | any                   | false         | true          | true          | Current form component value |
 | `setValue`\*          | (value: any) => void  | -             | true          | false         | Should be called when component value has changed |
 
-\* ***Note:** this prop can not be overriden, providing it will have no effect.*
+\* ***Note:** this prop can not be overridden, providing it will have no effect.*
 
 ##### Higher order component props
 These props are only used by the HOC and are not passed to the wrapped component.
@@ -113,10 +115,14 @@ These props are only used by the HOC and are not passed to the wrapped component
 | `validationGroup`     | string            | false     | - |
 | `initialValue`        | any               | false     | - |
 
-### Built-in validation rules
+### Validation rules
+Validation rules are executed sequentially (in the order in which they are defined) until a validation response has been returned, or all rules have been executed. If no rule has returned a validation response, then ValidationContext.Success will be returned.
+
+#### Built-in validation rules
+The following validation rules are built-in. By default, they will only return ValidationContext.Danger if the a value is defined and it fails to pass the test. However, this behaviour can be customized by overriding built-in rules. See the [Adding custom validation rules](#adding-custom-validation-rules) section for more information. Additional validation rules will be provided in the future.
+
 | Name              | Criteria          | Description       |
 | ----------------- | ----------------- | ----------------- |
-| `custom`          | ValidationRule    | Custom validation rule. It is executed before other rules |
 | `minValue`        | number            | Input is >= to the specified minimum value |
 | `maxValue`        | number            | Input is <= to the specified maximum value |
 | `isDivisibleBy`   | number            | Input is divisible by the specified number |
@@ -140,6 +146,14 @@ These props are only used by the HOC and are not passed to the wrapped component
 | `gteTarget`       | string            | Input value is >= to target input value |
 | `ltTarget`        | string            | Input value is < to target input value |
 | `lteTarget`       | string            | Input value is <= to target input value |
+| `custom`          | ValidationRule    | Custom validation rule. It is executed before other rules |
+
+#### Adding custom validation rules
+Adding additional validation rules can be done using the addValidationRule function. An example can be found in [Example: Adding custom validation rules](#example-adding-custom-validation-rules).
+
+`addValidationRule: (key: string, rule: ValidationRule) => void`
+
+***Note:** If a rule with the same key exists already, it will be overridden - this includes built-in rules.*
 
 ### Types
 
@@ -173,7 +187,7 @@ interface ValueMap {
 
 ### Examples
 
-#### Adding custom validation rules
+#### Example: Adding custom validation rules
 ```Typescript
 // validatorConfig.ts
 import {
@@ -199,7 +213,7 @@ addValidationRule(
 );
 ```
 
-#### Form Binding HOC
+#### Example: Form Binding HOC
 ```Typescript
 import * as React from 'react';
 import {
@@ -256,52 +270,67 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
 export const TextField = bind<TextFieldProps>(UnboundTextField);
 ```
 
-#### Form Usage
+#### Example: Form Usage
 ```Typescript
-<Form onValidSubmit={this.handleValidSubmit}>
-    <TextField
-        name="email"
-        label="Email"
-        validationRules={{
-            isEmail: true,
-        }}
-        required
-    />
-    <TextField
-        name="password"
-        label="Password"
-        validationGroup={[
-            'password-confirm'
-        ]}
-        validationRules={{
-            minLength: 8,
-        }}
-        type="password"
-        required
-    />
-    <TextField
-        name="password-confirm"
-        label="Confirm password"
-        validationRules={{
-            eqTarget: 'password'
-        }}
-        validationMessages={{
-            eqTarget: 'Must match password',
-        }}
-        type="password"
-        required
-    />
-    <TextField
-        name="favourite-animal"
-        label="Favourite animal"
-        validationRules={{
-            // Custom validation rule, see: "Adding custom validation rules"
-            containsCat: true,
-        }}
-        required
-    />
-    <Button label="Submit" type="submit"/>
-</Form>
+import * as React from 'react';
+import { Form, ValueMap } from 'react-form-validator';
+import { Button, TextField } from 'view/components';
+
+export interface RegistrationFormProps {}
+
+export class RegistrationForm extends React.Component<RegistrationFormProps> {
+    public render() {
+        return (
+            <Form onValidSubmit={this.handleValidSubmit}>
+                <TextField
+                    name="email"
+                    label="Email"
+                    validationRules={{
+                        isEmail: true,
+                    }}
+                    required
+                />
+                <TextField
+                    name="password"
+                    label="Password"
+                    validationGroup={['password-confirm']}
+                    validationRules={{
+                        minLength: 8,
+                    }}
+                    type="password"
+                    required
+                />
+                <TextField
+                    name="password-confirm"
+                    label="Confirm password"
+                    validationRules={{
+                        eqTarget: 'password',
+                    }}
+                    validationMessages={{
+                        eqTarget: 'Must match password',
+                    }}
+                    type="password"
+                    required
+                />
+                <TextField
+                    name="favourite-animal"
+                    label="Favourite animal"
+                    validationRules={{
+                        // Custom validation rule, see: "Adding custom validation rules"
+                        containsCat: true,
+                    }}
+                    required
+                />
+                <Button title="Submit" type="submit" />
+            </Form>
+        );
+    }
+
+    private handleValidSubmit = (values: ValueMap) => {
+        console.log('Successfully submitted form :)', values);
+    };
+}
+
 ```
 
 ## Authors

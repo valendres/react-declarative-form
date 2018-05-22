@@ -87,9 +87,9 @@ export class App extends React.Component<AppProps, AppState> {
                             <TextField
                                 name="username"
                                 label="Username"
-                                // validationContext={ValidationContext.Danger}
-                                // validationMessage="For some reason this field always has an error"
-                                // pristine={false}
+                                validationContext={ValidationContext.Danger}
+                                validationMessage="For some reason this field always has an error"
+                                pristine={false}
                                 required
                             />
                         </Grid>
@@ -98,6 +98,7 @@ export class App extends React.Component<AppProps, AppState> {
                             <TextField
                                 name="email"
                                 label="Email"
+                                initialValue="prefilledemail@domain.com"
                                 validationRules={{
                                     // Reject emails that contain the word cute
                                     matches: /^((?!cuti?e).)*$/i,
@@ -177,6 +178,8 @@ export class App extends React.Component<AppProps, AppState> {
                 <Button type="submit" onClick={this.handleSubmitButtonClick}>
                     External submit
                 </Button>
+                <Button onClick={this.handleClearButtonClick}>Clear</Button>
+                <Button onClick={this.handleResetButtonClick}>Reset</Button>
             </div>
         );
     }
@@ -209,6 +212,14 @@ export class App extends React.Component<AppProps, AppState> {
 
     private handleSubmitButtonClick = () => {
         this.formRef.current.submit();
+    };
+
+    private handleClearButtonClick = () => {
+        this.formRef.current.clear();
+    };
+
+    private handleResetButtonClick = () => {
+        this.formRef.current.reset();
     };
 
     private validateDob = (

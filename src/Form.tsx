@@ -108,6 +108,30 @@ export class Form extends React.Component<FormProps> {
     };
 
     /**
+     * Clears the form. The value and validation for each form component will be
+     * set to undefined. Note: this will have no effect if the valueProp has
+     * been provided.
+     */
+    public clear = (): void => {
+        Object.keys(this.componentRefs).forEach((componentName: string) => {
+            const component = this.componentRefs[componentName];
+            component.clear();
+        });
+    };
+
+    /**
+     * Resets the form using the initialValue prop for each form component. If
+     * the initialValue prop has not been provided, the new value will be undefined.
+     * Note: this will have no effect if the valueProp has been provided.
+     */
+    public reset = (): void => {
+        Object.keys(this.componentRefs).forEach((componentName: string) => {
+            const component = this.componentRefs[componentName];
+            component.reset();
+        });
+    };
+
+    /**
      * Validates specified component(s). If no component names are provided,
      * all components within the form will be validated.
      */

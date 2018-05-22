@@ -26,6 +26,7 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
             validationContext,
             validationMessage,
             pristine,
+            required,
             ...restProps
         } = this.props;
 

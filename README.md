@@ -61,6 +61,12 @@ Retrieves the current value for a component
 ###### `getValues(): ValueMap`
 Retrieves current values for all components
 
+###### `clear(): void`
+Clears the form. The value and validation for each form component will be set to undefined. Note: this will have no effect if the valueProp has been provided.
+
+###### `reset(): void`
+Resets the form to the initialValue prop for each form component. If the initialValue prop has not been provided, the new value will be undefined. Note: this will have no effect if the valueProp has been provided.
+
 ###### `validate(componentName?: string | string[]): void`
 Validates specified component(s). If no component names are provided, all components within the form will be validated.
 

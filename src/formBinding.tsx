@@ -56,6 +56,8 @@ export type BoundComponentAllProps = BoundComponentProps &
 export interface BoundComponentInstance {
     props: BoundComponentAllProps;
     state: BoundComponentState;
+    clear: () => void;
+    reset: () => void;
     validate: () => void;
     isValid: () => boolean;
     setValidation: (validation: ValidationResponse) => void;
@@ -109,6 +111,24 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
         public componentWillUnmount() {
             this.formApi.unregisterComponent(this.props.name);
         }
+
+        public clear = (): void => {
+            const { value } = this.props;
+            this.setState({
+                value: value || undefined,
+                validation: undefined,
+                pristine: true,
+            });
+        };
+
+        public reset = (): void => {
+            const { initialValue, value } = this.props;
+            this.setState({
+                value: value || initialValue,
+                validation: undefined,
+                pristine: true,
+            });
+        };
 
         public validate = () => {
             this.setState({

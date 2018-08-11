@@ -1,41 +1,41 @@
-import { addValidationRule, getValidationRules, validate } from './/validator';
-import { baseValidationRules } from './/rules';
-import { ValidationContext, ValueMap } from './/types';
+import { addValidatorRule, getValidatorRules, validate } from './/validator';
+import { baseValidatorRules } from './/rules';
+import { ValidatorContext, ValueMap } from './/types';
 
-describe('validation rules', () => {
-    it('should use default validation rules', () => {
-        // Should use default validation rules by default
-        expect(getValidationRules()).toEqual(baseValidationRules);
+describe('validator rules', () => {
+    it('should use default validator rules', () => {
+        // Should use default validator rules by default
+        expect(getValidatorRules()).toEqual(baseValidatorRules);
     });
 
-    it('should should allow additional validation rules to be defined', () => {
-        const customRuleKey = 'customValidationRule';
+    it('should should allow additional validator rules to be defined', () => {
+        const customRuleKey = 'customValidatorRule';
         const customRule = (key: string, values: ValueMap, criteria: any) => {
             return {
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
             };
         };
 
         // Should allow a custom rule to be defined
-        addValidationRule(customRuleKey, customRule);
-        expect(getValidationRules()[customRuleKey]).toEqual(customRule);
-        expect(Object.keys(getValidationRules()).length).toEqual(
-            Object.keys(baseValidationRules).length + 1,
+        addValidatorRule(customRuleKey, customRule);
+        expect(getValidatorRules()[customRuleKey]).toEqual(customRule);
+        expect(Object.keys(getValidatorRules()).length).toEqual(
+            Object.keys(baseValidatorRules).length + 1,
         );
     });
 });
 
 describe('func: validate', () => {
-    const validationKey = 'customValidator';
-    const validationContext = ValidationContext.Warning;
-    const validationMessage = 'a message...';
+    const validatorKey = 'customValidator';
+    const validatorContext = ValidatorContext.Warning;
+    const validatorMessage = 'a message...';
 
     beforeAll(() => {
-        addValidationRule(
-            validationKey,
+        addValidatorRule(
+            validatorKey,
             (key: string, values: ValueMap, criteria: any) => ({
-                context: validationContext,
-                message: validationMessage,
+                context: validatorContext,
+                message: validatorMessage,
             }),
         );
     });
@@ -44,26 +44,22 @@ describe('func: validate', () => {
         jest.spyOn(console, 'warn');
         const response = validate('name', { name: '' }, { unknownRuleKey: 52 });
 
-        expect(response.context).toEqual(ValidationContext.Success);
+        expect(response.context).toEqual(ValidatorContext.Success);
         expect(console.warn).toHaveBeenCalledWith(
             'Rule "unknownRuleKey" does not exist.',
         );
         (console.warn as any).mockRestore();
     });
 
-    it('should return success if there are no validation rules', () => {
+    it('should return success if there are no validator rules', () => {
         const response = validate('age', { age: 21 });
-        expect(response.context).toEqual(ValidationContext.Success);
+        expect(response.context).toEqual(ValidatorContext.Success);
     });
 
     it('should match customValidator', () => {
-        const response = validate(
-            'age',
-            { age: 21 },
-            { [validationKey]: true },
-        );
-        expect(response.context).toEqual(validationContext);
-        expect(response.message).toEqual(validationMessage);
+        const response = validate('age', { age: 21 }, { [validatorKey]: true });
+        expect(response.context).toEqual(validatorContext);
+        expect(response.message).toEqual(validatorMessage);
     });
 
     it('should execute required rule first if it is defined', () => {
@@ -82,7 +78,7 @@ describe('func: validate', () => {
             { name: 'somevalue' },
             {
                 custom: () => ({
-                    context: ValidationContext.Danger,
+                    context: ValidatorContext.Danger,
                     message,
                 }),
             },
@@ -97,7 +93,7 @@ describe('func: validate', () => {
             { minValue: 1000, maxValue: 50 },
         );
         expect(response.key).toEqual('minValue');
-        expect(response.context).toEqual(ValidationContext.Danger);
+        expect(response.context).toEqual(ValidatorContext.Danger);
     });
 
     it('should return custom error message string if provided', () => {

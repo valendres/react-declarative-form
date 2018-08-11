@@ -2,7 +2,7 @@ import * as React from 'react';
 import {
     bind,
     BoundComponentProps,
-    ValidationContext,
+    ValidatorContext,
 } from 'react-form-validator';
 
 import MaterialTextField, {
@@ -23,14 +23,14 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
             value,
             setValue,
             onChange,
-            validationContext,
-            validationMessage,
+            validatorContext,
+            validatorMessage,
             pristine,
             required,
             ...restProps
         } = this.props;
 
-        const hasError = validationContext === ValidationContext.Danger;
+        const hasError = validatorContext === ValidatorContext.Danger;
 
         return (
             <MaterialTextField
@@ -42,7 +42,7 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
                 value={value || ''}
                 onChange={this.handleChange}
                 error={!pristine && hasError}
-                helperText={!pristine && validationMessage}
+                helperText={!pristine && validatorMessage}
             />
         );
     }

@@ -11,7 +11,7 @@ import * as isPort from 'validator/lib/isPort';
 import * as isUppercase from 'validator/lib/isUppercase';
 import * as isUrl from 'validator/lib/isURL';
 
-import { ValidationContext, ValidationRuleMap, ValueMap } from './types';
+import { ValidatorContext, ValidatorRuleMap, ValueMap } from './types';
 import { isDefined } from './utils';
 
 const patterns: {
@@ -20,24 +20,24 @@ const patterns: {
     isDate: /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{4})$/,
 };
 
-const miscValidationRules: ValidationRuleMap = {
+const miscValidatorRules: ValidatorRuleMap = {
     required: (key: string, values: ValueMap) => {
         if (!isDefined(key, values)) {
             return {
                 key: 'required',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'This field is required',
             };
         }
     },
 };
 
-const numericValidationRules: ValidationRuleMap = {
+const numericValidatorRules: ValidatorRuleMap = {
     minValue: (key: string, values: ValueMap, minValue: number) => {
         if (isDefined(key, values) && values[key] < minValue) {
             return {
                 key: 'minValue',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: `${values[key]} must be >= ${minValue}`,
             };
         }
@@ -46,7 +46,7 @@ const numericValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && values[key] > maxValue) {
             return {
                 key: 'maxValue',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: `${values[key]} must be <= ${maxValue}`,
             };
         }
@@ -58,7 +58,7 @@ const numericValidationRules: ValidationRuleMap = {
         ) {
             return {
                 key: 'isDivisibleBy',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: `${values[key]} must be divisible by ${num}`,
             };
         }
@@ -67,7 +67,7 @@ const numericValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && !isInteger(String(values[key]))) {
             return {
                 key: 'isInteger',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Must be an integer',
             };
         }
@@ -76,7 +76,7 @@ const numericValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && !isDecimal(String(values[key]))) {
             return {
                 key: 'isDecimal',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Must be a decimal',
             };
         }
@@ -85,19 +85,19 @@ const numericValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && !isNumeric(String(values[key]))) {
             return {
                 key: 'isNumeric',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Must be a number',
             };
         }
     },
 };
 
-const stringValidationRules: ValidationRuleMap = {
+const stringValidatorRules: ValidatorRuleMap = {
     minLength: (key: string, values: ValueMap, minLength: number) => {
         if (isDefined(key, values) && String(values[key]).length < minLength) {
             return {
                 key: 'minLength',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: `Length must be >= ${minLength}`,
             };
         }
@@ -106,7 +106,7 @@ const stringValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && String(values[key]).length > maxLength) {
             return {
                 key: 'maxLength',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: `Length must be <= ${maxLength}`,
             };
         }
@@ -115,7 +115,7 @@ const stringValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && String(values[key]).length !== length) {
             return {
                 key: 'isLength',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: `Length must be ${length}`,
             };
         }
@@ -124,7 +124,7 @@ const stringValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && !isLowercase(String(values[key]))) {
             return {
                 key: 'isLowercase',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: `Must be all lowercase`,
             };
         }
@@ -133,19 +133,19 @@ const stringValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && !isUppercase(String(values[key]))) {
             return {
                 key: 'isUppercase',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: `Must be all uppercase`,
             };
         }
     },
 };
 
-const regexValidationRules: ValidationRuleMap = {
+const regexValidatorRules: ValidatorRuleMap = {
     matches: (key: string, values: ValueMap, pattern: RegExp) => {
         if (isDefined(key, values) && !pattern.test(values[key])) {
             return {
                 key: 'matches',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid input',
             };
         }
@@ -154,7 +154,7 @@ const regexValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && !isEmail(String(values[key]))) {
             return {
                 key: 'isEmail',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid email',
             };
         }
@@ -163,7 +163,7 @@ const regexValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && !isUrl(String(values[key]))) {
             return {
                 key: 'isUrl',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid url',
             };
         }
@@ -172,7 +172,7 @@ const regexValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && !isCreditCard(String(values[key]))) {
             return {
                 key: 'isCreditCard',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid credit card number',
             };
         }
@@ -181,7 +181,7 @@ const regexValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && !isHexColor(String(values[key]))) {
             return {
                 key: 'isHexColor',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid hex color',
             };
         }
@@ -190,7 +190,7 @@ const regexValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && !isIP(String(values[key]))) {
             return {
                 key: 'isIp',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid IP address',
             };
         }
@@ -199,7 +199,7 @@ const regexValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && !isPort(String(values[key]))) {
             return {
                 key: 'isPort',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid port',
             };
         }
@@ -209,14 +209,14 @@ const regexValidationRules: ValidationRuleMap = {
         if (isDefined(key, values) && !patterns.isDate.test(values[key])) {
             return {
                 key,
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid date format, expected: dd/mm/yyyy',
             };
         }
     },
 };
 
-const crossFieldValidationRules: ValidationRuleMap = {
+const crossFieldValidatorRules: ValidatorRuleMap = {
     eqTarget: (key: string, values: ValueMap, targetKey: string) => {
         if (
             isDefined(key, values) &&
@@ -225,7 +225,7 @@ const crossFieldValidationRules: ValidationRuleMap = {
         ) {
             return {
                 key: 'eqTarget',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Values do not match',
             };
         }
@@ -238,7 +238,7 @@ const crossFieldValidationRules: ValidationRuleMap = {
         ) {
             return {
                 key: 'gt',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: `Value must be > ${values[targetKey]}`,
             };
         }
@@ -251,7 +251,7 @@ const crossFieldValidationRules: ValidationRuleMap = {
         ) {
             return {
                 key: 'gte',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: `Value must be >= ${values[targetKey]}`,
             };
         }
@@ -264,7 +264,7 @@ const crossFieldValidationRules: ValidationRuleMap = {
         ) {
             return {
                 key: 'ltTarget',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: `Value must be < ${values[targetKey]}`,
             };
         }
@@ -277,17 +277,17 @@ const crossFieldValidationRules: ValidationRuleMap = {
         ) {
             return {
                 key: 'lteTarget',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: `Value must be <= ${values[targetKey]}`,
             };
         }
     },
 };
 
-export const baseValidationRules: ValidationRuleMap = {
-    ...miscValidationRules,
-    ...numericValidationRules,
-    ...stringValidationRules,
-    ...regexValidationRules,
-    ...crossFieldValidationRules,
+export const baseValidatorRules: ValidatorRuleMap = {
+    ...miscValidatorRules,
+    ...numericValidatorRules,
+    ...stringValidatorRules,
+    ...regexValidatorRules,
+    ...crossFieldValidatorRules,
 };

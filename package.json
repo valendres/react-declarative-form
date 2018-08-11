@@ -1,7 +1,7 @@
 {
     "name": "react-form-validator",
     "version": "0.0.1",
-    "description": "Simple react form validation",
+    "description": "Simple react form validator",
     "main": "lib/index",
     "typings": "lib/index",
     "repository": "valendres/react-form-validator",

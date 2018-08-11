@@ -1,20 +1,20 @@
-export enum ValidationContext {
+export enum ValidatorContext {
     Danger = 'danger',
     Warning = 'warning',
     Success = 'success',
 }
 
-export type ValidationRule = (
+export type ValidatorRule = (
     key: string,
     values: ValueMap,
     criteria?: any,
-) => ValidationResponse;
+) => ValidatorResponse;
 
-export interface ValidationRuleMap {
-    readonly [name: string]: ValidationRule;
+export interface ValidatorRuleMap {
+    readonly [name: string]: ValidatorRule;
 }
 
-export interface ValidationRules {
+export interface ValidatorRules {
     /** Input is >= to the specified minimum value */
     minValue?: number;
 
@@ -84,25 +84,25 @@ export interface ValidationRules {
     /** Input value is <= to target input value */
     lteTarget?: string;
 
-    /** Custom validation rule. It is executed before other rules */
-    custom?: ValidationRule;
+    /** Custom validator rule. It is executed before other rules */
+    custom?: ValidatorRule;
 
     [name: string]: any;
 }
 
-export type ValidationMessageGenerator = ((
+export type ValidatorMessageGenerator = ((
     key: string,
     values: ValueMap,
     criteria?: any,
 ) => string);
 
-export interface ValidationMessages {
-    readonly [name: string]: ValidationMessageGenerator | string;
+export interface ValidatorMessages {
+    readonly [name: string]: ValidatorMessageGenerator | string;
 }
 
-export interface ValidationResponse {
+export interface ValidatorResponse {
     readonly key?: string;
-    readonly context: ValidationContext;
+    readonly context: ValidatorContext;
     readonly message?: string;
 }
 

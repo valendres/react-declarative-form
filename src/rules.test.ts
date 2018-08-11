@@ -1,8 +1,8 @@
-import { baseValidationRules } from './rules';
-import { ValidationContext, ValidationRule, ValidationResponse } from './types';
+import { baseValidatorRules } from './rules';
+import { ValidatorContext, ValidatorRule, ValidatorResponse } from './types';
 
 const testRule = (
-    rule: ValidationRule,
+    rule: ValidatorRule,
     tests: {
         value: any;
         criteria?: any;
@@ -26,19 +26,19 @@ const testRule = (
     });
 };
 
-describe('Misc. validation rules', () => {
+describe('Misc. validator rules', () => {
     describe('rule: required', () => {
-        const { required } = baseValidationRules;
+        const { required } = baseValidatorRules;
 
         it('should return danger context if value is undefined or empty string', () => {
             expect(required('name', {})).toEqual({
                 key: 'required',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'This field is required',
             });
             expect(required('name', { name: '' })).toEqual({
                 key: 'required',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'This field is required',
             });
         });
@@ -49,14 +49,14 @@ describe('Misc. validation rules', () => {
     });
 });
 
-describe('Numeric validation rules', () => {
+describe('Numeric validator rules', () => {
     describe('rule: minValue', () => {
-        const { minValue } = baseValidationRules;
+        const { minValue } = baseValidatorRules;
 
         it('should return danger context if value is less than minValue', () => {
             expect(minValue('age', { age: 16 }, 18)).toEqual({
                 key: 'minValue',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: '16 must be >= 18',
             });
         });
@@ -67,12 +67,12 @@ describe('Numeric validation rules', () => {
     });
 
     describe('rule: maxValue', () => {
-        const { maxValue } = baseValidationRules;
+        const { maxValue } = baseValidatorRules;
 
         it('should return danger context if value is greater than maxValue', () => {
             expect(maxValue('age', { age: 21 }, 18)).toEqual({
                 key: 'maxValue',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: '21 must be <= 18',
             });
         });
@@ -83,12 +83,12 @@ describe('Numeric validation rules', () => {
     });
 
     describe('rule: isDivisibleBy', () => {
-        const { isDivisibleBy } = baseValidationRules;
+        const { isDivisibleBy } = baseValidatorRules;
 
         it('should return danger context if value is not divisible by criteria', () => {
             expect(isDivisibleBy('age', { age: '10' }, 3)).toEqual({
                 key: 'isDivisibleBy',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: '10 must be divisible by 3',
             });
         });
@@ -99,12 +99,12 @@ describe('Numeric validation rules', () => {
     });
 
     describe('rule: isInteger', () => {
-        const { isInteger } = baseValidationRules;
+        const { isInteger } = baseValidatorRules;
 
         it('should return danger context if value is not an integer', () => {
             expect(isInteger('age', { age: 'test' })).toEqual({
                 key: 'isInteger',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Must be an integer',
             });
         });
@@ -115,12 +115,12 @@ describe('Numeric validation rules', () => {
     });
 
     describe('rule: isDecimal', () => {
-        const { isDecimal } = baseValidationRules;
+        const { isDecimal } = baseValidatorRules;
 
         it('should return danger context if value is not a decimal', () => {
             expect(isDecimal('age', { age: 'test' })).toEqual({
                 key: 'isDecimal',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Must be a decimal',
             });
         });
@@ -131,12 +131,12 @@ describe('Numeric validation rules', () => {
     });
 
     describe('rule: isNumeric', () => {
-        const { isNumeric } = baseValidationRules;
+        const { isNumeric } = baseValidatorRules;
 
         it('should return danger context if value is not a number', () => {
             expect(isNumeric('age', { age: '10.52' })).toEqual({
                 key: 'isNumeric',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Must be a number',
             });
         });
@@ -147,12 +147,12 @@ describe('Numeric validation rules', () => {
     });
 });
 
-describe('String validation rules', () => {
+describe('String validator rules', () => {
     describe('rule: minLength', () => {
-        const { minLength } = baseValidationRules;
+        const { minLength } = baseValidatorRules;
 
         it('should return danger context if value length is < minLength', () => {
-            const context = ValidationContext.Danger;
+            const context = ValidatorContext.Danger;
             testRule(minLength, [
                 {
                     value: 'toolong',
@@ -184,10 +184,10 @@ describe('String validation rules', () => {
     });
 
     describe('rule: maxLength', () => {
-        const { maxLength } = baseValidationRules;
+        const { maxLength } = baseValidatorRules;
 
         it('should return danger context if value length is > maxLength', () => {
-            const context = ValidationContext.Danger;
+            const context = ValidatorContext.Danger;
             testRule(maxLength, [
                 {
                     value: 'toolong',
@@ -219,10 +219,10 @@ describe('String validation rules', () => {
     });
 
     describe('rule: isLength', () => {
-        const { isLength } = baseValidationRules;
+        const { isLength } = baseValidatorRules;
 
         it('should return danger context if value length is equal to length', () => {
-            const context = ValidationContext.Danger;
+            const context = ValidatorContext.Danger;
             testRule(isLength, [
                 {
                     value: 'toolong',
@@ -254,11 +254,11 @@ describe('String validation rules', () => {
     });
 
     describe('rule: isLowercase', () => {
-        const { isLowercase } = baseValidationRules;
+        const { isLowercase } = baseValidatorRules;
 
         it('should return danger context if value is not all lowercase', () => {
             const response = {
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Must be all lowercase',
             };
             testRule(isLowercase, [
@@ -284,11 +284,11 @@ describe('String validation rules', () => {
     });
 
     describe('rule: isUppercase', () => {
-        const { isUppercase } = baseValidationRules;
+        const { isUppercase } = baseValidatorRules;
 
         it('should return danger context if value is not all uppercase', () => {
             const response = {
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Must be all uppercase',
             };
             testRule(isUppercase, [
@@ -314,14 +314,14 @@ describe('String validation rules', () => {
     });
 });
 
-describe('Regex validation rules', () => {
+describe('Regex validator rules', () => {
     describe('rule: matches', () => {
-        const { matches } = baseValidationRules;
+        const { matches } = baseValidatorRules;
 
         it('should return danger context if value does not match pattern', () => {
             expect(matches('greeting', { greeting: 'hi' }, /hell.*/i)).toEqual({
                 key: 'matches',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid input',
             });
         });
@@ -334,11 +334,11 @@ describe('Regex validation rules', () => {
     });
 
     describe('rule: isEmail', () => {
-        const { isEmail } = baseValidationRules;
+        const { isEmail } = baseValidatorRules;
 
         it('should return danger context if value is not an email', () => {
             const response = {
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid email',
             };
             testRule(isEmail, [
@@ -367,11 +367,11 @@ describe('Regex validation rules', () => {
     });
 
     describe('rule: isUrl', () => {
-        const { isUrl } = baseValidationRules;
+        const { isUrl } = baseValidatorRules;
 
         it('should return danger context if value is not a url', () => {
             const response = {
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid url',
             };
             testRule(isUrl, [
@@ -402,11 +402,11 @@ describe('Regex validation rules', () => {
     });
 
     describe('rule: isCreditCard', () => {
-        const { isCreditCard } = baseValidationRules;
+        const { isCreditCard } = baseValidatorRules;
 
         it('should return danger context if value is not a credit card number', () => {
             const response = {
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid credit card number',
             };
             testRule(isCreditCard, [
@@ -450,11 +450,11 @@ describe('Regex validation rules', () => {
     });
 
     describe('rule: isHexColor', () => {
-        const { isHexColor } = baseValidationRules;
+        const { isHexColor } = baseValidatorRules;
 
         it('should return danger context if value is not a hex color', () => {
             const response = {
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid hex color',
             };
             testRule(isHexColor, [
@@ -485,11 +485,11 @@ describe('Regex validation rules', () => {
     });
 
     describe('rule: isIp', () => {
-        const { isIp } = baseValidationRules;
+        const { isIp } = baseValidatorRules;
 
         it('should return danger context if value is not an IP address', () => {
             const response = {
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid IP address',
             };
             testRule(isIp, [
@@ -532,11 +532,11 @@ describe('Regex validation rules', () => {
     });
 
     describe('rule: isPort', () => {
-        const { isPort } = baseValidationRules;
+        const { isPort } = baseValidatorRules;
 
         it('should return danger context if value is not a port', () => {
             const response = {
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid port',
             };
             testRule(isPort, [
@@ -566,11 +566,11 @@ describe('Regex validation rules', () => {
     });
 
     describe('rule: isDate', () => {
-        const { isDate } = baseValidationRules;
+        const { isDate } = baseValidatorRules;
 
         it('should return danger context if value is not a date (dd/mm/yyyy)', () => {
             const response = {
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Invalid date format, expected: dd/mm/yyyy',
             };
             testRule(isDate, [
@@ -601,9 +601,9 @@ describe('Regex validation rules', () => {
     });
 });
 
-describe('Cross field validation rules', () => {
+describe('Cross field validator rules', () => {
     describe('rule: eqTarget', () => {
-        const { eqTarget } = baseValidationRules;
+        const { eqTarget } = baseValidatorRules;
 
         it('should return danger context if value does not match other field value', () => {
             expect(
@@ -617,7 +617,7 @@ describe('Cross field validation rules', () => {
                 ),
             ).toEqual({
                 key: 'eqTarget',
-                context: ValidationContext.Danger,
+                context: ValidatorContext.Danger,
                 message: 'Values do not match',
             });
         });

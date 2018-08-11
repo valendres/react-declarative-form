@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { FormContext, FormApi } from './Form';
 import {
-    ValidationResponse,
-    ValidationContext,
-    ValidationRules,
-    ValidationMessageGenerator,
+    ValidatorResponse,
+    ValidatorContext,
+    ValidatorRules,
+    ValidatorMessageGenerator,
 } from './types';
 
 export interface BoundComponentCommonProps {
@@ -17,11 +17,11 @@ export interface BoundComponentCommonProps {
     /** Whether or not the value has been modified */
     pristine?: boolean;
 
-    /** Validation message to be displayed as help text */
-    validationMessage?: string;
+    /** Validator message to be displayed as help text */
+    validatorMessage?: string;
 
-    /** Validation context: danger, warning, success */
-    validationContext?: ValidationContext;
+    /** Validator context: danger, warning, success */
+    validatorContext?: ValidatorContext;
 
     /** Should be called when component has been blurred */
     onBlur?: React.EventHandler<any>;
@@ -42,11 +42,11 @@ export interface BoundComponentProps extends BoundComponentCommonProps {
  * These props are only used by the HOC and are not passed to the wrapped component.
  */
 export interface BoundComponentHOCProps extends BoundComponentProps {
-    validationRules?: ValidationRules;
-    validationMessages?: {
-        [ruleKey: string]: string | ValidationMessageGenerator;
+    validatorRules?: ValidatorRules;
+    validatorMessages?: {
+        [ruleKey: string]: string | ValidatorMessageGenerator;
     };
-    validationGroup?: string[];
+    validatorGroup?: string[];
     initialValue?: any;
 }
 
@@ -60,13 +60,13 @@ export interface BoundComponentInstance {
     reset: () => void;
     validate: () => void;
     isValid: () => boolean;
-    setValidation: (validation: ValidationResponse) => void;
+    setValidator: (validator: ValidatorResponse) => void;
 }
 
 export interface BoundComponentState {
     pristine: boolean;
     value?: any;
-    validation?: ValidationResponse;
+    validator?: ValidatorResponse;
 }
 export function bind<ComponentProps extends BoundComponentAllProps>(
     WrappedComponent: React.ComponentClass<ComponentProps>,
@@ -116,7 +116,7 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
             const { value } = this.props;
             this.setState({
                 value: value || undefined,
-                validation: undefined,
+                validator: undefined,
                 pristine: true,
             });
         };
@@ -125,42 +125,42 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
             const { initialValue, value } = this.props;
             this.setState({
                 value: value || initialValue,
-                validation: undefined,
+                validator: undefined,
                 pristine: true,
             });
         };
 
         public validate = () => {
             this.setState({
-                validation: this.getValidation(),
+                validator: this.getValidator(),
                 pristine: false,
             });
         };
 
         public isValid = (): boolean => {
-            const consumerValid = this.props.validationContext
-                ? this.props.validationContext !== ValidationContext.Danger
+            const consumerValid = this.props.validatorContext
+                ? this.props.validatorContext !== ValidatorContext.Danger
                 : true;
             const computedValid =
-                this.getValidation().context === ValidationContext.Success;
+                this.getValidator().context === ValidatorContext.Success;
 
             return consumerValid && computedValid;
         };
 
-        public setValidation = (validation: ValidationResponse): void => {
+        public setValidator = (validator: ValidatorResponse): void => {
             this.setState({
-                validation,
+                validator,
             });
         };
 
         public render() {
-            const { validation } = this.state;
+            const { validator } = this.state;
             const message =
-                this.props.validationMessage ||
-                (validation ? validation.message : undefined);
+                this.props.validatorMessage ||
+                (validator ? validator.message : undefined);
             const context =
-                this.props.validationContext ||
-                (validation ? validation.context : undefined);
+                this.props.validatorContext ||
+                (validator ? validator.context : undefined);
             const pristine =
                 'pristine' in this.props
                     ? this.props.pristine
@@ -168,9 +168,9 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
 
             const {
                 // Omit these
-                validationRules,
-                validationMessages,
-                validationGroup,
+                validatorRules,
+                validatorMessages,
+                validatorGroup,
                 initialValue,
                 ...restProps
             } = this.props as any;
@@ -184,8 +184,8 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
                                 {...restProps}
                                 value={this.state.value}
                                 pristine={pristine}
-                                validationMessage={message}
-                                validationContext={context}
+                                validatorMessage={message}
+                                validatorContext={context}
                                 setValue={this.setValue}
                                 onBlur={this.handleBlur}
                                 onFocus={this.handleFocus}
@@ -196,16 +196,16 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
             );
         }
 
-        getValidation = (value: any = this.state.value): ValidationResponse => {
+        getValidator = (value: any = this.state.value): ValidatorResponse => {
             const { name, required } = this.props;
-            return this.formApi.getValidation(name, value, required);
+            return this.formApi.getValidator(name, value, required);
         };
 
         setValue = (value: any) => {
             this.setState(
                 {
                     value,
-                    validation: this.getValidation(value),
+                    validator: this.getValidator(value),
                     pristine: false,
                 },
                 () => {

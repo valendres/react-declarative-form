@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ValidationResponse, ValueMap, Omit } from './types';
+import { ValidatorResponse, ValueMap, Omit } from './types';
 import { validate } from './validator';
 import { BoundComponentInstance } from './formBinding';
 
@@ -9,7 +9,7 @@ export interface FormApi {
     registerComponent: Form['registerComponent'];
     unregisterComponent: Form['unregisterComponent'];
     validate: Form['validate'];
-    getValidation: Form['getValidation'];
+    getValidator: Form['getValidator'];
     handleChange: Form['handleChange'];
     handleBlur: Form['handleBlur'];
     handleFocus: Form['handleFocus'];
@@ -108,7 +108,7 @@ export class Form extends React.Component<FormProps> {
     };
 
     /**
-     * Clears the form. The value and validation for each form component will be
+     * Clears the form. The value and validator for each form component will be
      * set to undefined. Note: this will have no effect if the valueProp has
      * been provided.
      */
@@ -147,7 +147,7 @@ export class Form extends React.Component<FormProps> {
     };
 
     /**
-     * Executes validation rules on all component
+     * Executes validator rules on all component
      * @returns true if all all components are valid
      */
     public isValid = (): boolean => {
@@ -160,32 +160,32 @@ export class Form extends React.Component<FormProps> {
     };
 
     /**
-     * Inject a custom validation response on a form component
+     * Inject a custom validator response on a form component
      * @param {string} componentName name of the component
-     * @param {object} validation custom validation response to be injected
+     * @param {object} validator custom validator response to be injected
      */
-    public setValidation = (
+    public setValidator = (
         componentName: string,
-        validation: ValidationResponse,
+        validator: ValidatorResponse,
     ): void => {
         if (componentName in this.componentRefs) {
-            this.componentRefs[componentName].setValidation(validation);
+            this.componentRefs[componentName].setValidator(validator);
         } else {
             console.warn(
-                `Failed to set validation for "${componentName}" component. It does not exist in form context.`,
+                `Failed to set validator for "${componentName}" component. It does not exist in form context.`,
             );
         }
     };
 
     /**
-     * Injects custom validation responses for form components
-     * @param {object} validations component name / validation response map
+     * Injects custom validator responses for form components
+     * @param {object} validators component name / validator response map
      */
-    public setValidations = (validations: {
-        [componentName: string]: ValidationResponse;
+    public setValidators = (validators: {
+        [componentName: string]: ValidatorResponse;
     }): void => {
-        Object.keys(validations).forEach((componentName: string) => {
-            this.setValidation(componentName, validations[componentName]);
+        Object.keys(validators).forEach((componentName: string) => {
+            this.setValidator(componentName, validators[componentName]);
         });
     };
 
@@ -207,7 +207,7 @@ export class Form extends React.Component<FormProps> {
             registerComponent: this.registerComponent,
             unregisterComponent: this.unregisterComponent,
             validate: this.validate,
-            getValidation: this.getValidation,
+            getValidator: this.getValidator,
             handleChange: this.handleChange,
             handleBlur: this.handleBlur,
             handleFocus: this.handleFocus,
@@ -248,21 +248,21 @@ export class Form extends React.Component<FormProps> {
     };
 
     /**
-     * Executes validation object for the specified component name. If no custom value
+     * Executes validator object for the specified component name. If no custom value
      * is provided, the current value will be retrieved from the form component.
      * @param {string} componentName name of the component
      * @param {any} value (optional) custom value to be used when validating
      * @param {boolean} required (default: false) whether or not a value is required
-     * @returns validation response: context, message
+     * @returns validator response: context, message
      */
-    private getValidation = (
+    private getValidator = (
         componentName: string,
         value?: any,
         required: boolean = false,
-    ): ValidationResponse => {
+    ): ValidatorResponse => {
         const values = this.getValues();
         const component = this.componentRefs[componentName];
-        const { validationRules, validationMessages } = component.props;
+        const { validatorRules, validatorMessages } = component.props;
         return validate(
             componentName,
             {
@@ -272,15 +272,15 @@ export class Form extends React.Component<FormProps> {
             },
             {
                 required,
-                ...validationRules,
+                ...validatorRules,
             },
-            validationMessages,
+            validatorMessages,
         );
     };
 
     /**
      * Recursively builds a dependency map for components that are part of the
-     * validation group tree.
+     * validator group tree.
      */
     private buildDependencyMap = (
         componentNames: string[],
@@ -293,9 +293,9 @@ export class Form extends React.Component<FormProps> {
         );
 
         return componentNames.reduce((output: any, name: string) => {
-            const validationGroup: string[] =
-                this.componentRefs[name].props.validationGroup || [];
-            const namesToMap = validationGroup.filter(
+            const validatorGroup: string[] =
+                this.componentRefs[name].props.validatorGroup || [];
+            const namesToMap = validatorGroup.filter(
                 (n: string) => !(n in mappedNames),
             );
 
@@ -313,13 +313,13 @@ export class Form extends React.Component<FormProps> {
 
     /**
      * Returns an of component names that should be validated when validating
-     * a specific component. Determined using the validation group tree.
+     * a specific component. Determined using the validator group tree.
      * @returns array of componentNames
      */
     private getRelatedComponents = (componentName: string): string[] => {
-        const { validationGroup } = this.componentRefs[componentName].props;
-        if (validationGroup) {
-            return Object.keys(this.buildDependencyMap(validationGroup)).filter(
+        const { validatorGroup } = this.componentRefs[componentName].props;
+        if (validatorGroup) {
+            return Object.keys(this.buildDependencyMap(validatorGroup)).filter(
                 (dependencyName: string) => dependencyName !== componentName,
             );
         }

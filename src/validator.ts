@@ -1,35 +1,35 @@
 import {
-    ValidationRule,
-    ValidationMessages,
-    ValidationResponse,
-    ValidationContext,
-    ValidationRuleMap,
-    ValidationMessageGenerator,
+    ValidatorRule,
+    ValidatorMessages,
+    ValidatorResponse,
+    ValidatorContext,
+    ValidatorRuleMap,
+    ValidatorMessageGenerator,
     ValueMap,
 } from './types';
-import { baseValidationRules } from './rules';
+import { baseValidatorRules } from './rules';
 
 /**
- * Validation rules to be used by validator
+ * Validator rules to be used by validator
  */
-let validationRules = baseValidationRules;
+let validatorRules = baseValidatorRules;
 
 /**
- * Returns current validation rules in use
+ * Returns current validator rules in use
  */
-export const getValidationRules = (): ValidationRuleMap => {
-    return validationRules;
+export const getValidatorRules = (): ValidatorRuleMap => {
+    return validatorRules;
 };
 
 /**
- * Adds a custom validation rule to the validator. If the rule is
+ * Adds a custom validator rule to the validator. If the rule is
  * already defined, the new rule will override the original.
  *
  * @param rule new rule to be added
  */
-export const addValidationRule = (key: string, rule: ValidationRule): void => {
-    validationRules = {
-        ...validationRules,
+export const addValidatorRule = (key: string, rule: ValidatorRule): void => {
+    validatorRules = {
+        ...validatorRules,
         [key]: rule,
     };
 };
@@ -39,8 +39,8 @@ export const addValidationRule = (key: string, rule: ValidationRule): void => {
  *
  * @param valueKey key of value to be validated
  * @param values values of all fields
- * @param targetRules validation rules to use
- * @param customMessages custom validation messages
+ * @param targetRules validator rules to use
+ * @param customMessages custom validator messages
  */
 export const validate = (
     valueKey: string,
@@ -48,17 +48,17 @@ export const validate = (
     targetRules: {
         readonly [name: string]: any;
     } = {},
-    customMessages: ValidationMessages = {},
-): ValidationResponse => {
+    customMessages: ValidatorMessages = {},
+): ValidatorResponse => {
     const { required, custom, ...restRules } = targetRules;
 
     // Execute required rule first (if it exists)
     if (required) {
-        const response = validationRules.required(valueKey, values);
+        const response = validatorRules.required(valueKey, values);
         if (response) return response;
     }
 
-    // Execute custom validation rule second (if it exists)
+    // Execute custom validator rule second (if it exists)
     if (custom) {
         const response = custom(valueKey, values);
         // Only return if there is a response to return
@@ -66,18 +66,18 @@ export const validate = (
     }
 
     // Excute rest rules
-    let cachedResponse: ValidationResponse;
+    let cachedResponse: ValidatorResponse;
     Object.keys(restRules).some((ruleKey: string) => {
         const criteria = targetRules[ruleKey];
-        if (ruleKey in validationRules) {
-            const response = validationRules[ruleKey](
+        if (ruleKey in validatorRules) {
+            const response = validatorRules[ruleKey](
                 valueKey,
                 values,
                 criteria,
             );
 
             // Break early if danger response is encountered
-            if (response && response.context === ValidationContext.Danger) {
+            if (response && response.context === ValidatorContext.Danger) {
                 cachedResponse = response;
                 return true;
             }
@@ -85,7 +85,7 @@ export const validate = (
             // Cache first warning response, don't break because there might be an error later on
             if (
                 response &&
-                response.context === ValidationContext.Warning &&
+                response.context === ValidatorContext.Warning &&
                 !cachedResponse
             ) {
                 cachedResponse = response;
@@ -105,7 +105,7 @@ export const validate = (
         if (ruleKey in customMessages) {
             const customMessage =
                 customMessages[ruleKey] instanceof Function
-                    ? ((customMessages[ruleKey] as ValidationMessageGenerator)(
+                    ? ((customMessages[ruleKey] as ValidatorMessageGenerator)(
                           valueKey,
                           values,
                           targetRules[ruleKey],
@@ -121,8 +121,8 @@ export const validate = (
         return cachedResponse;
     }
 
-    // If we don't have a cached response, assume validation is successful
+    // If we don't have a cached response, assume validator is successful
     return {
-        context: ValidationContext.Success,
+        context: ValidatorContext.Success,
     };
 };

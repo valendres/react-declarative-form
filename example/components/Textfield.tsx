@@ -3,14 +3,15 @@ import {
     bind,
     BoundComponentProps,
     ValidatorContext,
-} from 'react-form-validator';
+    Omit,
+} from 'react-declarative-form';
 
 import MaterialTextField, {
     TextFieldProps as MaterialTextFieldProps,
-} from 'material-ui/TextField';
+} from '@material-ui/core/TextField';
 
 export interface TextFieldProps
-    extends MaterialTextFieldProps,
+    extends Omit<MaterialTextFieldProps, 'value'>,
         BoundComponentProps {
     name: string;
     label?: string;

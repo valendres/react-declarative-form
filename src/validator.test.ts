@@ -78,8 +78,8 @@ describe('func: validate', () => {
             { name: 'somevalue' },
             {
                 custom: () => ({
-                    context: ValidatorContext.Danger,
                     message,
+                    context: ValidatorContext.Danger,
                 }),
             },
         );

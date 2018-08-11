@@ -232,7 +232,7 @@ import {
 } from 'react-declarative-form';
 import MaterialTextField, {
     TextFieldProps as MaterialTextFieldProps
-} from 'material-ui/TextField';
+} from '@material-ui/core/TextField';
 
 export interface TextFieldProps
     extends MaterialTextFieldProps, BoundComponentProps

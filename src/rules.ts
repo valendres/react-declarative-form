@@ -221,7 +221,7 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
         if (
             isDefined(key, values) &&
             isDefined(targetKey, values) &&
-            values[key] != values[targetKey]
+            values[key] !== values[targetKey]
         ) {
             return {
                 key: 'eqTarget',

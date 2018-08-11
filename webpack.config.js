@@ -20,7 +20,7 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
         alias: {
-            'react-form-validator': path.resolve(__dirname, './src'),
+            'react-declarative-form': path.resolve(__dirname, './src'),
         },
         modules: [path.resolve(__dirname, 'node_modules')],
     },

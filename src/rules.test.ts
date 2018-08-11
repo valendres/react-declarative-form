@@ -155,10 +155,10 @@ describe('String validator rules', () => {
             const context = ValidatorContext.Danger;
             testRule(minLength, [
                 {
+                    context,
                     value: 'toolong',
                     criteria: 8,
                     message: 'Length must be >= 8',
-                    context,
                 },
             ]);
         });
@@ -190,10 +190,10 @@ describe('String validator rules', () => {
             const context = ValidatorContext.Danger;
             testRule(maxLength, [
                 {
+                    context,
                     value: 'toolong',
                     criteria: 3,
                     message: 'Length must be <= 3',
-                    context,
                 },
             ]);
         });
@@ -225,10 +225,10 @@ describe('String validator rules', () => {
             const context = ValidatorContext.Danger;
             testRule(isLength, [
                 {
+                    context,
                     value: 'toolong',
                     criteria: 3,
                     message: 'Length must be 3',
-                    context,
                 },
             ]);
         });

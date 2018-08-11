@@ -5,12 +5,12 @@ import {
     ValueMap,
     ValidatorContext,
     ValidatorResponse,
-} from 'react-form-validator';
-import Button from 'material-ui/Button';
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
-import Tooltip from 'material-ui/Tooltip';
-import { LinearProgress } from 'material-ui/Progress';
+} from 'react-declarative-form';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import { TextField } from './Textfield';
 
 const getPasswordStrength = (password: string) => {

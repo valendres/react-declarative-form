@@ -1,1 +1,1 @@
-export { Form } from 'react-form-validator';
+export { Form } from 'react-declarative-form';

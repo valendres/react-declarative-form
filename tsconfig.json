@@ -14,7 +14,7 @@
         "outDir": "./dist",
         "baseUrl": "./",
         "paths": {
-            "react-form-validator": [
+            "react-declarative-form": [
                 "./src"
             ]
         },

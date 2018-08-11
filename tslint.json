@@ -13,6 +13,6 @@
             "allow-pascal-case"
         ],
         "jsx-boolean-value": false,
-        "import-name": false,
+        "import-name": false
     }
 }

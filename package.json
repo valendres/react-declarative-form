@@ -1,9 +1,9 @@
 {
     "name": "react-declarative-form",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Declarative react form validator",
-    "main": "lib/index",
-    "typings": "lib/index",
+    "main": "dist/lib/index",
+    "typings": "dist/lib/index",
     "repository": "valendres/react-declarative-form",
     "author": {
         "name": "Peter Weller",

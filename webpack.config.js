@@ -28,7 +28,7 @@ module.exports = {
         new OpenBrowserWebpackPlugin(),
         new webpack.NamedModulesPlugin(),
         new HtmlWebpackPlugin({
-            title: 'React Form Validator - Example',
+            title: 'React Declarative Form - Example',
             template: path.resolve(__dirname, './example/index.ejs'),
         }),
     ],

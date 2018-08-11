@@ -1,17 +1,17 @@
-# React Form Validator
+# React Declarative Form
 ## Overview
-**react-form-validator** is a simple-to-use declarative valadation library. It is designed to make building forms easy; allowing consumers to specify validator requirements on individual form components, and let the library do the heavy lifting.
+**react-declarative-form** is a simple-to-use declarative valadation library. It is designed to make building forms easy; allowing consumers to specify validator requirements on individual form components, and let the library do the heavy lifting.
 
 ### Requirements
 This library requires the following:
-* The `<Form />` component from **react-form-valdiator** is used instead of a html `<form/>`.
+* The `<Form />` component from **react-declarative-form** is used instead of a html `<form/>`.
 * Managed form components have been created using the [`bind() HOC`](#bind-hoc). See [Example: Form Binding HOC](#example-form-binding-hoc).
 * The managed form components are  descendants of a `<Form />` component. See [Example: Form Usage](#example-form-usage).
 
 ## Getting started
-1. Add **react-form-validator** to your project.
+1. Add **react-declarative-form** to your project.
     ```
-    npm i react-form-validator --save
+    npm i react-declarative-form --save
     ```
 2. Create bound form components using [`bind() HOC`](#bind-hoc)
 3. Use bound form components within a `<Form />` component.
@@ -92,7 +92,7 @@ Injects custom validator responses on form components.
 
 
 #### `bind HOC`
-Using the `bind()` higher order component allows **react-form-validator** to manage the form component value and validator state. Refer to [Example: Form Binding HOC](#example-form-binding-hoc) to get a better understanding of how these props can be used.
+Using the `bind()` higher order component allows **react-declarative-form** to manage the form component value and validator state. Refer to [Example: Form Binding HOC](#example-form-binding-hoc) to get a better understanding of how these props can be used.
 
 ##### Wrapped component props
 These props will be available to the wrapped component. The *injected* variables will always be provided to the wrapped component, even if the the the consumer did not provide them. However, a number of these props are *overridable*, meaning the consumer can override the HOC provided value.
@@ -203,7 +203,7 @@ import {
     isDefined,
     ValidatorContext,
     ValueMap,
-} from 'react-form-validator';
+} from 'react-declarative-form';
 
 addValidatorRule(
     'containsCat',
@@ -229,7 +229,7 @@ import {
     bind,
     BoundComponentProps,
     ValidatorContext,
-} from 'react-form-validator';
+} from 'react-declarative-form';
 import MaterialTextField, {
     TextFieldProps as MaterialTextFieldProps
 } from 'material-ui/TextField';
@@ -283,7 +283,7 @@ export const TextField = bind<TextFieldProps>(UnboundTextField);
 Using the bound TextField component inside a Form.
 ```Typescript
 import * as React from 'react';
-import { Form, ValueMap } from 'react-form-validator';
+import { Form, ValueMap } from 'react-declarative-form';
 import { Button, TextField } from 'view/components';
 
 export interface RegistrationFormProps {}

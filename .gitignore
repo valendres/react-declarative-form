@@ -1,6 +1,7 @@
 # Dir
 node_modules
 dist
+coverage
 
 # IDEs
 .vscode

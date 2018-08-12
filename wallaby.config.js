@@ -2,7 +2,7 @@ module.exports = function(wallaby) {
     return {
         files: [
             {
-                pattern: 'src/**/*.test.ts?(x)',
+                pattern: 'src/**/*test.ts?(x)',
                 instrument: false,
                 ignore: true,
             },
@@ -15,12 +15,12 @@ module.exports = function(wallaby) {
                 instrument: true,
             },
             {
-                pattern: 'src/**/*.ts?(x)',
+                pattern: 'src/**/*.ts*',
                 instrument: true,
             },
         ],
 
-        tests: ['src/**/*test.ts'],
+        tests: ['src/**/*test.ts*'],
 
         compilers: {
             '**/*.ts?(x)': wallaby.compilers.typeScript({
@@ -39,5 +39,7 @@ module.exports = function(wallaby) {
         hints: {
             ignoreCoverage: /istanbul ignore next/,
         },
+
+        debug: true,
     };
 };

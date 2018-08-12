@@ -87,13 +87,14 @@
     "jest": {
         "setupTestFrameworkScriptFile": "<rootDir>/test/setup.ts",
         "transform": {
-            ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+            ".(ts|tsx)": "ts-jest"
         },
         "testRegex": "(<rootDir>/src/.*|(\\.|/)(test))\\.tsx?$",
         "moduleFileExtensions": [
+            "js",
+            "jsx",
             "ts",
-            "tsx",
-            "js"
+            "tsx"
         ],
         "moduleNameMapper": {
             "^@components(.*)": "<rootDir>/src/components$1",
@@ -103,10 +104,14 @@
             "^@validator(.*)": "<rootDir>/src/validator$1",
             "\\.(s?css|less)$": "<rootDir>/test/style-mock.ts"
         },
-        "collectCoverage": false,
+        "collectCoverage": true,
         "collectCoverageFrom": [
-            "!src/**/*.test.{.ts,tsx}",
-            "src/**/*.{.ts,tsx}"
+            "!src/**/*.test.{ts,tsx}",
+            "src/**/*.{ts,tsx}"
+        ],
+        "coverageReporters": [
+            "html",
+            "lcov"
         ]
     }
 }

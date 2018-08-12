@@ -16,7 +16,12 @@
         "paths": {
             "react-declarative-form": [
                 "./src"
-            ]
+            ],
+            "@components": ["src/components/index"],
+            "@rules": ["src/rules/index"],
+            "@types": ["src/types/index"],
+            "@utils": ["src/utils/index"],
+            "@validator": ["src/validator/index"],
         },
         "noImplicitReturns": false,
         "noImplicitThis": true,
@@ -32,7 +37,6 @@
         "./example/**/*"
     ],
     "exclude": [
-        "node_modules",
-        "**/*.test.ts"
+        "node_modules"
     ]
 }

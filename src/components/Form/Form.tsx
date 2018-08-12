@@ -1,18 +1,20 @@
 import * as React from 'react';
-import { ValidatorResponse, ValueMap, Omit } from './types';
-import { validate } from './validator';
-import { BoundComponentInstance } from './formBinding';
 
-export const FormContext = React.createContext({} as FormApi);
+import { ValidatorResponse, ValueMap, Omit } from '@types';
+import { validate } from '@validator';
+
+import { BoundComponentInstance } from '../bind';
+
+export const FormContext = React.createContext(undefined as FormApi);
 
 export interface FormApi {
     registerComponent: Form['registerComponent'];
     unregisterComponent: Form['unregisterComponent'];
     validate: Form['validate'];
-    getValidator: Form['getValidator'];
-    handleChange: Form['handleChange'];
-    handleBlur: Form['handleBlur'];
-    handleFocus: Form['handleFocus'];
+    getResponse: Form['getResponse'];
+    onChange: Form['handleChange'];
+    onBlur: Form['handleBlur'];
+    onFocus: Form['handleFocus'];
 }
 
 export interface FormProps
@@ -162,14 +164,14 @@ export class Form extends React.Component<FormProps> {
     /**
      * Inject a custom validator response on a form component
      * @param {string} componentName name of the component
-     * @param {object} validator custom validator response to be injected
+     * @param {object} response custom validator response to be injected
      */
-    public setValidator = (
+    public setResponse = (
         componentName: string,
-        validator: ValidatorResponse,
+        response: ValidatorResponse,
     ): void => {
         if (componentName in this.componentRefs) {
-            this.componentRefs[componentName].setValidator(validator);
+            this.componentRefs[componentName].setResponse(response);
         } else {
             console.warn(
                 `Failed to set validator for "${componentName}" component. It does not exist in form context.`,
@@ -179,13 +181,13 @@ export class Form extends React.Component<FormProps> {
 
     /**
      * Injects custom validator responses for form components
-     * @param {object} validators component name / validator response map
+     * @param {object} responses component name / validator response map
      */
-    public setValidators = (validators: {
+    public setResponses = (responses: {
         [componentName: string]: ValidatorResponse;
     }): void => {
-        Object.keys(validators).forEach((componentName: string) => {
-            this.setValidator(componentName, validators[componentName]);
+        Object.keys(responses).forEach((componentName: string) => {
+            this.setResponse(componentName, responses[componentName]);
         });
     };
 
@@ -207,10 +209,10 @@ export class Form extends React.Component<FormProps> {
             registerComponent: this.registerComponent,
             unregisterComponent: this.unregisterComponent,
             validate: this.validate,
-            getValidator: this.getValidator,
-            handleChange: this.handleChange,
-            handleBlur: this.handleBlur,
-            handleFocus: this.handleFocus,
+            getResponse: this.getResponse,
+            onChange: this.handleChange,
+            onBlur: this.handleBlur,
+            onFocus: this.handleFocus,
         };
 
         return (
@@ -255,7 +257,7 @@ export class Form extends React.Component<FormProps> {
      * @param {boolean} required (default: false) whether or not a value is required
      * @returns validator response: context, message
      */
-    private getValidator = (
+    private getResponse = (
         componentName: string,
         value?: any,
         required: boolean = false,

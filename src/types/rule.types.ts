@@ -1,14 +1,4 @@
-export type KeyofBase = keyof any;
-export type Diff<T extends KeyofBase, U extends KeyofBase> = ({ [P in T]: P } &
-    { [P in U]: never } & { [x: string]: never })[T];
-
-export type Omit<T, K extends keyof T> = Pick<T, Diff<keyof T, K>>;
-
-export enum ValidatorContext {
-    Danger = 'danger',
-    Warning = 'warning',
-    Success = 'success',
-}
+import { ValueMap, ValidatorResponse } from './validator.types';
 
 export type ValidatorRule = (
     key: string,
@@ -93,25 +83,5 @@ export interface ValidatorRules {
     /** Custom validator rule. It is executed before other rules */
     custom?: ValidatorRule;
 
-    [name: string]: any;
-}
-
-export type ValidatorMessageGenerator = ((
-    key: string,
-    values: ValueMap,
-    criteria?: any,
-) => string);
-
-export interface ValidatorMessages {
-    readonly [name: string]: ValidatorMessageGenerator | string;
-}
-
-export interface ValidatorResponse {
-    readonly key?: string;
-    readonly context: ValidatorContext;
-    readonly message?: string;
-}
-
-export interface ValueMap {
     [name: string]: any;
 }

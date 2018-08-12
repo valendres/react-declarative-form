@@ -1,4 +1,4 @@
-import { isDefined } from './/utils';
+import { isDefined } from './utils';
 
 describe('func: isDefined', () => {
     it('should return false if value is undefined or empty string', () => {

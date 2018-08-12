@@ -73,10 +73,10 @@ Validates specified component(s). If no component names are provided, all compon
 ###### `isValid(): boolean`
 Executes validator rules on all components. True will be returned if all components are valid.
 
-###### `setValidator(componentName: string, validator: ValidatorResponse): void`
+###### `setResponse(componentName: string, response: ValidatorResponse): void`
 Inject a custom validator response on a form component.
 
-###### `setValidators(validators: {[componentName: string]: ValidatorResponse}): void`
+###### `setResponses(responses: {[componentName: string]: ValidatorResponse}): void`
 Injects custom validator responses on form components.
 
 ##### Form Props

@@ -11,8 +11,8 @@ import * as isPort from 'validator/lib/isPort';
 import * as isUppercase from 'validator/lib/isUppercase';
 import * as isUrl from 'validator/lib/isURL';
 
-import { ValidatorContext, ValidatorRuleMap, ValueMap } from './types';
-import { isDefined } from './utils';
+import { ValidatorContext, ValidatorRuleMap, ValueMap } from '@types';
+import { isDefined } from '@utils';
 
 const patterns: {
     [key: string]: RegExp;

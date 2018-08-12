@@ -1,11 +1,13 @@
 import * as React from 'react';
-import { FormContext, FormApi } from './Form';
+
 import {
     ValidatorResponse,
     ValidatorContext,
     ValidatorRules,
     ValidatorMessageGenerator,
-} from './types';
+} from '@types';
+
+import { FormContext, FormApi } from '../Form';
 
 export interface BoundComponentCommonProps {
     /** Unique form component identifier */
@@ -60,13 +62,13 @@ export interface BoundComponentInstance {
     reset: () => void;
     validate: () => void;
     isValid: () => boolean;
-    setValidator: (validator: ValidatorResponse) => void;
+    setResponse: (response: ValidatorResponse) => void;
 }
 
 export interface BoundComponentState {
     pristine: boolean;
     value?: any;
-    validator?: ValidatorResponse;
+    response?: ValidatorResponse;
 }
 export function bind<ComponentProps extends BoundComponentAllProps>(
     WrappedComponent: React.ComponentClass<ComponentProps>,
@@ -105,18 +107,26 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
         }
 
         public componentDidMount() {
-            this.formApi.registerComponent(this.props.name, this);
+            if (this.isInsideForm()) {
+                this.formApi.registerComponent(this.props.name, this);
+            } else {
+                console.error(
+                    'Bound form components must be placed inside of a <Form/> component.',
+                );
+            }
         }
 
         public componentWillUnmount() {
-            this.formApi.unregisterComponent(this.props.name);
+            if (this.isInsideForm()) {
+                this.formApi.unregisterComponent(this.props.name);
+            }
         }
 
         public clear = (): void => {
             const { value } = this.props;
             this.setState({
                 value: value || undefined,
-                validator: undefined,
+                response: undefined,
                 pristine: true,
             });
         };
@@ -125,14 +135,14 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
             const { initialValue, value } = this.props;
             this.setState({
                 value: value || initialValue,
-                validator: undefined,
+                response: undefined,
                 pristine: true,
             });
         };
 
         public validate = () => {
             this.setState({
-                validator: this.getValidator(),
+                response: this.getResponse(),
                 pristine: false,
             });
         };
@@ -142,25 +152,25 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
                 ? this.props.validatorContext !== ValidatorContext.Danger
                 : true;
             const computedValid =
-                this.getValidator().context === ValidatorContext.Success;
+                this.getResponse().context === ValidatorContext.Success;
 
             return consumerValid && computedValid;
         };
 
-        public setValidator = (validator: ValidatorResponse): void => {
+        public setResponse = (response: ValidatorResponse): void => {
             this.setState({
-                validator,
+                response,
             });
         };
 
         public render() {
-            const { validator } = this.state;
+            const { response } = this.state;
             const message =
                 this.props.validatorMessage ||
-                (validator ? validator.message : undefined);
+                (response ? response.message : undefined);
             const context =
                 this.props.validatorContext ||
-                (validator ? validator.context : undefined);
+                (response ? response.context : undefined);
             const pristine =
                 'pristine' in this.props
                     ? this.props.pristine
@@ -196,32 +206,42 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
             );
         }
 
-        getValidator = (value: any = this.state.value): ValidatorResponse => {
+        getResponse = (value: any = this.state.value): ValidatorResponse => {
             const { name, required } = this.props;
-            return this.formApi.getValidator(name, value, required);
+            return this.isInsideForm()
+                ? this.formApi.getResponse(name, value, required)
+                : {
+                      context: ValidatorContext.Success,
+                  };
         };
 
         setValue = (value: any) => {
-            this.setState(
-                {
-                    value,
-                    validator: this.getValidator(value),
-                    pristine: false,
-                },
-                () => {
-                    this.formApi.handleChange(this.props.name, value);
-                },
-            );
+            this.setState({
+                value,
+                response: this.getResponse(value),
+                pristine: false,
+            });
+            if (this.isInsideForm()) {
+                this.formApi.onChange(this.props.name, value);
+            }
         };
 
         handleBlur = (event?: React.FocusEvent<any>): void => {
-            this.formApi.handleBlur(this.props.name, this.state.value);
+            if (this.isInsideForm()) {
+                this.formApi.onBlur(this.props.name, this.state.value);
+            }
             this.props.onBlur(event);
         };
 
         handleFocus = (event?: React.FocusEvent<any>): void => {
-            this.formApi.handleFocus(this.props.name, this.state.value);
+            if (this.isInsideForm()) {
+                this.formApi.onFocus(this.props.name, this.state.value);
+            }
             this.props.onFocus(event);
+        };
+
+        isInsideForm = (): boolean => {
+            return !!this.formApi;
         };
     };
 }

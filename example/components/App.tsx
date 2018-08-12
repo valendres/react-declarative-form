@@ -198,7 +198,7 @@ export class App extends React.Component<AppProps, AppState> {
 
     private handleFormValidSubmit = (values: ValueMap) => {
         console.log('Successfully submitted form :)', values);
-        this.formRef.current.setValidators({
+        this.formRef.current.setResponses({
             email: {
                 context: ValidatorContext.Danger,
                 message: 'already registered!',

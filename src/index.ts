@@ -1,3 +1,5 @@
-export * from './formBinding';
-export * from './Form';
+export * from './components';
+export * from './rules';
 export * from './types';
+export * from './utils';
+export * from './validator';

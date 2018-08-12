@@ -1,15 +1,8 @@
-import { baseValidatorRules } from './rules';
-import { ValidatorContext, ValidatorRule, ValidatorResponse } from './types';
+import { ValidatorContext, ValidatorRule, ValidatorTest } from '@types';
 
-const testRule = (
-    rule: ValidatorRule,
-    tests: {
-        value: any;
-        criteria?: any;
-        message?: string;
-        context?: string;
-    }[],
-) => {
+import { baseValidatorRules } from './rules';
+
+const testRule = (rule: ValidatorRule, tests: ValidatorTest[]) => {
     const name = 'TEST';
     tests.forEach(({ value, criteria, message, context }) => {
         const output = rule(name, { [name]: value }, criteria);
@@ -164,7 +157,7 @@ describe('String validator rules', () => {
         });
 
         it('should return undefined if value length is >= minLength', () => {
-            const response = {
+            const response: ValidatorTest = {
                 message: undefined,
                 context: undefined,
             };
@@ -199,7 +192,7 @@ describe('String validator rules', () => {
         });
 
         it('should return undefined if value is <= maxLength', () => {
-            const response = {
+            const response: ValidatorTest = {
                 message: undefined,
                 context: undefined,
             };
@@ -234,7 +227,7 @@ describe('String validator rules', () => {
         });
 
         it('should return undefined if value is equal to length', () => {
-            const response = {
+            const response: ValidatorTest = {
                 message: undefined,
                 context: undefined,
             };
@@ -257,7 +250,7 @@ describe('String validator rules', () => {
         const { isLowercase } = baseValidatorRules;
 
         it('should return danger context if value is not all lowercase', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: ValidatorContext.Danger,
                 message: 'Must be all lowercase',
             };
@@ -267,7 +260,7 @@ describe('String validator rules', () => {
         });
 
         it('should return undefined if value does not contain uppercase characters', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: undefined,
                 message: undefined,
             };
@@ -287,7 +280,7 @@ describe('String validator rules', () => {
         const { isUppercase } = baseValidatorRules;
 
         it('should return danger context if value is not all uppercase', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: ValidatorContext.Danger,
                 message: 'Must be all uppercase',
             };
@@ -297,7 +290,7 @@ describe('String validator rules', () => {
         });
 
         it('should return undefined if value does not contain lowercase characters', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: undefined,
                 message: undefined,
             };
@@ -337,7 +330,7 @@ describe('Regex validator rules', () => {
         const { isEmail } = baseValidatorRules;
 
         it('should return danger context if value is not an email', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: ValidatorContext.Danger,
                 message: 'Invalid email',
             };
@@ -349,7 +342,7 @@ describe('Regex validator rules', () => {
         });
 
         it('should return undefined if value is an email', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: undefined,
                 message: undefined,
             };
@@ -370,7 +363,7 @@ describe('Regex validator rules', () => {
         const { isUrl } = baseValidatorRules;
 
         it('should return danger context if value is not a url', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: ValidatorContext.Danger,
                 message: 'Invalid url',
             };
@@ -382,7 +375,7 @@ describe('Regex validator rules', () => {
         });
 
         it('should return undefined if value is a url', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: undefined,
                 message: undefined,
             };
@@ -405,7 +398,7 @@ describe('Regex validator rules', () => {
         const { isCreditCard } = baseValidatorRules;
 
         it('should return danger context if value is not a credit card number', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: ValidatorContext.Danger,
                 message: 'Invalid credit card number',
             };
@@ -417,7 +410,7 @@ describe('Regex validator rules', () => {
         });
 
         it('should return undefined if value is an email', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: undefined,
                 message: undefined,
             };
@@ -453,7 +446,7 @@ describe('Regex validator rules', () => {
         const { isHexColor } = baseValidatorRules;
 
         it('should return danger context if value is not a hex color', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: ValidatorContext.Danger,
                 message: 'Invalid hex color',
             };
@@ -466,7 +459,7 @@ describe('Regex validator rules', () => {
         });
 
         it('should return undefined if value is a hex color', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: undefined,
                 message: undefined,
             };
@@ -488,7 +481,7 @@ describe('Regex validator rules', () => {
         const { isIp } = baseValidatorRules;
 
         it('should return danger context if value is not an IP address', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: ValidatorContext.Danger,
                 message: 'Invalid IP address',
             };
@@ -506,7 +499,7 @@ describe('Regex validator rules', () => {
         });
 
         it('should return undefined if value is an IP address', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: undefined,
                 message: undefined,
             };
@@ -535,7 +528,7 @@ describe('Regex validator rules', () => {
         const { isPort } = baseValidatorRules;
 
         it('should return danger context if value is not a port', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: ValidatorContext.Danger,
                 message: 'Invalid port',
             };
@@ -548,7 +541,7 @@ describe('Regex validator rules', () => {
         });
 
         it('should return undefined if value is a port', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: undefined,
                 message: undefined,
             };
@@ -569,7 +562,7 @@ describe('Regex validator rules', () => {
         const { isDate } = baseValidatorRules;
 
         it('should return danger context if value is not a date (dd/mm/yyyy)', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: ValidatorContext.Danger,
                 message: 'Invalid date format, expected: dd/mm/yyyy',
             };
@@ -581,7 +574,7 @@ describe('Regex validator rules', () => {
         });
 
         it('should return undefined if value is a port', () => {
-            const response = {
+            const response: ValidatorTest = {
                 context: undefined,
                 message: undefined,
             };

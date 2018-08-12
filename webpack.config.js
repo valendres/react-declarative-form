@@ -21,6 +21,11 @@ module.exports = {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
         alias: {
             'react-declarative-form': path.resolve(__dirname, './src'),
+            '@components': path.resolve(__dirname, './src/components'),
+            '@rules': path.resolve(__dirname, './src/rules'),
+            '@types': path.resolve(__dirname, './src/types'),
+            '@utils': path.resolve(__dirname, './src/utils'),
+            '@validator': path.resolve(__dirname, './src/validator'),
         },
         modules: [path.resolve(__dirname, 'node_modules')],
     },

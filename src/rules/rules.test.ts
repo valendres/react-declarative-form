@@ -127,7 +127,7 @@ describe('Numeric validator rules', () => {
         const { isNumeric } = baseValidatorRules;
 
         it('should return danger context if value is not a number', () => {
-            expect(isNumeric('age', { age: '10.52' })).toEqual({
+            expect(isNumeric('age', { age: '$10.52' })).toEqual({
                 key: 'isNumeric',
                 context: ValidatorContext.Danger,
                 message: 'Must be a number',

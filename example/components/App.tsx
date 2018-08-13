@@ -129,7 +129,7 @@ export class App extends React.Component<AppProps, AppState> {
                                 label="Password"
                                 value={password}
                                 onChange={this.handlePasswordChange}
-                                validatorGroup={['password-confirm']}
+                                validatorTrigger={['password-confirm']}
                                 validatorRules={{
                                     minLength: 8,
                                 }}

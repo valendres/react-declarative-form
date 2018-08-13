@@ -17,7 +17,7 @@ This library requires the following:
 3. Use bound form components within a `<Form />` component.
 
 ## How does it work?
-Each bound component registers itself with the closest `<Form />` ancestor, allowing for event bubbling and cross-field validator. This is done using the [React 16.3 context API](https://reactjs.org/blog/2018/03/29/react-v-16-3.html). The value and validator state of the wrapped components is directly controlled by the [`bind() HOC`](#bind-hoc). Because the HOC is only concerned with its own wrapped component, then only that component will be re-rendered upon value change, assuming it is not part of a validator group. However, if the component does belong to a validator group, then the related components will also be validated and re-rendered. When the setValue function is called, the component is validated using the new value.
+Each bound component registers itself with the closest `<Form />` ancestor, allowing for event bubbling and cross-field validator. This is done using the [React 16.3 context API](https://reactjs.org/blog/2018/03/29/react-v-16-3.html). The value and validator state of the wrapped components is directly controlled by the [`bind() HOC`](#bind-hoc). Because the HOC is only concerned with its own wrapped component, then only that component will be re-rendered upon value change, assuming it is not part of a validator trigger. However, if the component does belong to a validator trigger, then the related components will also be validated and re-rendered. When the setValue function is called, the component is validated using the new value.
 
 ## Table of Contents
 
@@ -118,7 +118,7 @@ These props are only used by the HOC and are not passed to the wrapped component
 | ------------------- | -------------- | -------- | ----------- |
 | `validatorRules`    | ValidatorRules | false    | -           |
 | `validatorMessages` | any            | false    | -           |
-| `validatorGroup`    | string         | false    | -           |
+| `validatorTrigger`  | string         | false    | -           |
 | `initialValue`      | any            | false    | -           |
 
 ### Validator rules
@@ -303,7 +303,7 @@ export class RegistrationForm extends React.Component<RegistrationFormProps> {
                 <TextField
                     name="password"
                     label="Password"
-                    validatorGroup={['password-confirm']}
+                    validatorTrigger={['password-confirm']}
                     validatorRules={{
                         minLength: 8,
                     }}

@@ -47,7 +47,7 @@ export interface BoundComponentHOCProps extends BoundComponentProps {
     validatorMessages?: {
         [ruleKey: string]: string | ValidatorMessageGenerator;
     };
-    validatorGroup?: string[];
+    validatorTrigger?: string[];
     initialValue?: any;
 }
 
@@ -185,7 +185,7 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
                 // Omit these
                 validatorRules,
                 validatorMessages,
-                validatorGroup,
+                validatorTrigger,
                 initialValue,
                 ...restProps
             } = this.props as any;

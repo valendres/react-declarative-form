@@ -281,7 +281,7 @@ export class Form extends React.Component<FormProps> {
 
     /**
      * Recursively builds a dependency map for components that are part of the
-     * validator group tree.
+     * validator trigger tree.
      */
     private buildDependencyMap = (
         componentNames: string[],
@@ -294,9 +294,9 @@ export class Form extends React.Component<FormProps> {
         );
 
         return componentNames.reduce((output: any, name: string) => {
-            const validatorGroup: string[] =
-                this.componentRefs[name].props.validatorGroup || [];
-            const namesToMap = validatorGroup.filter(
+            const validatorTrigger: string[] =
+                this.componentRefs[name].props.validatorTrigger || [];
+            const namesToMap = validatorTrigger.filter(
                 (n: string) => !(n in mappedNames),
             );
 
@@ -313,14 +313,16 @@ export class Form extends React.Component<FormProps> {
     };
 
     /**
-     * Returns an of component names that should be validated when validating
-     * a specific component. Determined using the validator group tree.
+     * Returns an array of component names that should be validated when validating
+     * a specific component. Determined using the validator trigger tree.
      * @returns array of componentNames
      */
     private getRelatedComponents = (componentName: string): string[] => {
-        const { validatorGroup } = this.componentRefs[componentName].props;
-        if (validatorGroup) {
-            return Object.keys(this.buildDependencyMap(validatorGroup)).filter(
+        const { validatorTrigger } = this.componentRefs[componentName].props;
+        if (validatorTrigger) {
+            return Object.keys(
+                this.buildDependencyMap(validatorTrigger),
+            ).filter(
                 (dependencyName: string) => dependencyName !== componentName,
             );
         }

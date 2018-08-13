@@ -230,19 +230,19 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
             }
         };
 
-        handleBlur(event?: React.FocusEvent<any>): void {
+        handleBlur = (event?: React.FocusEvent<any>): void => {
             if (this.isInsideForm()) {
                 this.formApi.onBlur(this.props.name, this.state.value);
             }
             this.props.onBlur(event);
-        }
+        };
 
-        handleFocus(event?: React.FocusEvent<any>): void {
+        handleFocus = (event?: React.FocusEvent<any>): void => {
             if (this.isInsideForm()) {
                 this.formApi.onFocus(this.props.name, this.state.value);
             }
             this.props.onFocus(event);
-        }
+        };
 
         isInsideForm(): boolean {
             return !!this.formApi;

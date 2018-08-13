@@ -1,5 +1,4 @@
-import { ValidatorContext, ValidatorRule, ValidatorTest } from '@types';
-
+import { ValidatorContext, ValidatorRule, ValidatorTest } from '../types';
 import { baseValidatorRules } from './rules';
 
 const testRule = (rule: ValidatorRule, tests: ValidatorTest[]) => {

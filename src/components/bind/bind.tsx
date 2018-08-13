@@ -5,8 +5,7 @@ import {
     ValidatorContext,
     ValidatorRules,
     ValidatorMessageGenerator,
-} from '@types';
-
+} from '../../types';
 import { FormContext, FormApi } from '../Form';
 
 export interface BoundComponentCommonProps {
@@ -70,6 +69,7 @@ export interface BoundComponentState {
     value?: any;
     response?: ValidatorResponse;
 }
+
 export function bind<ComponentProps extends BoundComponentAllProps>(
     WrappedComponent: React.ComponentClass<ComponentProps>,
 ) {
@@ -104,6 +104,8 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
                 value: props.value || props.initialValue,
                 pristine: true,
             };
+            this.getResponse = this.getResponse.bind(this);
+            this.isInsideForm = this.isInsideForm.bind(this);
         }
 
         public componentDidMount() {
@@ -148,11 +150,14 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
         };
 
         public isValid = (): boolean => {
+            const response = this.getResponse();
+
             const consumerValid = this.props.validatorContext
                 ? this.props.validatorContext !== ValidatorContext.Danger
                 : true;
-            const computedValid =
-                this.getResponse().context === ValidatorContext.Success;
+            const computedValid = response
+                ? response.context === ValidatorContext.Success
+                : true;
 
             return consumerValid && computedValid;
         };
@@ -206,14 +211,13 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
             );
         }
 
-        getResponse = (value: any = this.state.value): ValidatorResponse => {
+        getResponse(value: any = this.state.value): ValidatorResponse {
             const { name, required } = this.props;
-            return this.isInsideForm()
-                ? this.formApi.getResponse(name, value, required)
-                : {
-                      context: ValidatorContext.Success,
-                  };
-        };
+            if (this.isInsideForm()) {
+                return this.formApi.getResponse(name, value, required);
+            }
+            return undefined;
+        }
 
         setValue = (value: any) => {
             this.setState({
@@ -226,22 +230,22 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
             }
         };
 
-        handleBlur = (event?: React.FocusEvent<any>): void => {
+        handleBlur(event?: React.FocusEvent<any>): void {
             if (this.isInsideForm()) {
                 this.formApi.onBlur(this.props.name, this.state.value);
             }
             this.props.onBlur(event);
-        };
+        }
 
-        handleFocus = (event?: React.FocusEvent<any>): void => {
+        handleFocus(event?: React.FocusEvent<any>): void {
             if (this.isInsideForm()) {
                 this.formApi.onFocus(this.props.name, this.state.value);
             }
             this.props.onFocus(event);
-        };
+        }
 
-        isInsideForm = (): boolean => {
+        isInsideForm(): boolean {
             return !!this.formApi;
-        };
+        }
     };
 }

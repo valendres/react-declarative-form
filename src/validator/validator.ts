@@ -6,8 +6,8 @@ import {
     ValidatorRuleMap,
     ValidatorMessageGenerator,
     ValueMap,
-} from '@types';
-import { baseValidatorRules } from '@rules';
+} from '../types';
+import { baseValidatorRules } from '../rules';
 
 /**
  * Validator rules to be used by validator

@@ -1,8 +1,7 @@
 import * as React from 'react';
 
-import { ValidatorResponse, ValueMap, Omit } from '@types';
-import { validate } from '@validator';
-
+import { ValidatorResponse, ValueMap, Omit } from '../../types';
+import { validate } from '../../validator';
 import { BoundComponentInstance } from '../bind';
 
 export const FormContext = React.createContext(undefined as FormApi);

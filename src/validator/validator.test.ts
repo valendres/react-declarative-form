@@ -1,6 +1,5 @@
-import { baseValidatorRules } from '@rules';
-import { ValidatorContext, ValueMap } from '@types';
-
+import { baseValidatorRules } from '../rules';
+import { ValidatorContext, ValueMap } from '../types';
 import { addValidatorRule, getValidatorRules, validate } from './validator';
 
 describe('validator rules', () => {

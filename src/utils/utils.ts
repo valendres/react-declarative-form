@@ -1,4 +1,4 @@
-import { ValueMap } from '@types';
+import { ValueMap } from '../types';
 
 export const isDefined = (key: string, values: ValueMap) => {
     return (

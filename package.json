@@ -1,6 +1,6 @@
 {
     "name": "react-declarative-form",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Declarative react form validator",
     "main": "dist/lib/index",
     "typings": "dist/lib/index",

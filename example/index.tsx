@@ -1,9 +1,15 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { hot } from 'react-hot-loader';
-import { App } from './components';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import { LoginForm } from './forms';
 import 'typeface-roboto';
+
+const App = () => (
+    <React.Fragment>
+        <LoginForm />
+    </React.Fragment>
+);
 
 const HotApp = hot(module)(App);
 const rootEl = document.getElementById('root');

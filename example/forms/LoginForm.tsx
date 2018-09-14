@@ -11,7 +11,8 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Tooltip from '@material-ui/core/Tooltip';
 import LinearProgress from '@material-ui/core/LinearProgress';
-import { TextField } from './Textfield';
+
+import { TextField } from '../components';
 
 const getPasswordStrength = (password: string) => {
     if (!password) {
@@ -40,9 +41,9 @@ const getPasswordStrength = (password: string) => {
     };
 };
 
-export interface AppProps {}
+export interface LoginFormProps {}
 
-export interface AppState {
+export interface LoginFormState {
     password?: string;
     passwordStrength?: {
         score: number;
@@ -50,10 +51,10 @@ export interface AppState {
     };
 }
 
-export class App extends React.Component<AppProps, AppState> {
+export class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
     private formRef: React.RefObject<Form>;
 
-    constructor(props: AppProps) {
+    constructor(props: LoginFormProps) {
         super(props);
         this.formRef = React.createRef();
         this.state = {};

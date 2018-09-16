@@ -56,12 +56,12 @@ export type BoundComponentAllProps = BoundComponentProps &
 
 export interface BoundComponentInstance {
     props: BoundComponentAllProps;
-    state: BoundComponentState;
     clear: () => void;
     reset: () => void;
     validate: () => void;
     isValid: () => boolean;
     setResponse: (response: ValidatorResponse) => void;
+    getValue: () => any;
 }
 
 export interface BoundComponentState {
@@ -197,7 +197,7 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
                         return (
                             <WrappedComponent
                                 {...restProps}
-                                value={this.state.value}
+                                value={this.getValue()}
                                 pristine={pristine}
                                 validatorMessage={message}
                                 validatorContext={context}
@@ -218,6 +218,21 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
             }
             return undefined;
         }
+
+        getValidatorTrigger = () => {
+            const { validatorTrigger } = this.props;
+            return validatorTrigger || [];
+        };
+
+        getValue = () => {
+            const { name } = this.props;
+            const stateValue = this.state.value;
+            const formValue = this.isInsideForm()
+                ? this.formApi.getFormValue(name)
+                : undefined;
+
+            return stateValue !== undefined ? stateValue : formValue;
+        };
 
         setValue = (value: any) => {
             this.setState({

@@ -10,6 +10,7 @@ export interface FormApi {
     registerComponent: Form['registerComponent'];
     unregisterComponent: Form['unregisterComponent'];
     validate: Form['validate'];
+    getFormValue: Form['getFormValue'];
     getResponse: Form['getResponse'];
     onChange: Form['handleChange'];
     onBlur: Form['handleBlur'];
@@ -59,6 +60,8 @@ export interface FormProps
      * @param {object} values name/value pairs for all bound form components.
      */
     onInvalidSubmit?: (values: ValueMap) => void;
+
+    initialValues?: ValueMap;
 }
 
 export class Form extends React.Component<FormProps> {
@@ -92,7 +95,7 @@ export class Form extends React.Component<FormProps> {
      * @param {string} componentName name of the component
      */
     public getValue = (componentName: string): any => {
-        return this.componentRefs[componentName].state.value;
+        return this.componentRefs[componentName].getValue();
     };
 
     /**
@@ -200,6 +203,7 @@ export class Form extends React.Component<FormProps> {
             onSubmit,
             onValidSubmit,
             onInvalidSubmit,
+            initialValues,
             // Injected
             ...restProps
         } = this.props;
@@ -208,6 +212,7 @@ export class Form extends React.Component<FormProps> {
             registerComponent: this.registerComponent,
             unregisterComponent: this.unregisterComponent,
             validate: this.validate,
+            getFormValue: this.getFormValue,
             getResponse: this.getResponse,
             onChange: this.handleChange,
             onBlur: this.handleBlur,
@@ -246,6 +251,12 @@ export class Form extends React.Component<FormProps> {
      */
     private unregisterComponent = (componentName: string): void => {
         delete this.componentRefs[componentName];
+    };
+
+    /** Retrieves the form value from the values prop */
+    private getFormValue = (componentName: string): any => {
+        const { initialValues } = this.props;
+        return initialValues ? initialValues[componentName] : undefined;
     };
 
     /**

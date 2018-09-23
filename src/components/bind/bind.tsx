@@ -225,13 +225,17 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
         };
 
         getValue = () => {
-            const { name } = this.props;
+            const { name, initialValue } = this.props;
             const stateValue = this.state.value;
             const formValue = this.isInsideForm()
                 ? this.formApi.getFormValue(name)
                 : undefined;
 
-            return stateValue !== undefined ? stateValue : formValue;
+            return stateValue !== undefined
+                ? stateValue
+                : formValue !== undefined
+                    ? formValue
+                    : initialValue;
         };
 
         setValue = (value: any) => {

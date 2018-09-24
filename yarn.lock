@@ -5935,6 +5935,10 @@ sha.js@^2.4.0, sha.js@^2.4.8:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
+shallow-equal-object@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/shallow-equal-object/-/shallow-equal-object-1.1.1.tgz#0c016b8cc16dc59ab76739b6eeaa9c99d68beef7"
+
 shallowequal@^1.0.2:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/shallowequal/-/shallowequal-1.1.0.tgz#188d521de95b9087404fd4dcb68b13df0ae4e7f8"

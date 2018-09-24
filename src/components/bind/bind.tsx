@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { shallowEqual } from 'shallow-equal-object';
 
 import {
     ValidatorResponse,
@@ -121,6 +122,20 @@ export function bind<ComponentProps extends BoundComponentAllProps>(
         public componentWillUnmount() {
             if (this.isInsideForm()) {
                 this.formApi.unregisterComponent(this.props.name);
+            }
+        }
+
+        public componentDidUpdate() {
+            const { pristine, response: prevResponse } = this.state;
+
+            // Only update state if necessary to prevent setState loops
+            if (!pristine) {
+                const nextResponse = this.getResponse();
+                if (!shallowEqual(prevResponse, nextResponse)) {
+                    this.setState({
+                        response: nextResponse,
+                    });
+                }
             }
         }
 

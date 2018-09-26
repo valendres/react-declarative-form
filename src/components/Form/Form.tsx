@@ -221,7 +221,7 @@ export class Form extends React.Component<FormProps> {
 
         return (
             <FormContext.Provider value={api}>
-                <form {...restProps} onSubmit={this.handleSubmit}>
+                <form {...restProps as any} onSubmit={this.handleSubmit}>
                     {children}
                 </form>
             </FormContext.Provider>

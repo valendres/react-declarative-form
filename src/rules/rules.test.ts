@@ -49,7 +49,7 @@ describe('Numeric validator rules', () => {
             expect(minValue('age', { age: 16 }, 18)).toEqual({
                 key: 'minValue',
                 context: ValidatorContext.Danger,
-                message: '16 must be >= 18',
+                message: 'Value must be >= 18',
             });
         });
 
@@ -65,7 +65,7 @@ describe('Numeric validator rules', () => {
             expect(maxValue('age', { age: 21 }, 18)).toEqual({
                 key: 'maxValue',
                 context: ValidatorContext.Danger,
-                message: '21 must be <= 18',
+                message: 'Value must be <= 18',
             });
         });
 

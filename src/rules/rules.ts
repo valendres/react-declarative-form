@@ -38,7 +38,7 @@ const numericValidatorRules: ValidatorRuleMap = {
             return {
                 key: 'minValue',
                 context: ValidatorContext.Danger,
-                message: `${values[key]} must be >= ${minValue}`,
+                message: `Value must be >= ${minValue}`,
             };
         }
     },
@@ -47,7 +47,7 @@ const numericValidatorRules: ValidatorRuleMap = {
             return {
                 key: 'maxValue',
                 context: ValidatorContext.Danger,
-                message: `${values[key]} must be <= ${maxValue}`,
+                message: `Value must be <= ${maxValue}`,
             };
         }
     },

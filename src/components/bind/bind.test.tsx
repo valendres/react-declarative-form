@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { bind, BoundComponentAllProps } from './bind';
+import { bind, BoundComponentProps } from './bind';
 import { FormApi } from '../Form';
 import { ValidatorResponse, ValidatorContext } from '../../types';
 
@@ -8,8 +8,8 @@ describe('module: bind', () => {
     const BoundComponentClass = bind(<div /> as any);
 
     const mockProps = (
-        props: Partial<BoundComponentAllProps> = {},
-    ): BoundComponentAllProps => ({
+        props: Partial<BoundComponentProps> = {},
+    ): BoundComponentProps => ({
         name: 'test',
         onBlur: jest.fn(),
         onFocus: jest.fn(),

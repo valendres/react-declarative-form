@@ -35,7 +35,7 @@ export interface BoundComponentCommonProps {
     value?: any;
 }
 
-export interface BoundComponentProps extends BoundComponentCommonProps {
+export interface BoundComponentInternalProps extends BoundComponentCommonProps {
     /** Should be called when component value has changed */
     setValue?: (value: any) => void;
 }
@@ -43,7 +43,7 @@ export interface BoundComponentProps extends BoundComponentCommonProps {
 /**
  * These props are only used by the HOC and are not passed to the wrapped component.
  */
-export interface BoundComponentHOCProps extends BoundComponentProps {
+export interface BoundComponentHOCProps extends BoundComponentInternalProps {
     validatorRules?: ValidatorRules;
     validatorMessages?: {
         [ruleKey: string]: string | ValidatorMessageGenerator;
@@ -52,11 +52,11 @@ export interface BoundComponentHOCProps extends BoundComponentProps {
     initialValue?: any;
 }
 
-export type BoundComponentAllProps = BoundComponentProps &
+export type BoundComponentProps = BoundComponentInternalProps &
     BoundComponentHOCProps;
 
 export interface BoundComponentInstance {
-    props: BoundComponentAllProps;
+    props: BoundComponentProps;
     clear: () => void;
     reset: () => void;
     validate: () => void;
@@ -71,24 +71,24 @@ export interface BoundComponentState {
     response?: ValidatorResponse;
 }
 
-export function bind<ComponentProps extends BoundComponentAllProps>(
+export function bind<ComponentProps extends BoundComponentProps>(
     WrappedComponent: React.ComponentClass<ComponentProps>,
 ) {
     return class BoundComponent
         extends React.Component<
-            ComponentProps & BoundComponentAllProps,
+            ComponentProps & BoundComponentProps,
             BoundComponentState
         >
         implements BoundComponentInstance {
         formApi: FormApi;
 
-        static defaultProps: Partial<BoundComponentAllProps> = {
+        static defaultProps: Partial<BoundComponentProps> = {
             onBlur: () => {},
             onFocus: () => {},
         };
 
         static getDerivedStateFromProps(
-            nextProps: BoundComponentAllProps,
+            nextProps: BoundComponentProps,
             prevState: BoundComponentState,
         ) {
             return {

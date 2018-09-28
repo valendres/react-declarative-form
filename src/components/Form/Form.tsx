@@ -61,7 +61,23 @@ export interface FormProps
      */
     onInvalidSubmit?: (values: ValueMap) => void;
 
+    /**
+     * Initial values to be provided to the bound form components. This is useful for
+     * populating the form without having to manage all form values. It can be provided
+     * asynchronously. The values will be applied if the form components have not been
+     * modified. If you need to apply new values to the form, call reset on the form after
+     * updating the initialValues.
+     */
     initialValues?: ValueMap;
+
+    /**
+     * Whether a hidden submit should be rendered within the form. The existance of a
+     * `<button type="submit"/>` allows forms to be submitted when the enter key is pressed.
+     * However, if you a form which is being submitted programatically, or it doesn't
+     * make sense to show a submit button, setting this to true will allow submit on enter
+     * to work.
+     */
+    withHiddenSubmit?: boolean;
 }
 
 export class Form extends React.Component<FormProps> {
@@ -196,6 +212,7 @@ export class Form extends React.Component<FormProps> {
     public render() {
         const {
             children,
+            withHiddenSubmit,
             // Omitted
             onChange,
             onBlur,
@@ -223,6 +240,9 @@ export class Form extends React.Component<FormProps> {
             <FormContext.Provider value={api}>
                 <form {...restProps as any} onSubmit={this.handleSubmit}>
                     {children}
+                    {withHiddenSubmit && (
+                        <button type="submit" style={{ display: 'none' }} />
+                    )}
                 </form>
             </FormContext.Provider>
         );

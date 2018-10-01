@@ -203,7 +203,7 @@ import {
     isDefined,
     ValidatorContext,
     ValueMap,
-} from 'react-declarative-form';
+} from '@react-declarative-form/core';
 
 addValidatorRule(
     'containsCat',
@@ -229,10 +229,11 @@ import {
     bind,
     BoundComponentProps,
     ValidatorContext,
-} from 'react-declarative-form';
-import MaterialTextField, {
+} from '@react-declarative-form/core';
+import  {
+    TextField as MaterialTextField
     TextFieldProps as MaterialTextFieldProps
-} from '@material-ui/core/TextField';
+} from '@material-ui/core';
 
 export interface TextFieldProps
     extends MaterialTextFieldProps, BoundComponentProps
@@ -283,7 +284,7 @@ export const TextField = bind<TextFieldProps>(UnboundTextField);
 Using the bound TextField component inside a Form.
 ```Typescript
 import * as React from 'react';
-import { Form, ValueMap } from 'react-declarative-form';
+import { Form, ValueMap } from '@react-declarative-form/core';
 import { Button, TextField } from 'view/components';
 
 export interface RegistrationFormProps {}

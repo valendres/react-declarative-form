@@ -1,10 +1,7 @@
 import * as React from 'react';
-import { Form, ValueMap } from 'react-declarative-form';
-import Button from '@material-ui/core/Button';
-// import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-
-import { TextField } from '../components';
+import { Form, ValueMap } from '@react-declarative-form/core';
+import { TextField } from '@react-declarative-form/material-ui';
+import { Button, Typography } from '@material-ui/core';
 
 export interface InitialValuesFormValues {
     firstName: string;

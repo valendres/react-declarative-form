@@ -4,7 +4,7 @@ import {
     BoundComponentProps,
     ValidatorContext,
     Omit,
-} from 'react-declarative-form';
+} from '@react-declarative-form/core';
 
 import MaterialTextField, {
     TextFieldProps as MaterialTextFieldProps,

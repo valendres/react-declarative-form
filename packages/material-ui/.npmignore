@@ -1,0 +1,17 @@
+# Folders
+.cache
+.vscode
+node_modules
+package
+src
+test
+
+# Files
+.editorconfig
+.gitignore
+tsconfig.json
+tslint.json
+wallaby.config.js
+yarn.lock
+*.log
+*.tgz

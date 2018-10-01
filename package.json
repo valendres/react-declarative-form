@@ -1,9 +1,6 @@
 {
-    "name": "react-declarative-form",
-    "version": "1.0.11",
-    "description": "Declarative react form validator",
-    "main": "dist/lib/index",
-    "typings": "dist/lib/index",
+    "private": true,
+    "name": "val-chat-bot",
     "repository": "valendres/react-declarative-form",
     "author": {
         "name": "Peter Weller",
@@ -11,108 +8,48 @@
         "url": "https://github.com/valendres"
     },
     "license": "MIT",
-    "private": false,
     "scripts": {
-        "clean": "rimraf dist",
-        "copy": "cpx ./package.json ./dist && cpx .npmignore ./dist",
-        "start": "webpack-dev-server --hot",
-        "test": "jest --silent",
-        "prettier": "prettier --write \"?(src|example|test)/**/*.ts?(x)\"",
-        "build": "tsc --sourceMap false",
-        "prebuild": "yarn install && yarn run clean",
-        "postbuild": "mv ./dist/src ./dist/lib",
-        "prepackage": "yarn run build && yarn run copy",
-        "package": "cd ./dist && yarn pack",
-        "precommit": "yarn run test --coverage=0 && lint-staged",
-        "gen:toc": "markdown-toc -i --maxdepth 5 README.md",
-        "lint": "tslint -c ./tslint.json ./src/**/*.ts --format stylish"
+        "bootstrap": "lerna bootstrap",
+        "build": "lerna run --concurrency=1 --stream build",
+        "start": "lerna run --concurrency=1 --stream start",
+        "test": "lerna run --concurrency=1 --stream test",
+        "precommit": "lerna run --concurrency 1 --stream precommit",
+        "prepush": "lerna run --concurrency 1 --stream prepush",
+        "preinstall": "npx use-yarn -m 'Please use yarn!'"
     },
-    "lint-staged": {
-        "*.{ts,tsx,js,jsx}": [
-            "tslint --fix",
-            "prettier --write",
-            "git add"
-        ]
+    "workspaces": [
+        "packages/*",
+        "services/*"
+    ],
+    "husky": {
+        "hooks": {
+            "pre-commit": "yarn run precommit",
+            "pre-push": "yarn run prepush"
+        }
     },
     "devDependencies": {
-        "@material-ui/core": "^3.1.1",
-        "@types/classnames": "^2.2.6",
         "@types/enzyme": "^3.1.14",
         "@types/enzyme-adapter-react-16": "^1.0.3",
-        "@types/jest": "^23.3.2",
+        "@types/jest": "^23.3.1",
+        "@types/node": "^10.9.3",
         "@types/react-dom": "^16.0.7",
-        "@types/validator": "^9.4.2",
-        "@types/zxcvbn": "^4.4.0",
-        "autoprefixer": "^9.1.5",
-        "awesome-typescript-loader": "^5.2.1",
-        "cpx": "^1.5.0",
-        "css-loader": "^1.0.0",
+        "babel-core": "6.26.3",
+        "babel-jest": "^23.4.2",
         "enzyme": "^3.6.0",
         "enzyme-adapter-react-16": "^1.5.0",
-        "file-loader": "^2.0.0",
-        "html-webpack-plugin": "^3.2.0",
         "husky": "^1.0.0",
-        "jest": "^23.6.0",
-        "lint-staged": "^7.3.0",
-        "markdown-toc": "^1.2.0",
-        "open-browser-webpack-plugin": "^0.0.5",
-        "postcss-loader": "^3.0.0",
-        "prettier": "^1.14.3",
-        "react": "^16.5.2",
-        "react-dom": "^16.5.2",
-        "react-hot-loader": "^4.3.11",
+        "jest": "^23.5.0",
+        "lerna": "^3.2.1",
+        "lint-staged": "^7.2.2",
+        "prettier": "^1.14.2",
         "rimraf": "^2.6.2",
-        "source-map-loader": "^0.2.4",
-        "style-loader": "^0.23.0",
-        "ts-jest": "^23.10.2",
+        "ts-jest": "^23.1.4",
+        "ts-node": "^7.0.1",
+        "tsconfig-paths": "^3.5.0",
         "tslint": "^5.11.0",
-        "tslint-config-airbnb": "^5.11.0",
+        "tslint-config-airbnb": "^5.10.0",
         "tslint-config-prettier": "^1.15.0",
         "tslint-react": "^3.6.0",
-        "typeface-roboto": "^0.0.54",
-        "typescript": "^3.0.3",
-        "webpack": "4.19",
-        "webpack-cli": "^3.1.1",
-        "webpack-dev-server": "^3.1.9",
-        "webpack-hot-middleware": "^2.24.2",
-        "zxcvbn": "^4.4.2"
-    },
-    "peerDependencies": {
-        "react": ">=0.16.3",
-        "react-dom": ">=16.3.2"
-    },
-    "dependencies": {
-        "shallow-equal-object": "^1.1.1",
-        "validator": "^10.8.0"
-    },
-    "jest": {
-        "setupTestFrameworkScriptFile": "<rootDir>/test/setup.ts",
-        "transform": {
-            ".(ts|tsx)": "ts-jest"
-        },
-        "testRegex": "(<rootDir>/src/.*|(\\.|/)(test))\\.tsx?$",
-        "moduleFileExtensions": [
-            "js",
-            "jsx",
-            "ts",
-            "tsx"
-        ],
-        "moduleNameMapper": {
-            "^@components(.*)": "<rootDir>/src/components$1",
-            "^@rules(.*)": "<rootDir>/src/rules$1",
-            "^@types(.*)": "<rootDir>/src/types$1",
-            "^@utils(.*)": "<rootDir>/src/utils$1",
-            "^@validator(.*)": "<rootDir>/src/validator$1",
-            "\\.(s?css|less)$": "<rootDir>/test/style-mock.ts"
-        },
-        "collectCoverage": true,
-        "collectCoverageFrom": [
-            "!src/**/*.test.{ts,tsx}",
-            "src/**/*.{ts,tsx}"
-        ],
-        "coverageReporters": [
-            "html",
-            "lcov"
-        ]
+        "typescript": "^3.0.1"
     }
 }

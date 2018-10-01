@@ -1,7 +1,11 @@
 const webpack = require('webpack');
 const path = require('path');
+const autoprefixer = require('autoprefixer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OpenBrowserWebpackPlugin = require('open-browser-webpack-plugin');
+
+const packagePath = relPath => path.resolve(__dirname, relPath);
+const rootPath = relPath => path.resolve(__dirname, '../..', relPath);
 
 module.exports = {
     devtool: 'inline-source-map',
@@ -11,30 +15,22 @@ module.exports = {
         stats: 'errors-only',
     },
     mode: 'development',
-    entry: ['react-hot-loader/patch', './example/index'],
+    entry: [rootPath('node_modules/react-hot-loader/patch'), './src/index'],
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: packagePath('dist'),
         publicPath: '/',
         filename: '[name].js',
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
-        alias: {
-            'react-declarative-form': path.resolve(__dirname, './src'),
-            '@components': path.resolve(__dirname, './src/components'),
-            '@rules': path.resolve(__dirname, './src/rules'),
-            '@types': path.resolve(__dirname, './src/types'),
-            '@utils': path.resolve(__dirname, './src/utils'),
-            '@validator': path.resolve(__dirname, './src/validator'),
-        },
-        modules: [path.resolve(__dirname, 'node_modules')],
+        modules: [packagePath('node_modules'), rootPath('node_modules')],
     },
     plugins: [
         new OpenBrowserWebpackPlugin(),
         new webpack.NamedModulesPlugin(),
         new HtmlWebpackPlugin({
-            title: 'React Declarative Form - Example',
-            template: path.resolve(__dirname, './example/index.ejs'),
+            title: 'React Declarative Form - Demo',
+            template: packagePath('./src/index.ejs'),
         }),
     ],
     module: {
@@ -46,9 +42,18 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: [
-                    'style-loader',
-                    { loader: 'css-loader', options: { importLoaders: 1 } },
-                    'postcss-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            importLoaders: 1,
+                        },
+                    },
+                    {
+                        loader: 'postcss-loader',
+                        options: {
+                            plugins: () => [autoprefixer()],
+                        },
+                    },
                 ],
             },
             {

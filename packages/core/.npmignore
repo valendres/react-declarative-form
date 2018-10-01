@@ -1,18 +1,17 @@
 # Folders
 .cache
 .vscode
-example
 node_modules
+package
 src
 test
 
 # Files
 .editorconfig
 .gitignore
-.prettierrc
 tsconfig.json
 tslint.json
-wallaby.config.json
-webpack.config.json
-yarn-error.log
+wallaby.config.js
 yarn.lock
+*.log
+*.tgz

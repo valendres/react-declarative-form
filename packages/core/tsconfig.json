@@ -1,0 +1,17 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": "./",
+        "outDir": "./dist",
+        "paths": {
+            "@components": ["src/components/index"],
+            "@rules": ["src/rules/index"],
+            "@types": ["src/types/index"],
+            "@utils": ["src/utils/index"],
+            "@validator": ["src/validator/index"],
+        },
+    },
+    "rootDirs": ["src", "test"],
+    "include": ["./src/**/*"],
+    "exclude": ["node_modules", "test"]
+}

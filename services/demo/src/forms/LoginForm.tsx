@@ -5,14 +5,15 @@ import {
     ValueMap,
     ValidatorContext,
     ValidatorResponse,
-} from 'react-declarative-form';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Tooltip from '@material-ui/core/Tooltip';
-import LinearProgress from '@material-ui/core/LinearProgress';
-
-import { TextField } from '../components';
+} from '@react-declarative-form/core';
+import { TextField } from '@react-declarative-form/material-ui';
+import {
+    Button,
+    Grid,
+    Typography,
+    Tooltip,
+    LinearProgress,
+} from '@material-ui/core';
 
 const getPasswordStrength = (password: string) => {
     if (!password) {

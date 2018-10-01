@@ -1,0 +1,76 @@
+{
+    "name": "@react-declarative-form/core",
+    "version": "1.0.11",
+    "description": "Declarative react form validator",
+    "main": "./dist/index",
+    "typings": "./dist/index",
+    "repository": "valendres/react-declarative-form",
+    "author": {
+        "name": "Peter Weller",
+        "email": "contact@peterweller.com.au",
+        "url": "https://github.com/valendres"
+    },
+    "license": "MIT",
+    "private": false,
+    "scripts": {
+        "build": "tsc --sourceMap false",
+        "clean": "rimraf dist",
+        "gen:toc": "markdown-toc -i --maxdepth 5 README.md",
+        "lint": "tslint -c ./tslint.json ./src/**/*.ts --format stylish",
+        "package": "cd ./dist && yarn pack",
+        "prebuild": "yarn run clean",
+        "precommit": "yarn run test --coverage=0 && lint-staged",
+        "prepackage": "yarn run build",
+        "prettier": "prettier --write \"?(src|test)/**/*.ts?(x)\"",
+        "test": "jest --silent"
+    },
+    "lint-staged": {
+        "*.{ts,tsx,js,jsx}": [
+            "tslint --fix",
+            "prettier --write",
+            "git add"
+        ]
+    },
+    "devDependencies": {
+        "@types/validator": "^9.4.2",
+        "markdown-toc": "^1.2.0"
+    },
+    "peerDependencies": {
+        "react": ">=0.16.3",
+        "react-dom": ">=16.3.2"
+    },
+    "dependencies": {
+        "shallow-equal-object": "^1.1.1",
+        "validator": "^10.8.0"
+    },
+    "jest": {
+        "setupTestFrameworkScriptFile": "<rootDir>/test/setup.ts",
+        "transform": {
+            ".(ts|tsx)": "ts-jest"
+        },
+        "testRegex": "(<rootDir>/src/.*|(\\.|/)(test))\\.tsx?$",
+        "moduleFileExtensions": [
+            "js",
+            "jsx",
+            "ts",
+            "tsx"
+        ],
+        "moduleNameMapper": {
+            "^@components(.*)": "<rootDir>/src/components$1",
+            "^@rules(.*)": "<rootDir>/src/rules$1",
+            "^@types(.*)": "<rootDir>/src/types$1",
+            "^@utils(.*)": "<rootDir>/src/utils$1",
+            "^@validator(.*)": "<rootDir>/src/validator$1",
+            "\\.(s?css|less)$": "<rootDir>/test/style-mock.ts"
+        },
+        "collectCoverage": true,
+        "collectCoverageFrom": [
+            "!src/**/*.test.{ts,tsx}",
+            "src/**/*.{ts,tsx}"
+        ],
+        "coverageReporters": [
+            "html",
+            "lcov"
+        ]
+    }
+}

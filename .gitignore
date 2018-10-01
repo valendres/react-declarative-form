@@ -1,13 +1,16 @@
 # Dir
-node_modules
-dist
-coverage
+**/coverage
+**/dist
+**/node_modules
+**/.cache
+
+# Common
+*.log
+*.tgz
+
+# OS
+.DS_Store
+Thumbs.db
 
 # IDEs
 .vscode
-
-# logs
-*.log
-
-# Awesome typescript loader
-.cache

@@ -102,8 +102,8 @@ export class Form extends React.Component<FormProps> {
     /**
      * Programmatically submit form
      */
-    public submit = (): void => {
-        this.handleSubmit();
+    public submit = () => {
+        return this.handleSubmit();
     };
 
     /**
@@ -381,12 +381,22 @@ export class Form extends React.Component<FormProps> {
         if (event) {
             event.preventDefault();
         }
+
+        const isValid = this.isValid();
         const values = this.getValues();
-        if (this.isValid()) {
+
+        if (isValid) {
             this.handleValidSubmit(values);
         } else {
             this.handleInvalidSubmit(values);
         }
+
+        this.props.onSubmit(values);
+
+        return {
+            isValid,
+            values,
+        };
     };
 
     private handleValidSubmit = (values: ValueMap) => {

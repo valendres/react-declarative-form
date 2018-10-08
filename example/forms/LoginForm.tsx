@@ -99,7 +99,7 @@ export class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
                             <TextField
                                 name="email"
                                 label="Email"
-                                initialValue="prefilledemail@domain.com"
+                                defaultValue="prefilledemail@domain.com"
                                 validatorRules={{
                                     // Reject emails that contain the word cute
                                     matches: /^((?!cuti?e).)*$/i,

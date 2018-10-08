@@ -11,7 +11,7 @@ import MaterialTextField, {
 } from '@material-ui/core/TextField';
 
 export interface TextFieldProps
-    extends Omit<MaterialTextFieldProps, 'value'>,
+    extends Omit<MaterialTextFieldProps, 'value' | 'defaultValue'>,
         BoundComponentProps {
     name: string;
     label?: string;
@@ -28,6 +28,7 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
             validatorMessage,
             pristine,
             required,
+            defaultValue,
             ...restProps
         } = this.props;
 

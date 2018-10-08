@@ -119,7 +119,7 @@ These props are only used by the HOC and are not passed to the wrapped component
 | `validatorRules`    | ValidatorRules | false    | -           |
 | `validatorMessages` | any            | false    | -           |
 | `validatorTrigger`  | string         | false    | -           |
-| `initialValue`      | any            | false    | -           |
+| `defaultValue`      | any            | false    | -           |
 
 ### Validator rules
 Validator rules are executed sequentially (in the order in which they are defined) until a validator response has been returned, or all rules have been executed. If no rule has returned a validator response, then a response with Success context will be returned.

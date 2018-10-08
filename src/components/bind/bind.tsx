@@ -49,7 +49,7 @@ export interface BoundComponentHOCProps extends BoundComponentInternalProps {
         [ruleKey: string]: string | ValidatorMessageGenerator;
     };
     validatorTrigger?: string[];
-    initialValue?: any;
+    defaultValue?: any;
 }
 
 export type BoundComponentProps = BoundComponentInternalProps &
@@ -87,22 +87,9 @@ export function bind<ComponentProps extends BoundComponentProps>(
             onFocus: () => {},
         };
 
-        static getDerivedStateFromProps(
-            nextProps: BoundComponentProps,
-            prevState: BoundComponentState,
-        ) {
-            return {
-                value:
-                    nextProps.value !== undefined
-                        ? nextProps.value
-                        : prevState.value,
-            };
-        }
-
         public constructor(props: ComponentProps) {
             super(props);
             this.state = {
-                value: props.value || props.initialValue,
                 pristine: true,
             };
             this.getResponse = this.getResponse.bind(this);
@@ -149,9 +136,9 @@ export function bind<ComponentProps extends BoundComponentProps>(
         };
 
         public reset = (): void => {
-            const { initialValue, value } = this.props;
+            const { value } = this.props;
             this.setState({
-                value: value || initialValue,
+                value,
                 response: undefined,
                 pristine: true,
             });
@@ -201,7 +188,7 @@ export function bind<ComponentProps extends BoundComponentProps>(
                 validatorRules,
                 validatorMessages,
                 validatorTrigger,
-                initialValue,
+                defaultValue,
                 ...restProps
             } = this.props as any;
 
@@ -239,18 +226,24 @@ export function bind<ComponentProps extends BoundComponentProps>(
             return validatorTrigger || [];
         };
 
+        /**
+         * Determines the value to be provided to the wrapped component. There are 4 ways a
+         * component value can be provied (in order of precedence):
+         *  1. externally managed value prop provided to the component
+         *  2. internally managed value when the user changes input
+         *  3. value provided to initialValues prop on form component
+         *  4. default value specified on individual form component
+         */
         getValue = () => {
-            const { name, initialValue } = this.props;
+            const { name, defaultValue, value } = this.props;
             const stateValue = this.state.value;
-            const formValue = this.isInsideForm()
-                ? this.formApi.getFormValue(name)
+            const initialValue = this.isInsideForm()
+                ? this.formApi.getInitialValue(name)
                 : undefined;
 
-            return stateValue !== undefined
-                ? stateValue
-                : formValue !== undefined
-                    ? formValue
-                    : initialValue;
+            return [value, stateValue, initialValue, defaultValue].find(
+                v => v !== undefined,
+            );
         };
 
         setValue = (value: any) => {

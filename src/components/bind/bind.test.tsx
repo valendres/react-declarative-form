@@ -21,7 +21,7 @@ describe('module: bind', () => {
         unregisterComponent: jest.fn(),
         validate: jest.fn(),
         getResponse: jest.fn(),
-        getFormValue: jest.fn().mockReturnValue(undefined),
+        getInitialValue: jest.fn().mockReturnValue(undefined),
         onChange: jest.fn(),
         onBlur: jest.fn(),
         onFocus: jest.fn(),

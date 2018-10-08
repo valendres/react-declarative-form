@@ -10,7 +10,7 @@ export interface FormApi {
     registerComponent: Form['registerComponent'];
     unregisterComponent: Form['unregisterComponent'];
     validate: Form['validate'];
-    getFormValue: Form['getFormValue'];
+    getInitialValue: Form['getInitialValue'];
     getResponse: Form['getResponse'];
     onChange: Form['handleChange'];
     onBlur: Form['handleBlur'];
@@ -229,7 +229,7 @@ export class Form extends React.Component<FormProps> {
             registerComponent: this.registerComponent,
             unregisterComponent: this.unregisterComponent,
             validate: this.validate,
-            getFormValue: this.getFormValue,
+            getInitialValue: this.getInitialValue,
             getResponse: this.getResponse,
             onChange: this.handleChange,
             onBlur: this.handleBlur,
@@ -273,8 +273,8 @@ export class Form extends React.Component<FormProps> {
         delete this.componentRefs[componentName];
     };
 
-    /** Retrieves the form value from the values prop */
-    private getFormValue = (componentName: string): any => {
+    /** Retrieves the initial component value from the initialValues prop */
+    private getInitialValue = (componentName: string): any => {
         const { initialValues } = this.props;
         return initialValues ? initialValues[componentName] : undefined;
     };

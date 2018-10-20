@@ -2,11 +2,18 @@ import * as React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import { Form, FormProps } from './Form';
-import { bind } from '../bind';
+import { bind, BoundComponentProps } from '../bind';
+import { ValidatorContext } from '@types';
 
-class UnconnectedTextField extends React.Component<any> {
+interface TextFieldProps extends BoundComponentProps {
+    label?: string;
+    onChange?: (event: any) => void;
+}
+
+class UnconnectedTextField extends React.Component<TextFieldProps> {
     render() {
         const {
+            label,
             setValue,
             validatorContext,
             validatorMessage,
@@ -59,6 +66,68 @@ describe('Component: Form', () => {
             const submitButtons = wrapper.find('button[type="submit"]');
             expect(submitButtons.length).toBe(1);
             expect(submitButtons.at(0).props().style.display).toBe('none');
+        });
+
+        it.each([ValidatorContext.Success, ValidatorContext.Danger])(
+            'should call handleSubmit regardless of validity state',
+            validationContext => {
+                const props = mockProps();
+                const wrapper = mount(
+                    <Form {...props}>
+                        <TextField
+                            name="test"
+                            value="abc"
+                            validatorContext={validationContext}
+                        />
+                    </Form>,
+                );
+                const form: Form = wrapper.instance() as any;
+
+                form.submit();
+                expect(props.onSubmit).toHaveBeenCalledWith({
+                    test: 'abc',
+                });
+            },
+        );
+
+        it('should call onValidSubmit if form is valid when submitting', () => {
+            const props = mockProps();
+            const wrapper = mount(
+                <Form {...props}>
+                    <TextField
+                        name="test"
+                        value="abc"
+                        validatorContext={ValidatorContext.Danger}
+                    />
+                </Form>,
+            );
+            const form: Form = wrapper.instance() as any;
+
+            form.submit();
+            expect(props.onInvalidSubmit).toHaveBeenCalledWith({
+                test: 'abc',
+            });
+            expect(props.onValidSubmit).not.toHaveBeenCalled();
+        });
+
+        it('should call onInvalidSubmit if form is invalid when submitting', () => {
+            const props = mockProps();
+            const wrapper = mount(
+                <Form {...props}>
+                    <TextField
+                        name="test"
+                        value="abc"
+                        validatorContext={ValidatorContext.Success}
+                    />
+                </Form>,
+            );
+            const form: Form = wrapper.instance() as any;
+
+            form.submit();
+            expect(props.onInvalidSubmit).not.toHaveBeenCalled();
+            expect(props.onValidSubmit).toHaveBeenCalledWith({
+                test: 'abc',
+            });
         });
     });
 

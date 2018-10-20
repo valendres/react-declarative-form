@@ -1,6 +1,6 @@
 {
-    "private": true,
-    "name": "val-chat-bot",
+    "name": "react-declarative-form",
+    "description": "Declarative react form validator",
     "repository": "valendres/react-declarative-form",
     "author": {
         "name": "Peter Weller",

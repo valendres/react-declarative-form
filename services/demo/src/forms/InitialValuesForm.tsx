@@ -1,16 +1,16 @@
 import * as React from 'react';
 import { Form, ValueMap } from '@react-declarative-form/core';
 import { TextField } from '@react-declarative-form/material-ui';
-import { Button, Typography } from '@material-ui/core';
+import { Button, Typography, Grid } from '@material-ui/core';
 
 export interface InitialValuesFormValues {
-    firstName: string;
-    lastName: string;
+    initial: string;
 }
 
 export interface InitialValuesFormProps {}
 export interface InitialValuesFormState {
     initialValues?: Partial<InitialValuesFormValues>;
+    controlledValue?: string;
 }
 
 export class InitialValuesForm extends React.Component<
@@ -22,14 +22,17 @@ export class InitialValuesForm extends React.Component<
     constructor(props: InitialValuesFormProps) {
         super(props);
         this.state = {
+            controlledValue: 'Level 1',
             initialValues: {
-                firstName: 'test',
-                lastName: 'abc',
+                initial: 'Level 3',
             },
         };
     }
 
     public render() {
+        const { controlledValue } = this.state;
+        const defaultValue = 'Default...';
+
         return (
             <div>
                 <Typography variant="title">Initial values form</Typography>
@@ -40,14 +43,44 @@ export class InitialValuesForm extends React.Component<
                     onChange={this.handleFormChange}
                     initialValues={this.state.initialValues}
                 >
-                    <TextField name="firstName" label="First name" required />
-                    <TextField name="lastName" label="Last name" required />
-                    <TextField
-                        name="comment"
-                        label="Comment"
-                        initialValue="Some comment"
-                        required
-                    />
+                    <Grid>
+                        <Grid>
+                            <TextField
+                                name="controlled"
+                                label="Controlled (level 1)"
+                                value={controlledValue}
+                                onChange={this.handleControlledChange}
+                                defaultValue={defaultValue}
+                                required
+                            />
+                        </Grid>
+                        <Grid>
+                            <TextField
+                                name="auto"
+                                label="Auto (level 2)"
+                                defaultValue={defaultValue}
+                                required
+                            />
+                        </Grid>
+                    </Grid>
+                    <Grid>
+                        <Grid>
+                            <TextField
+                                name="initial"
+                                label="Initial value (Level 3)"
+                                defaultValue={defaultValue}
+                                required
+                            />
+                        </Grid>
+                        <Grid>
+                            <TextField
+                                name="default"
+                                label="Default value (Level 4)"
+                                defaultValue={defaultValue}
+                                required
+                            />
+                        </Grid>
+                    </Grid>
                 </Form>
                 <Button type="submit" onClick={this.handleSubmitButtonClick}>
                     Submit
@@ -60,6 +93,13 @@ export class InitialValuesForm extends React.Component<
             </div>
         );
     }
+
+    private handleControlledChange = (event: React.SyntheticEvent<any>) => {
+        console.log('Handle comment change!');
+        this.setState({
+            controlledValue: event.currentTarget.value,
+        });
+    };
 
     private handleFormChange = (name: string, value: any) => {
         console.log(`${name} field value set to: ${value}`);

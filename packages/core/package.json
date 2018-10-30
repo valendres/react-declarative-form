@@ -1,7 +1,7 @@
 {
     "private": false,
     "name": "@react-declarative-form/core",
-    "version": "1.0.17-alpha.0",
+    "version": "1.0.17",
     "description": "Declarative react form validator",
     "main": "./dist/index",
     "typings": "./dist/index",

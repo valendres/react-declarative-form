@@ -1,7 +1,7 @@
 {
     "private": true,
     "name": "@react-declarative-form/demo",
-    "version": "1.0.17-alpha.0",
+    "version": "1.0.17-alpha.1",
     "description": "Interactive demo for react-declarative-form",
     "repository": "valendres/react-declarative-form",
     "author": {

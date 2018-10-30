@@ -1,7 +1,7 @@
 {
     "private": true,
     "name": "@react-declarative-form/material-ui",
-    "version": "1.0.0",
+    "version": "1.0.16",
     "description": "Bound Material UI form components",
     "main": "./dist/index",
     "typings": "./dist/index",
@@ -32,7 +32,7 @@
     },
     "dependencies": {
         "@material-ui/core": "^3.1.1",
-        "@react-declarative-form/core": "^1.0.0"
+        "@react-declarative-form/core": "^0.0.1"
     },
     "peerDependencies": {
         "react": ">=0.16.3",

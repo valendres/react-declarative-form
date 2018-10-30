@@ -1,7 +1,7 @@
 {
     "private": true,
     "name": "@react-declarative-form/demo",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "description": "Interactive demo for react-declarative-form",
     "repository": "valendres/react-declarative-form",
     "author": {
@@ -43,8 +43,8 @@
     },
     "dependencies": {
         "@material-ui/core": "^3.1.1",
-        "@react-declarative-form/core": "^1.0.0",
-        "@react-declarative-form/material-ui": "^1.0.0",
+        "@react-declarative-form/core": "^0.0.1",
+        "@react-declarative-form/material-ui": "^0.0.1",
         "react": "^16.5.2",
         "react-dom": "^16.5.2",
         "react-hot-loader": "^4.3.11",

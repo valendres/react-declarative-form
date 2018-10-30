@@ -142,7 +142,7 @@ const stringValidatorRules: ValidatorRuleMap = {
 
 const regexValidatorRules: ValidatorRuleMap = {
     matches: (key: string, values: ValueMap, pattern: RegExp) => {
-        if (isDefined(key, values) && !pattern.test(values[key])) {
+        if (isDefined(key, values) && pattern && !pattern.test(values[key])) {
             return {
                 key: 'matches',
                 context: ValidatorContext.Danger,

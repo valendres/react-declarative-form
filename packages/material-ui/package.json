@@ -1,4 +1,5 @@
 {
+    "private": true,
     "name": "@react-declarative-form/material-ui",
     "version": "1.0.0",
     "description": "Bound Material UI form components",
@@ -11,7 +12,6 @@
         "url": "https://github.com/valendres"
     },
     "license": "MIT",
-    "private": false,
     "scripts": {
         "build": "tsc --sourceMap false",
         "clean": "rimraf dist",
@@ -20,6 +20,7 @@
         "prebuild": "yarn run clean",
         "precommit": "lint-staged",
         "prepackage": "yarn run build",
+        "prepublish": "yarn run build",
         "prettier": "prettier --write \"?(src|test)/**/*.ts?(x)\""
     },
     "lint-staged": {

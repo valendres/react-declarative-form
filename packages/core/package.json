@@ -1,6 +1,7 @@
 {
+    "private": false,
     "name": "@react-declarative-form/core",
-    "version": "1.0.11",
+    "version": "1.0.16",
     "description": "Declarative react form validator",
     "main": "./dist/index",
     "typings": "./dist/index",
@@ -11,7 +12,6 @@
         "url": "https://github.com/valendres"
     },
     "license": "MIT",
-    "private": false,
     "scripts": {
         "build": "tsc --sourceMap false",
         "clean": "rimraf dist",
@@ -21,6 +21,7 @@
         "prebuild": "yarn run clean",
         "precommit": "yarn run test --coverage=0 && lint-staged",
         "prepackage": "yarn run build",
+        "prepublish": "yarn run build",
         "prettier": "prettier --write \"?(src|test)/**/*.ts?(x)\"",
         "test": "jest --silent"
     },

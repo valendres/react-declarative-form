@@ -1,4 +1,5 @@
 {
+    "private": true,
     "name": "react-declarative-form",
     "description": "Declarative react form validator",
     "repository": "valendres/react-declarative-form",

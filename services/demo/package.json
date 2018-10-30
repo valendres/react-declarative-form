@@ -1,4 +1,5 @@
 {
+    "private": true,
     "name": "@react-declarative-form/demo",
     "version": "1.0.0",
     "description": "Interactive demo for react-declarative-form",
@@ -9,7 +10,6 @@
         "url": "https://github.com/valendres"
     },
     "license": "MIT",
-    "private": true,
     "scripts": {
         "build": "webpack --config=webpack.config.js",
         "clean": "rimraf dist",

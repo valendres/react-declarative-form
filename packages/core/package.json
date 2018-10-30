@@ -1,7 +1,7 @@
 {
     "private": false,
     "name": "@react-declarative-form/core",
-    "version": "1.0.17-alpha.1",
+    "version": "1.0.17-alpha.4",
     "description": "Declarative react form validator",
     "main": "./dist/index",
     "typings": "./dist/index",
@@ -73,5 +73,6 @@
             "html",
             "lcov"
         ]
-    }
+    },
+    "gitHead": "f4123eb4383492943c25229283c7fc4cf054c29d"
 }

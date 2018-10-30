@@ -24,6 +24,12 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
         modules: [packagePath('node_modules'), rootPath('node_modules')],
+        alias: {
+            '@react-declarative-form/core': rootPath('packages/core/src'),
+            '@react-declarative-form/material-ui': rootPath(
+                'packages/material-ui/src',
+            ),
+        },
     },
     plugins: [
         new OpenBrowserWebpackPlugin(),

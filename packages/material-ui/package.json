@@ -32,7 +32,7 @@
     },
     "dependencies": {
         "@material-ui/core": "^3.1.1",
-        "@react-declarative-form/core": "^0.0.1"
+        "@react-declarative-form/core": "^1.0.17"
     },
     "peerDependencies": {
         "react": ">=0.16.3",

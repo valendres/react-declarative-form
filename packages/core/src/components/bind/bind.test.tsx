@@ -1,11 +1,18 @@
 import * as React from 'react';
+import { mount } from 'enzyme';
 
 import { bind, BoundComponentProps } from './bind';
-import { FormApi } from '../Form';
+import { FormApi, Form } from '../Form';
 import { ValidatorResponse, ValidatorContext } from '../../types';
 
 describe('module: bind', () => {
-    const BoundComponentClass = bind(<div /> as any);
+    class ComponentClass extends React.Component<any> {
+        render() {
+            return <div />;
+        }
+    }
+
+    const BoundComponentClass = bind(ComponentClass);
 
     const mockProps = (
         props: Partial<BoundComponentProps> = {},
@@ -29,9 +36,17 @@ describe('module: bind', () => {
     });
 
     describe('func: setValue', () => {
-        it('should call setState with new value, response for value and set pristine to false', () => {
+        it('should call setState with new value, response for value and set pristine to false', async () => {
             const props = mockProps();
-            const instance = new BoundComponentClass(props);
+            const wrapper = mount(
+                <Form>
+                    <BoundComponentClass {...props} />
+                </Form>,
+            );
+            const instance = wrapper
+                .find(BoundComponentClass)
+                .instance() as any;
+
             const nextValue = 'test';
             const nextResponse: ValidatorResponse = {
                 key: 'test',
@@ -41,10 +56,10 @@ describe('module: bind', () => {
 
             jest.spyOn(instance, 'getResponse').mockReturnValue(nextResponse);
             jest.spyOn(instance, 'setState');
-            instance.setValue(nextValue);
+            await instance.setValue(nextValue);
 
             expect(instance.getResponse).toHaveBeenCalledWith(nextValue);
-            expect(instance.setState).toHaveBeenCalledWith({
+            expect(instance.setState.mock.calls[0][0]).toEqual({
                 value: nextValue,
                 response: nextResponse,
                 pristine: false,

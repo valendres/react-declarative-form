@@ -61,8 +61,9 @@ export interface BoundComponentInstance {
     reset: () => void;
     validate: () => void;
     isValid: () => boolean;
-    setResponse: (response: ValidatorResponse) => void;
+    setResponse: (response: ValidatorResponse) => Promise<void>;
     getValue: () => any;
+    setValue: (value: any) => Promise<void>;
 }
 
 export interface BoundComponentState {
@@ -164,11 +165,15 @@ export function bind<ComponentProps extends BoundComponentProps>(
             return consumerValid && computedValid;
         };
 
-        public setResponse = (response: ValidatorResponse): void => {
-            this.setState({
-                response,
+        public setResponse = (response: ValidatorResponse): Promise<void> =>
+            new Promise(resolve => {
+                this.setState(
+                    {
+                        response,
+                    },
+                    resolve,
+                );
             });
-        };
 
         public render() {
             const { response } = this.state;
@@ -246,16 +251,20 @@ export function bind<ComponentProps extends BoundComponentProps>(
             );
         };
 
-        setValue = (value: any) => {
-            this.setState({
-                value,
-                response: this.getResponse(value),
-                pristine: false,
+        setValue = (value: any): Promise<void> =>
+            new Promise(resolve => {
+                this.setState(
+                    {
+                        value,
+                        response: this.getResponse(value),
+                        pristine: false,
+                    },
+                    resolve,
+                );
+                if (this.isInsideForm()) {
+                    this.formApi.onChange(this.props.name, value);
+                }
             });
-            if (this.isInsideForm()) {
-                this.formApi.onChange(this.props.name, value);
-            }
-        };
 
         handleBlur = (event?: React.FocusEvent<any>): void => {
             if (this.isInsideForm()) {

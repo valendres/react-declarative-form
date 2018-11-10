@@ -18,10 +18,17 @@ class UnconnectedTextField extends React.Component<TextFieldProps> {
             validatorContext,
             validatorMessage,
             pristine,
+            value,
             ...restProps
         } = this.props;
 
-        return <input {...restProps} onChange={this.handleChange} />;
+        return (
+            <input
+                {...restProps}
+                value={value || ''}
+                onChange={this.handleChange}
+            />
+        );
     }
 
     handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -227,6 +234,54 @@ describe('Component: Form', () => {
 
             // Should be defaultValue because no other higher precedence value sources exist
             expect(wrapper.find('input').props().value).toBe(defaultValue);
+        });
+
+        it('should allow a single form value to be programatically set', async () => {
+            const nextValue = 'abc';
+            const props = mockProps();
+            const wrapper = mount(
+                <Form {...props}>
+                    <TextField name="test" label="Programatic" required />
+                </Form>,
+            );
+            const instance: Form = wrapper.instance() as any;
+            await instance.setValue('test', nextValue);
+
+            // Update the wrapper so the latest value can be retrieved
+            wrapper.update();
+
+            expect(wrapper.find('input').props().value).toBe(nextValue);
+        });
+
+        it('should allow multiple form values to be programatically set', async () => {
+            const firstName = 'Peter';
+            const lastName = 'Weller';
+            const props = mockProps();
+            const wrapper = mount(
+                <Form {...props}>
+                    <TextField name="firstName" label="First name" required />
+                    <TextField name="lastName" label="Last name" required />
+                </Form>,
+            );
+            const instance: Form = wrapper.instance() as any;
+            await instance.setValues({
+                firstName,
+                lastName,
+            });
+
+            // Update the wrapper so the latest value can be retrieved
+            wrapper.update();
+
+            const firstNameInput = wrapper
+                .find({ name: 'firstName' })
+                .find('input');
+
+            const lastNameInput = wrapper
+                .find({ name: 'lastName' })
+                .find('input');
+
+            expect(firstNameInput.props().value).toBe(firstName);
+            expect(lastNameInput.props().value).toBe(lastName);
         });
     });
 });

@@ -180,6 +180,31 @@ export class Form extends React.Component<FormProps> {
     };
 
     /**
+     * Inject a custom value on a form component
+     * @param {string} componentName name of the component
+     * @param {any} value custom value to be injected
+     */
+    public setValue = (componentName: string, value: any): Promise<void> =>
+        componentName in this.componentRefs
+            ? this.componentRefs[componentName].setValue(value)
+            : Promise.reject(
+                  `Failed to set value for "${componentName}" component. It does not exist in form context.`,
+              );
+
+    /**
+     * Injects custom values for form components
+     * @param {object} values component name / value map
+     */
+    public setValues = (values: {
+        [componentName: string]: any;
+    }): Promise<void[]> =>
+        Promise.all(
+            Object.keys(values).map((componentName: string) =>
+                this.setValue(componentName, values[componentName]),
+            ),
+        );
+
+    /**
      * Inject a custom validator response on a form component
      * @param {string} componentName name of the component
      * @param {object} response custom validator response to be injected
@@ -187,15 +212,12 @@ export class Form extends React.Component<FormProps> {
     public setResponse = (
         componentName: string,
         response: ValidatorResponse,
-    ): void => {
-        if (componentName in this.componentRefs) {
-            this.componentRefs[componentName].setResponse(response);
-        } else {
-            console.warn(
-                `Failed to set validator for "${componentName}" component. It does not exist in form context.`,
-            );
-        }
-    };
+    ): Promise<void> =>
+        componentName in this.componentRefs
+            ? this.componentRefs[componentName].setResponse(response)
+            : Promise.reject(
+                  `Failed to set validator for "${componentName}" component. It does not exist in form context.`,
+              );
 
     /**
      * Injects custom validator responses for form components
@@ -203,11 +225,12 @@ export class Form extends React.Component<FormProps> {
      */
     public setResponses = (responses: {
         [componentName: string]: ValidatorResponse;
-    }): void => {
-        Object.keys(responses).forEach((componentName: string) => {
-            this.setResponse(componentName, responses[componentName]);
-        });
-    };
+    }): Promise<void[]> =>
+        Promise.all(
+            Object.keys(responses).map((componentName: string) =>
+                this.setResponse(componentName, responses[componentName]),
+            ),
+        );
 
     public render() {
         const {

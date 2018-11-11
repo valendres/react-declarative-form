@@ -193,7 +193,6 @@ export function bind<ComponentProps extends BoundComponentProps>(
                 validatorRules,
                 validatorMessages,
                 validatorTrigger,
-                defaultValue,
                 ...restProps
             } = this.props as any;
 

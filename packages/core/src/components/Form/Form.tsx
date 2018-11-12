@@ -317,7 +317,6 @@ export class Form extends React.Component<FormProps> {
     ): ValidatorResponse => {
         const values = this.getValues();
         const component = this.componentRefs[componentName];
-        const { validatorRules, validatorMessages } = component.props;
         return validate(
             componentName,
             {
@@ -327,9 +326,9 @@ export class Form extends React.Component<FormProps> {
             },
             {
                 required,
-                ...validatorRules,
+                ...(component ? component.props.validatorRules : {}),
             },
-            validatorMessages,
+            component ? component.props.validatorMessages : {},
         );
     };
 
@@ -372,10 +371,10 @@ export class Form extends React.Component<FormProps> {
      * @returns array of componentNames
      */
     private getRelatedComponents = (componentName: string): string[] => {
-        const { validatorTrigger } = this.componentRefs[componentName].props;
-        if (validatorTrigger) {
+        const component = this.componentRefs[componentName];
+        if (component && component.props.validatorTrigger) {
             return Object.keys(
-                this.buildDependencyMap(validatorTrigger),
+                this.buildDependencyMap(component.props.validatorTrigger),
             ).filter(
                 (dependencyName: string) => dependencyName !== componentName,
             );

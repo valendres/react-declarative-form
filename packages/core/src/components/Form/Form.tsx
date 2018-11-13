@@ -3,15 +3,20 @@ import * as React from 'react';
 import { ValidatorResponse, ValueMap, Omit } from '../../types';
 import { validate } from '../../validator';
 import { BoundComponentInstance } from '../bind';
+import { MirrorInstance } from '../Mirror';
 
 export const FormContext = React.createContext(undefined as FormApi);
 
 export interface FormApi {
     registerComponent: Form['registerComponent'];
     unregisterComponent: Form['unregisterComponent'];
+    registerMirror: Form['registerMirror'];
+    unregisterMirror: Form['unregisterMirror'];
     validate: Form['validate'];
     getInitialValue: Form['getInitialValue'];
     getResponse: Form['getResponse'];
+    getValue: Form['getValue'];
+    onUpdate: Form['handleUpdate'];
     onChange: Form['handleChange'];
     onBlur: Form['handleBlur'];
     onFocus: Form['handleFocus'];
@@ -94,9 +99,14 @@ export class Form extends React.Component<FormProps> {
         [componentName: string]: BoundComponentInstance;
     };
 
+    private mirrorRefs: {
+        [componentName: string]: MirrorInstance[];
+    };
+
     public constructor(props: FormProps) {
         super(props);
         this.componentRefs = {};
+        this.mirrorRefs = {};
     }
 
     /**
@@ -111,7 +121,8 @@ export class Form extends React.Component<FormProps> {
      * @param {string} componentName name of the component
      */
     public getValue = (componentName: string): any => {
-        return this.componentRefs[componentName].getValue();
+        const component = this.componentRefs[componentName];
+        return component ? component.getValue() : undefined;
     };
 
     /**
@@ -251,9 +262,13 @@ export class Form extends React.Component<FormProps> {
         const api: FormApi = {
             registerComponent: this.registerComponent,
             unregisterComponent: this.unregisterComponent,
+            registerMirror: this.registerMirror,
+            unregisterMirror: this.unregisterMirror,
             validate: this.validate,
             getInitialValue: this.getInitialValue,
             getResponse: this.getResponse,
+            getValue: this.getValue,
+            onUpdate: this.handleUpdate,
             onChange: this.handleChange,
             onBlur: this.handleBlur,
             onFocus: this.handleFocus,
@@ -294,6 +309,36 @@ export class Form extends React.Component<FormProps> {
      */
     private unregisterComponent = (componentName: string): void => {
         delete this.componentRefs[componentName];
+    };
+
+    /**
+     * Registers a mirror with the form, allowing it to reflect a component.
+     * @param {string} componentName name of the component to mirror
+     * @param {object} mirrorRef react mirror reference to be registered
+     */
+    private registerMirror = (componentName: string, mirrorRef: any): void => {
+        if (componentName in this.mirrorRefs) {
+            this.mirrorRefs[componentName].push(mirrorRef);
+        } else {
+            this.mirrorRefs[componentName] = [mirrorRef];
+        }
+    };
+
+    /**
+     * Unregisters a mirror with the form, so it will no longer reflect
+     * @param {string} componentName name of the component to mirror
+     * @param {object} mirrorRef react mirror reference to be unregistered
+     */
+    private unregisterMirror = (
+        componentName: string,
+        mirrorRef: any,
+    ): void => {
+        if (componentName in this.mirrorRefs) {
+            const index = this.mirrorRefs[componentName].indexOf(mirrorRef);
+            if (index > -1) {
+                this.mirrorRefs[componentName].splice(index, 1);
+            }
+        }
     };
 
     /** Retrieves the initial component value from the initialValues prop */
@@ -382,12 +427,33 @@ export class Form extends React.Component<FormProps> {
         return [];
     };
 
-    private handleChange = (componentName: string, value: any) => {
-        // Cross validate if necessary
+    /**
+     * Returns an array of mirror instances that are currently reflecting the specified component.
+     * @param {string} componentName name of the component
+     * @returns array of mirror instances
+     */
+    private getMirrors = (componentName: string): MirrorInstance[] => {
+        return this.mirrorRefs[componentName] || [];
+    };
+
+    /**
+     * Event handler to be fired whenever a bound form component is updated. When called, validation rules
+     * will be executed on any related components, and mirrors updated to reflect the new value.
+     * @param {string} componentName name of the component
+     */
+    private handleUpdate = (componentName: string) => {
+        // Cross-validate if necessary
         this.getRelatedComponents(componentName).forEach((relName: string) => {
             this.componentRefs[relName].validate();
         });
 
+        // Reflect all mirrors
+        this.getMirrors(componentName).forEach((mirror: MirrorInstance) =>
+            mirror.reflect(),
+        );
+    };
+
+    private handleChange = (componentName: string, value: any) => {
         this.props.onChange(componentName, value);
     };
 

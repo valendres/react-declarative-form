@@ -26,9 +26,13 @@ describe('module: bind', () => {
     const mockFormApi = (api: Partial<FormApi> = {}): FormApi => ({
         registerComponent: jest.fn(),
         unregisterComponent: jest.fn(),
+        registerMirror: jest.fn(),
+        unregisterMirror: jest.fn(),
         validate: jest.fn(),
         getResponse: jest.fn(),
         getInitialValue: jest.fn().mockReturnValue(undefined),
+        getValue: jest.fn().mockReturnValue(undefined),
+        onUpdate: jest.fn(),
         onChange: jest.fn(),
         onBlur: jest.fn(),
         onFocus: jest.fn(),

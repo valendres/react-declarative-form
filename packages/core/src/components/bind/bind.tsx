@@ -100,6 +100,7 @@ export function bind<ComponentProps extends BoundComponentProps>(
         public componentDidMount() {
             if (this.isInsideForm()) {
                 this.formApi.registerComponent(this.props.name, this);
+                this.formApi.onUpdate(this.props.name);
             } else {
                 console.error(
                     'Bound form components must be placed inside of a <Form/> component.',
@@ -116,6 +117,10 @@ export function bind<ComponentProps extends BoundComponentProps>(
         public componentDidUpdate() {
             const { pristine, response: prevResponse } = this.state;
 
+            // Notify form of when this component has been updated, this
+            // allows for any attached mirrors to reflect this components value.
+            this.formApi.onUpdate(this.props.name);
+
             // Only update state if necessary to prevent setState loops
             if (!pristine) {
                 const nextResponse = this.getResponse();
@@ -125,6 +130,19 @@ export function bind<ComponentProps extends BoundComponentProps>(
                     });
                 }
             }
+        }
+
+        public shouldComponentUpdate(
+            nextProps: ComponentProps & BoundComponentProps,
+            nextState: BoundComponentState,
+        ) {
+            const propsChanged = !shallowEqual(this.props, nextProps);
+            const stateChanged =
+                this.state.pristine !== nextState.pristine ||
+                this.state.value !== nextState.value ||
+                !shallowEqual(this.state.response, nextState.response);
+
+            return propsChanged || stateChanged;
         }
 
         public clear = (): void => {
@@ -255,8 +273,12 @@ export function bind<ComponentProps extends BoundComponentProps>(
                 this.setState(
                     {
                         value,
-                        response: this.getResponse(value),
                         pristine: false,
+                        // Use cache response if value has not changed
+                        response:
+                            this.state.value !== value
+                                ? this.getResponse(value)
+                                : this.state.response,
                     },
                     resolve,
                 );

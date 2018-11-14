@@ -47,7 +47,9 @@ export class Mirror extends React.Component<MirrorProps> {
     }
 
     reflect = (): void => {
-        this.forceUpdate();
+        // Document check is done to prevent a jest unit test error where
+        // the document may be cleaned up before forceUpdate is called
+        document && this.forceUpdate();
     };
 
     isInsideForm = (): boolean => {

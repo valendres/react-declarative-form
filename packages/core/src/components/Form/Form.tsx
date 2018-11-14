@@ -93,6 +93,7 @@ export class Form extends React.Component<FormProps> {
         onSubmit: () => {},
         onValidSubmit: () => {},
         onInvalidSubmit: () => {},
+        initialValues: {},
     };
 
     private componentRefs: {
@@ -122,7 +123,9 @@ export class Form extends React.Component<FormProps> {
      */
     public getValue = (componentName: string): any => {
         const component = this.componentRefs[componentName];
-        return component ? component.getValue() : undefined;
+        return component
+            ? component.getValue()
+            : this.props.initialValues[componentName];
     };
 
     /**

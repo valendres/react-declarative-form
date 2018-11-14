@@ -117,9 +117,11 @@ export function bind<ComponentProps extends BoundComponentProps>(
         public componentDidUpdate() {
             const { pristine, response: prevResponse } = this.state;
 
-            // Notify form of when this component has been updated, this
-            // allows for any attached mirrors to reflect this components value.
-            this.formApi.onUpdate(this.props.name);
+            if (this.isInsideForm()) {
+                // Notify form of when this component has been updated, this
+                // allows for any attached mirrors to reflect this components value.
+                this.formApi.onUpdate(this.props.name);
+            }
 
             // Only update state if necessary to prevent setState loops
             if (!pristine) {

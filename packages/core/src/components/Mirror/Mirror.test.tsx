@@ -41,7 +41,7 @@ describe('Component: Mirror', () => {
                 <Form initialValues={initialValues}>
                     <TextField name="age" />
                     <Mirror name="age">
-                        {(age: string) => <div id="mirroredAge">{age}</div>}
+                        {({ age }) => <div id="mirroredAge">{age}</div>}
                     </Mirror>
                 </Form>,
             );
@@ -57,7 +57,7 @@ describe('Component: Mirror', () => {
                 <Form>
                     <TextField name="age" defaultValue={age} />
                     <Mirror name="age">
-                        {(age: string) => <div id="mirroredAge">{age}</div>}
+                        {({ age }) => <div id="mirroredAge">{age}</div>}
                     </Mirror>
                 </Form>,
             );
@@ -79,7 +79,7 @@ describe('Component: Mirror', () => {
                 <Form>
                     <TextField name="age" value={age} />
                     <Mirror name="age">
-                        {(age: string) => <div id="mirroredAge">{age}</div>}
+                        {({ age }) => <div id="mirroredAge">{age}</div>}
                     </Mirror>
                 </Form>,
             );
@@ -101,7 +101,7 @@ describe('Component: Mirror', () => {
                 <Form>
                     <TextField name="age" />
                     <Mirror name="age">
-                        {(age: string) => <div id="mirroredAge">{age}</div>}
+                        {({ age }) => <div id="mirroredAge">{age}</div>}
                     </Mirror>
                 </Form>,
             );
@@ -120,6 +120,35 @@ describe('Component: Mirror', () => {
 
             // Should now reflect externally managed value
             expect(wrapper.find({ id: 'mirroredAge' }).text()).toEqual(age);
+        });
+
+        it('should reflect multiple values', async () => {
+            const values = {
+                firstName: 'Peter',
+                lastName: 'Weller',
+            };
+            const wrapper = mount(
+                <Form initialValues={values}>
+                    <TextField name="firstName" />
+                    <TextField name="lastName" />
+                    <Mirror name={['firstName', 'lastName']}>
+                        {({ firstName, lastName }) => (
+                            <React.Fragment>
+                                <div id="mirroredFirstName">{firstName}</div>
+                                <div id="mirroredLastName">{lastName}</div>
+                            </React.Fragment>
+                        )}
+                    </Mirror>
+                </Form>,
+            );
+
+            // Should reflect initialValues on mount
+            expect(wrapper.find({ id: 'mirroredFirstName' }).text()).toEqual(
+                values.firstName,
+            );
+            expect(wrapper.find({ id: 'mirroredLastName' }).text()).toEqual(
+                values.lastName,
+            );
         });
     });
 });

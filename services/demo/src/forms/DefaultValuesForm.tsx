@@ -50,7 +50,7 @@ export class DefaultValuesForm extends React.Component<
                                 required
                             />
                             <Mirror name="firstName">
-                                {(firstName: string) =>
+                                {({ firstName }) =>
                                     firstName && <div>Welcome {firstName}!</div>
                                 }
                             </Mirror>

@@ -7,8 +7,12 @@ export interface MirrorInstance {
 }
 
 export interface MirrorProps {
-    name: string;
-    children: (value: any) => any;
+    name: string | string[];
+    children: (
+        values: {
+            [key: string]: any;
+        },
+    ) => any;
 }
 
 export class Mirror extends React.Component<MirrorProps> {
@@ -16,7 +20,9 @@ export class Mirror extends React.Component<MirrorProps> {
 
     public componentDidMount() {
         if (this.isInsideForm()) {
-            this.formApi.registerMirror(this.props.name, this);
+            this.getNames().map(name =>
+                this.formApi.registerMirror(name, this),
+            );
 
             // Defer an update so we can get loaded values
             setImmediate(this.reflect);
@@ -29,18 +35,27 @@ export class Mirror extends React.Component<MirrorProps> {
 
     public componentWillUnmount() {
         if (this.isInsideForm()) {
-            this.formApi.unregisterMirror(this.props.name, this);
+            this.getNames().map(name =>
+                this.formApi.unregisterMirror(name, this),
+            );
         }
     }
 
     render() {
-        const { children, name } = this.props;
-
         return (
             <FormContext.Consumer>
                 {(api: FormApi) => {
                     this.formApi = api;
-                    return children(api.getValue(name));
+
+                    return this.props.children(
+                        this.getNames().reduce(
+                            (output, singleName) => ({
+                                ...output,
+                                [singleName]: api.getValue(singleName),
+                            }),
+                            {},
+                        ),
+                    );
                 }}
             </FormContext.Consumer>
         );
@@ -50,6 +65,11 @@ export class Mirror extends React.Component<MirrorProps> {
         // Document check is done to prevent a jest unit test error where
         // the document may be cleaned up before forceUpdate is called
         document && this.forceUpdate();
+    };
+
+    getNames = (): string[] => {
+        const { name } = this.props;
+        return Array.isArray(name) ? name : [name];
     };
 
     isInsideForm = (): boolean => {

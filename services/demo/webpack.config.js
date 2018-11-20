@@ -64,7 +64,7 @@ module.exports = {
             },
             {
                 test: /\.tsx?$/,
-                exclude: ['/node_modules/', 'dist'],
+                exclude: [packagePath('dist'), packagePath('dist')],
                 loader: 'awesome-typescript-loader',
                 query: {
                     useTranspileModule: true,

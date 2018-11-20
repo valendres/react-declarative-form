@@ -33,17 +33,17 @@
         ]
     },
     "devDependencies": {
-        "@types/validator": "^9.4.2",
+        "@types/validator": "9.4.3",
         "delay": "4.1.0",
-        "markdown-toc": "^1.2.0"
+        "markdown-toc": "1.2.0"
     },
     "peerDependencies": {
         "react": ">=0.16.3",
         "react-dom": ">=16.3.2"
     },
     "dependencies": {
-        "shallow-equal-object": "^1.1.1",
-        "validator": "^10.8.0"
+        "shallow-equal-object": "1.1.1",
+        "validator": "10.9.0"
     },
     "jest": {
         "setupTestFrameworkScriptFile": "<rootDir>/test/setup.ts",

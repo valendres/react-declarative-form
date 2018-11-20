@@ -7,7 +7,7 @@ import {
 } from '@react-declarative-form/core';
 
 import MaterialTextField, {
-    TextFieldProps as MaterialTextFieldProps,
+    StandardTextFieldProps as MaterialTextFieldProps,
 } from '@material-ui/core/TextField';
 
 export interface TextFieldProps

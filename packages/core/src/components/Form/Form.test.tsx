@@ -590,76 +590,88 @@ describe('component: Form', () => {
             );
         });
 
-        it('should trigger validation on related components if there are no circular dependencies', () => {
-            const password = 'abc';
-            const props = mockProps({
-                initialValues: {
-                    password: 'a',
-                    passwordConfirm: 'b',
-                },
-            });
-            const wrapper = mount(
-                <Form {...props}>
-                    <TextField
-                        name="password"
-                        validatorTrigger={['passwordConfirm']}
-                        type="password"
-                    />
-                    <TextField
-                        name="passwordConfirm"
-                        validatorRules={{
-                            eqTarget: 'password',
-                        }}
-                        validatorMessages={{
-                            eqTarget: 'Must match password',
-                        }}
-                        type="password"
-                    />
-                </Form>,
-            );
+        it.each([
+            // Singular prop
+            'passwordConfirm',
+            // Array prop
+            ['passwordConfirm'],
+        ])(
+            'should trigger validation on related components if there are no circular dependencies',
+            validatorTrigger => {
+                const password = 'abc';
+                const props = mockProps({
+                    initialValues: {
+                        password: 'a',
+                        passwordConfirm: 'b',
+                    },
+                });
+                const wrapper = mount(
+                    <Form {...props}>
+                        <TextField
+                            name="password"
+                            validatorTrigger={validatorTrigger}
+                            type="password"
+                        />
+                        <TextField
+                            name="passwordConfirm"
+                            validatorRules={{
+                                eqTarget: 'password',
+                            }}
+                            validatorMessages={{
+                                eqTarget: 'Must match password',
+                            }}
+                            type="password"
+                        />
+                    </Form>,
+                );
 
-            // Shouldn't have a responses by default
-            expect(wrapper.find({ name: 'password' })).toHaveResponse(
-                undefined,
-            );
-            expect(wrapper.find({ name: 'passwordConfirm' })).toHaveResponse(
-                undefined,
-            );
+                // Shouldn't have a responses by default
+                expect(wrapper.find({ name: 'password' })).toHaveResponse(
+                    undefined,
+                );
+                expect(
+                    wrapper.find({ name: 'passwordConfirm' }),
+                ).toHaveResponse(undefined);
 
-            // Simulate chaging the password confirmation to something that doesn't match
-            wrapper
-                .find({ name: 'passwordConfirm' })
-                .find('input')
-                .simulate('change', mockEvent(password));
+                // Simulate chaging the password confirmation to something that doesn't match
+                wrapper
+                    .find({ name: 'passwordConfirm' })
+                    .find('input')
+                    .simulate('change', mockEvent(password));
 
-            // Update the wrapper so the latest response can be retrieved
-            wrapper.update();
+                // Update the wrapper so the latest response can be retrieved
+                wrapper.update();
 
-            // Should add incorrect password messaeg
-            expect(wrapper.find({ name: 'passwordConfirm' })).toHaveResponse({
-                context: ValidatorContext.Danger,
-                message: 'Must match password',
-            });
+                // Should add incorrect password messaeg
+                expect(
+                    wrapper.find({ name: 'passwordConfirm' }),
+                ).toHaveResponse({
+                    context: ValidatorContext.Danger,
+                    message: 'Must match password',
+                });
 
-            // Simulate chaging the password to trigger a related updated
-            wrapper
-                .find({ name: 'password' })
-                .find('input')
-                .simulate('change', mockEvent(password));
+                // Simulate chaging the password to trigger a related updated
+                wrapper
+                    .find({ name: 'password' })
+                    .find('input')
+                    .simulate('change', mockEvent(password));
 
-            // Update the wrapper so the latest response can be retrieved
-            wrapper.update();
+                // Update the wrapper so the latest response can be retrieved
+                wrapper.update();
 
-            expect(wrapper.find({ name: 'password' })).toHaveResponse({
-                context: ValidatorContext.Success,
-                message: undefined,
-            });
+                expect(wrapper.find({ name: 'password' })).toHaveResponse({
+                    context: ValidatorContext.Success,
+                    message: undefined,
+                });
 
-            expect(wrapper.find({ name: 'passwordConfirm' })).toHaveResponse({
-                context: ValidatorContext.Success,
-                message: undefined,
-            });
-        });
+                expect(
+                    wrapper.find({ name: 'passwordConfirm' }),
+                ).toHaveResponse({
+                    context: ValidatorContext.Success,
+                    message: undefined,
+                });
+            },
+        );
 
         it('should allow validation on all form components to be programatically triggered', () => {
             const wrapper = mount(

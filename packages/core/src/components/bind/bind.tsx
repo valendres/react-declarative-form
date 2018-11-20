@@ -48,7 +48,7 @@ export interface BoundComponentHOCProps extends BoundComponentInternalProps {
     validatorMessages?: {
         [ruleKey: string]: string | ValidatorMessageGenerator;
     };
-    validatorTrigger?: string[];
+    validatorTrigger?: string | string[];
     defaultValue?: any;
 }
 
@@ -56,7 +56,6 @@ export type BoundComponentProps = BoundComponentInternalProps &
     BoundComponentHOCProps;
 
 export interface BoundComponentInstance {
-    props: BoundComponentProps;
     clear: () => void;
     reset: () => void;
     validate: () => void;
@@ -64,6 +63,9 @@ export interface BoundComponentInstance {
     setResponse: (response: ValidatorResponse) => Promise<void>;
     getValue: () => any;
     setValue: (value: any) => Promise<void>;
+    getValidatorRules: () => BoundComponentHOCProps['validatorRules'];
+    getValidatorMessages: () => BoundComponentHOCProps['validatorMessages'];
+    getValidatorTriggers: () => string[];
 }
 
 export interface BoundComponentState {
@@ -245,9 +247,21 @@ export function bind<ComponentProps extends BoundComponentProps>(
             return undefined;
         }
 
-        getValidatorTrigger = () => {
+        getValidatorMessages = () => {
+            return this.props.validatorMessages;
+        };
+
+        getValidatorRules = () => {
+            return this.props.validatorRules;
+        };
+
+        getValidatorTriggers = () => {
             const { validatorTrigger } = this.props;
-            return validatorTrigger || [];
+            return Array.isArray(validatorTrigger)
+                ? validatorTrigger
+                : validatorTrigger !== undefined
+                    ? [validatorTrigger]
+                    : [];
         };
 
         /**

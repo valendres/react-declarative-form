@@ -379,9 +379,9 @@ export class Form extends React.Component<FormProps> {
             },
             {
                 required,
-                ...(component ? component.props.validatorRules : {}),
+                ...(component ? component.getValidatorRules() : {}),
             },
-            component ? component.props.validatorMessages : {},
+            component ? component.getValidatorMessages() : {},
         );
     };
 
@@ -402,7 +402,7 @@ export class Form extends React.Component<FormProps> {
         return componentNames.reduce((output: any, name: string) => {
             const validatorTrigger: string[] =
                 (this.componentRefs[name] &&
-                    this.componentRefs[name].props.validatorTrigger) ||
+                    this.componentRefs[name].getValidatorTriggers()) ||
                 [];
             const namesToMap = validatorTrigger.filter(
                 (n: string) => !(n in mappedNames),
@@ -427,9 +427,9 @@ export class Form extends React.Component<FormProps> {
      */
     private getRelatedComponents = (componentName: string): string[] => {
         const component = this.componentRefs[componentName];
-        if (component && component.props.validatorTrigger) {
+        if (component) {
             return Object.keys(
-                this.buildDependencyMap(component.props.validatorTrigger),
+                this.buildDependencyMap(component.getValidatorTriggers()),
             ).filter(
                 (dependencyName: string) => dependencyName !== componentName,
             );

@@ -3,7 +3,7 @@ import * as React from 'react';
 import { ValidatorResponse, ValueMap, Omit } from '../../types';
 import { validate } from '../../validator';
 import { BoundComponentInstance } from '../bind';
-import { MirrorInstance } from '../Mirror';
+import { MirrorInstance, Mirror } from '../Mirror';
 
 export const FormContext = React.createContext(undefined as FormApi);
 
@@ -16,6 +16,7 @@ export interface FormApi {
     getInitialValue: Form['getInitialValue'];
     getResponse: Form['getResponse'];
     getValue: Form['getValue'];
+    onMount: Form['handleMount'];
     onUpdate: Form['handleUpdate'];
     onChange: Form['handleChange'];
     onBlur: Form['handleBlur'];
@@ -230,7 +231,7 @@ export class Form extends React.Component<FormProps> {
         componentName in this.componentRefs
             ? this.componentRefs[componentName].setResponse(response)
             : Promise.reject(
-                  `Failed to set validator for "${componentName}" component. It does not exist in form context.`,
+                  `Failed to set response for "${componentName}" component. It does not exist in form context.`,
               );
 
     /**
@@ -271,6 +272,7 @@ export class Form extends React.Component<FormProps> {
             getInitialValue: this.getInitialValue,
             getResponse: this.getResponse,
             getValue: this.getValue,
+            onMount: this.handleMount,
             onUpdate: this.handleUpdate,
             onChange: this.handleChange,
             onBlur: this.handleBlur,
@@ -319,7 +321,10 @@ export class Form extends React.Component<FormProps> {
      * @param {string} componentName name of the component to mirror
      * @param {object} mirrorRef react mirror reference to be registered
      */
-    private registerMirror = (componentName: string, mirrorRef: any): void => {
+    private registerMirror = (
+        componentName: string,
+        mirrorRef: Mirror,
+    ): void => {
         if (componentName in this.mirrorRefs) {
             this.mirrorRefs[componentName].push(mirrorRef);
         } else {
@@ -334,7 +339,7 @@ export class Form extends React.Component<FormProps> {
      */
     private unregisterMirror = (
         componentName: string,
-        mirrorRef: any,
+        mirrorRef: Mirror,
     ): void => {
         if (componentName in this.mirrorRefs) {
             const index = this.mirrorRefs[componentName].indexOf(mirrorRef);
@@ -396,7 +401,9 @@ export class Form extends React.Component<FormProps> {
 
         return componentNames.reduce((output: any, name: string) => {
             const validatorTrigger: string[] =
-                this.componentRefs[name].props.validatorTrigger || [];
+                (this.componentRefs[name] &&
+                    this.componentRefs[name].props.validatorTrigger) ||
+                [];
             const namesToMap = validatorTrigger.filter(
                 (n: string) => !(n in mappedNames),
             );
@@ -439,6 +446,13 @@ export class Form extends React.Component<FormProps> {
         return this.mirrorRefs[componentName] || [];
     };
 
+    private handleMount = (componentName: string) => {
+        // Reflect all mirrors
+        this.getMirrors(componentName).forEach((mirror: MirrorInstance) =>
+            mirror.reflect(),
+        );
+    };
+
     /**
      * Event handler to be fired whenever a bound form component is updated. When called, validation rules
      * will be executed on any related components, and mirrors updated to reflect the new value.
@@ -460,12 +474,12 @@ export class Form extends React.Component<FormProps> {
         this.props.onChange(componentName, value);
     };
 
-    private handleBlur = (componentName: string, value: any) => {
-        this.props.onBlur(componentName, value);
+    private handleBlur = (componentName: string) => {
+        this.props.onBlur(componentName, this.getValue(componentName));
     };
 
-    private handleFocus = (componentName: string, value: any) => {
-        this.props.onFocus(componentName, value);
+    private handleFocus = (componentName: string) => {
+        this.props.onFocus(componentName, this.getValue(componentName));
     };
 
     private handleSubmit = (event?: React.FormEvent<HTMLFormElement>) => {

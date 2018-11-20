@@ -100,7 +100,7 @@ export function bind<ComponentProps extends BoundComponentProps>(
         public componentDidMount() {
             if (this.isInsideForm()) {
                 this.formApi.registerComponent(this.props.name, this);
-                this.formApi.onUpdate(this.props.name);
+                this.formApi.onMount(this.props.name);
             } else {
                 console.error(
                     'Bound form components must be placed inside of a <Form/> component.',
@@ -291,14 +291,14 @@ export function bind<ComponentProps extends BoundComponentProps>(
 
         handleBlur = (event?: React.FocusEvent<any>): void => {
             if (this.isInsideForm()) {
-                this.formApi.onBlur(this.props.name, this.state.value);
+                this.formApi.onBlur(this.props.name);
             }
             this.props.onBlur(event);
         };
 
         handleFocus = (event?: React.FocusEvent<any>): void => {
             if (this.isInsideForm()) {
-                this.formApi.onFocus(this.props.name, this.state.value);
+                this.formApi.onFocus(this.props.name);
             }
             this.props.onFocus(event);
         };

@@ -32,6 +32,7 @@ describe('module: bind', () => {
         getResponse: jest.fn(),
         getInitialValue: jest.fn().mockReturnValue(undefined),
         getValue: jest.fn().mockReturnValue(undefined),
+        onMount: jest.fn(),
         onUpdate: jest.fn(),
         onChange: jest.fn(),
         onBlur: jest.fn(),

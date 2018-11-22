@@ -42,7 +42,9 @@ describe('component: Form', () => {
 
     const TextField = bind(UnconnectedTextField);
 
-    const mockProps = (props: Partial<FormProps> = {}): FormProps => ({
+    const mockProps = (
+        props: Partial<FormProps<any>> = {},
+    ): FormProps<any> => ({
         onChange: jest.fn(),
         onBlur: jest.fn(),
         onFocus: jest.fn(),
@@ -115,7 +117,7 @@ describe('component: Form', () => {
             // should not have been called yet
             expect(props.onSubmit).not.toHaveBeenCalled();
 
-            const form = wrapper.instance() as Form;
+            const form = wrapper.instance() as Form<any>;
             form.submit();
 
             // should have been called
@@ -283,7 +285,7 @@ describe('component: Form', () => {
             );
 
             // Programatically submit the form
-            const result = await (wrapper.instance() as Form).submit();
+            const result = await (wrapper.instance() as Form<any>).submit();
 
             // Test programatic form submission result
             expect(result).toMatchObject({
@@ -324,7 +326,7 @@ describe('component: Form', () => {
             );
 
             // Programatically submit the form
-            const result = await (wrapper.instance() as Form).submit();
+            const result = await (wrapper.instance() as Form<any>).submit();
 
             // Test programatic form submission result
             expect(result).toMatchObject({
@@ -454,7 +456,10 @@ describe('component: Form', () => {
             expect(wrapper.find({ name: 'firstName' })).toHaveInputValue('');
 
             // Programatically set the form value
-            await (wrapper.instance() as Form).setValue('firstName', nextValue);
+            await (wrapper.instance() as Form<any>).setValue(
+                'firstName',
+                nextValue,
+            );
 
             // Update the wrapper so the latest value can be retrieved
             wrapper.update();
@@ -495,7 +500,7 @@ describe('component: Form', () => {
             );
 
             // Programatically set the form values
-            await (wrapper.instance() as Form).setValues(nextValues);
+            await (wrapper.instance() as Form<any>).setValues(nextValues);
 
             // Update the wrapper so the latest value can be retrieved
             wrapper.update();
@@ -518,7 +523,7 @@ describe('component: Form', () => {
             );
 
             expect.assertions(1);
-            return (wrapper.instance() as Form)
+            return (wrapper.instance() as Form<any>)
                 .setValue('lastName', 'abc')
                 .catch(error => {
                     expect(error).toBe(
@@ -542,7 +547,7 @@ describe('component: Form', () => {
             );
 
             // Trigger validation by submitting
-            await (wrapper.instance() as Form).submit();
+            await (wrapper.instance() as Form<any>).submit();
 
             // Update the wrapper so the latest response can be retrieved
             wrapper.update();
@@ -576,7 +581,7 @@ describe('component: Form', () => {
             );
 
             // Attempt to replace response
-            (wrapper.instance() as Form).setResponse('firstName', {
+            (wrapper.instance() as Form<any>).setResponse('firstName', {
                 context: ValidatorContext.Success,
                 message: undefined,
             });
@@ -694,7 +699,7 @@ describe('component: Form', () => {
             );
 
             // Trigger all validations
-            (wrapper.instance() as Form).validate();
+            (wrapper.instance() as Form<any>).validate();
 
             // Update the wrapper so the latest response can be retrieved
             wrapper.update();
@@ -731,7 +736,7 @@ describe('component: Form', () => {
             );
 
             // Programatically set the response
-            await (wrapper.instance() as Form).setResponse(
+            await (wrapper.instance() as Form<any>).setResponse(
                 'firstName',
                 response,
             );
@@ -773,7 +778,7 @@ describe('component: Form', () => {
             );
 
             // Programatically set the responses
-            await (wrapper.instance() as Form).setResponses(responses);
+            await (wrapper.instance() as Form<any>).setResponses(responses);
 
             // Update the wrapper so the latest responses can be retrieved
             wrapper.update();
@@ -796,7 +801,7 @@ describe('component: Form', () => {
             );
 
             expect.assertions(1);
-            return (wrapper.instance() as Form)
+            return (wrapper.instance() as Form<any>)
                 .setResponse('lastName', {
                     context: ValidatorContext.Danger,
                     message: 'Something went wrong :(',

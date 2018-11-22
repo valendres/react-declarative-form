@@ -8,64 +8,64 @@ import { MirrorInstance, Mirror } from '../Mirror';
 export const FormContext = React.createContext(undefined as FormApi);
 
 export interface FormApi {
-    registerComponent: Form['registerComponent'];
-    unregisterComponent: Form['unregisterComponent'];
-    registerMirror: Form['registerMirror'];
-    unregisterMirror: Form['unregisterMirror'];
-    validate: Form['validate'];
-    getInitialValue: Form['getInitialValue'];
-    getResponse: Form['getResponse'];
-    getValue: Form['getValue'];
-    onMount: Form['handleMount'];
-    onUpdate: Form['handleUpdate'];
-    onChange: Form['handleChange'];
-    onBlur: Form['handleBlur'];
-    onFocus: Form['handleFocus'];
+    registerComponent: Form<any>['registerComponent'];
+    unregisterComponent: Form<any>['unregisterComponent'];
+    registerMirror: Form<any>['registerMirror'];
+    unregisterMirror: Form<any>['unregisterMirror'];
+    validate: Form<any>['validate'];
+    getInitialValue: Form<any>['getInitialValue'];
+    getResponse: Form<any>['getResponse'];
+    getValue: Form<any>['getValue'];
+    onMount: Form<any>['handleMount'];
+    onUpdate: Form<any>['handleUpdate'];
+    onChange: Form<any>['handleChange'];
+    onBlur: Form<any>['handleBlur'];
+    onFocus: Form<any>['handleFocus'];
 }
 
-export interface FormProps
+export interface FormProps<FormFields extends ValueMap>
     extends Omit<
             React.FormHTMLAttributes<HTMLFormElement>,
-            'onChange' | 'onBlur' | 'onFocus'
+            'onChange' | 'onBlur' | 'onFocus' | 'onSubmit'
         > {
     /**
      * Called when the value of a bound form component has been changed.
      * @param {string} componentName name of the component
      * @param {object} value new value
      */
-    onChange?: (componentName: string, value: any) => void;
+    onChange?: (componentName: keyof FormFields, value: any) => void;
 
     /**
      * Called when a bound form component has been blurred.
      * @param {string} componentName name of the component
      * @param {object} value current value
      */
-    onBlur?: (componentName: string, value: any) => void;
+    onBlur?: (componentName: keyof FormFields, value: any) => void;
 
     /**
      * Called when a bound form component has been focused.
      * @param {string} componentName name of the component
      * @param {object} value current value
      */
-    onFocus?: (componentName: string, value: any) => void;
+    onFocus?: (componentName: keyof FormFields, value: any) => void;
 
     /**
      * 	Called when the form is programmatically submitted, or a button with type="submit" is clicked.
      * @param {object} values name/value pairs for all bound form components.
      */
-    onSubmit?: (values: ValueMap) => void;
+    onSubmit?: (values: FormFields) => void;
 
     /**
      * 	Called after onSubmit if all bound form components are valid.
      * @param {object} values name/value pairs for all bound form components.
      */
-    onValidSubmit?: (values: ValueMap) => void;
+    onValidSubmit?: (values: FormFields) => void;
 
     /**
      * Called after onSubmit at least 1 bound form component is invalid.
      * @param {object} values name/value pairs for all bound form components.
      */
-    onInvalidSubmit?: (values: ValueMap) => void;
+    onInvalidSubmit?: (values: FormFields) => void;
 
     /**
      * Initial values to be provided to the bound form components. This is useful for
@@ -74,7 +74,7 @@ export interface FormProps
      * modified. If you need to apply new values to the form, call reset on the form after
      * updating the initialValues.
      */
-    initialValues?: ValueMap;
+    initialValues?: FormFields;
 
     /**
      * Whether a hidden submit should be rendered within the form. The existance of a
@@ -86,8 +86,10 @@ export interface FormProps
     withHiddenSubmit?: boolean;
 }
 
-export class Form extends React.Component<FormProps> {
-    static defaultProps: FormProps = {
+export class Form<FormComponents extends ValueMap = {}> extends React.Component<
+    FormProps<FormComponents>
+> {
+    static defaultProps: FormProps<any> = {
         onChange: () => {},
         onBlur: () => {},
         onFocus: () => {},
@@ -98,17 +100,17 @@ export class Form extends React.Component<FormProps> {
     };
 
     private componentRefs: {
-        [componentName: string]: BoundComponentInstance;
+        [ComponentName in keyof FormComponents]: BoundComponentInstance
     };
 
     private mirrorRefs: {
-        [componentName: string]: MirrorInstance[];
+        [ComponentName in keyof FormComponents]: MirrorInstance[]
     };
 
-    public constructor(props: FormProps) {
-        super(props);
-        this.componentRefs = {};
-        this.mirrorRefs = {};
+    public constructor(props: FormProps<FormComponents>) {
+        super(props as any);
+        this.componentRefs = {} as any;
+        this.mirrorRefs = {} as any;
     }
 
     /**
@@ -122,7 +124,7 @@ export class Form extends React.Component<FormProps> {
      * Retrieves the current value for a component
      * @param {string} componentName name of the component
      */
-    public getValue = (componentName: string): any => {
+    public getValue = (componentName: keyof FormComponents): any => {
         const component = this.componentRefs[componentName];
         return component
             ? component.getValue()
@@ -132,13 +134,13 @@ export class Form extends React.Component<FormProps> {
     /**
      * Retrieves current values for all components
      */
-    public getValues = (): ValueMap => {
+    public getValues = (): FormComponents => {
         return Object.keys(this.componentRefs).reduce(
-            (values: ValueMap, componentName: string) => {
+            (values: FormComponents, componentName: keyof FormComponents) => {
                 values[componentName] = this.getValue(componentName);
                 return values;
             },
-            {},
+            {} as FormComponents,
         );
     };
 
@@ -148,10 +150,12 @@ export class Form extends React.Component<FormProps> {
      * been provided.
      */
     public clear = (): void => {
-        Object.keys(this.componentRefs).forEach((componentName: string) => {
-            const component = this.componentRefs[componentName];
-            component.clear();
-        });
+        Object.keys(this.componentRefs).forEach(
+            (componentName: keyof FormComponents) => {
+                const component = this.componentRefs[componentName];
+                component.clear();
+            },
+        );
     };
 
     /**
@@ -160,17 +164,21 @@ export class Form extends React.Component<FormProps> {
      * Note: this will have no effect if the valueProp has been provided.
      */
     public reset = (): void => {
-        Object.keys(this.componentRefs).forEach((componentName: string) => {
-            const component = this.componentRefs[componentName];
-            component.reset();
-        });
+        Object.keys(this.componentRefs).forEach(
+            (componentName: keyof FormComponents) => {
+                const component = this.componentRefs[componentName];
+                component.reset();
+            },
+        );
     };
 
     /**
      * Validates specified component(s). If no component names are provided,
      * all components within the form will be validated.
      */
-    public validate = (componentName?: string | string[]): void => {
+    public validate = (
+        componentName?: keyof FormComponents | (keyof FormComponents)[],
+    ): void => {
         (componentName !== undefined
             ? Array.isArray(componentName)
                 ? componentName
@@ -199,7 +207,10 @@ export class Form extends React.Component<FormProps> {
      * @param {string} componentName name of the component
      * @param {any} value custom value to be injected
      */
-    public setValue = (componentName: string, value: any): Promise<void> =>
+    public setValue = (
+        componentName: keyof FormComponents,
+        value: any,
+    ): Promise<void> =>
         componentName in this.componentRefs
             ? this.componentRefs[componentName].setValue(value)
             : Promise.reject(
@@ -210,9 +221,9 @@ export class Form extends React.Component<FormProps> {
      * Injects custom values for form components
      * @param {object} values component name / value map
      */
-    public setValues = (values: {
-        [componentName: string]: any;
-    }): Promise<void[]> =>
+    public setValues = (
+        values: { [ComponentName in keyof FormComponents]: any },
+    ): Promise<void[]> =>
         Promise.all(
             Object.keys(values).map((componentName: string) =>
                 this.setValue(componentName, values[componentName]),
@@ -225,7 +236,7 @@ export class Form extends React.Component<FormProps> {
      * @param {object} response custom validator response to be injected
      */
     public setResponse = (
-        componentName: string,
+        componentName: keyof FormComponents,
         response: ValidatorResponse,
     ): Promise<void> =>
         componentName in this.componentRefs
@@ -238,11 +249,13 @@ export class Form extends React.Component<FormProps> {
      * Injects custom validator responses for form components
      * @param {object} responses component name / validator response map
      */
-    public setResponses = (responses: {
-        [componentName: string]: ValidatorResponse;
-    }): Promise<void[]> =>
+    public setResponses = (
+        responses: {
+            [ComponentName in keyof FormComponents]: ValidatorResponse
+        },
+    ): Promise<void[]> =>
         Promise.all(
-            Object.keys(responses).map((componentName: string) =>
+            Object.keys(responses).map((componentName: keyof FormComponents) =>
                 this.setResponse(componentName, responses[componentName]),
             ),
         );
@@ -297,7 +310,7 @@ export class Form extends React.Component<FormProps> {
      * @param {object} componentRef react component reference to be monitored
      */
     private registerComponent = (
-        componentName: string,
+        componentName: keyof FormComponents,
         componentRef: BoundComponentInstance,
     ): void => {
         // Only register if this form component has not been mounted yet
@@ -312,7 +325,9 @@ export class Form extends React.Component<FormProps> {
      * Unregisters a component with the form, so it will no longer be managed
      * @param {string} componentName name of the component
      */
-    private unregisterComponent = (componentName: string): void => {
+    private unregisterComponent = (
+        componentName: keyof FormComponents,
+    ): void => {
         delete this.componentRefs[componentName];
     };
 
@@ -322,7 +337,7 @@ export class Form extends React.Component<FormProps> {
      * @param {object} mirrorRef react mirror reference to be registered
      */
     private registerMirror = (
-        componentName: string,
+        componentName: keyof FormComponents,
         mirrorRef: Mirror,
     ): void => {
         if (componentName in this.mirrorRefs) {
@@ -338,7 +353,7 @@ export class Form extends React.Component<FormProps> {
      * @param {object} mirrorRef react mirror reference to be unregistered
      */
     private unregisterMirror = (
-        componentName: string,
+        componentName: keyof FormComponents,
         mirrorRef: Mirror,
     ): void => {
         if (componentName in this.mirrorRefs) {
@@ -350,7 +365,7 @@ export class Form extends React.Component<FormProps> {
     };
 
     /** Retrieves the initial component value from the initialValues prop */
-    private getInitialValue = (componentName: string): any => {
+    private getInitialValue = (componentName: keyof FormComponents): any => {
         const { initialValues } = this.props;
         return initialValues ? initialValues[componentName] : undefined;
     };
@@ -364,16 +379,16 @@ export class Form extends React.Component<FormProps> {
      * @returns validator response: context, message
      */
     private getResponse = (
-        componentName: string,
+        componentName: keyof FormComponents,
         value?: any,
         required: boolean = false,
     ): ValidatorResponse => {
         const values = this.getValues();
         const component = this.componentRefs[componentName];
         return validate(
-            componentName,
+            componentName as string,
             {
-                ...values,
+                ...(values as ValueMap),
                 [componentName]:
                     value !== undefined ? value : values[componentName],
             },
@@ -390,34 +405,37 @@ export class Form extends React.Component<FormProps> {
      * validator trigger tree.
      */
     private buildDependencyMap = (
-        componentNames: string[],
-        mappedNames: any = {},
-    ): any => {
+        componentNames: (keyof FormComponents)[],
+        mappedNames: FormComponents = {} as any,
+    ): (keyof FormComponents)[] => {
         // tslint:disable-next-line:no-parameter-reassignment
         mappedNames = componentNames.reduce(
             (names: any, name: string) => ({ ...names, [name]: true }),
             mappedNames,
         );
 
-        return componentNames.reduce((output: any, name: string) => {
-            const validatorTrigger: string[] =
-                (this.componentRefs[name] &&
-                    this.componentRefs[name].getValidatorTriggers()) ||
-                [];
-            const namesToMap = validatorTrigger.filter(
-                (n: string) => !(n in mappedNames),
-            );
+        return componentNames.reduce(
+            (output: any, name: keyof FormComponents) => {
+                const validatorTrigger: string[] =
+                    (this.componentRefs[name] &&
+                        this.componentRefs[name].getValidatorTriggers()) ||
+                    [];
+                const namesToMap = validatorTrigger.filter(
+                    (n: string) => !(n in mappedNames),
+                );
 
-            // Only recurse if necessary
-            if (namesToMap.length > 0) {
-                return {
-                    ...output,
-                    ...this.buildDependencyMap(namesToMap, mappedNames),
-                };
-            }
+                // Only recurse if necessary
+                if (namesToMap.length > 0) {
+                    return {
+                        ...output,
+                        ...this.buildDependencyMap(namesToMap, mappedNames),
+                    };
+                }
 
-            return output;
-        }, mappedNames);
+                return output;
+            },
+            mappedNames,
+        );
     };
 
     /**
@@ -425,7 +443,9 @@ export class Form extends React.Component<FormProps> {
      * a specific component. Determined using the validator trigger tree.
      * @returns array of componentNames
      */
-    private getRelatedComponents = (componentName: string): string[] => {
+    private getRelatedComponents = (
+        componentName: keyof FormComponents,
+    ): string[] => {
         const component = this.componentRefs[componentName];
         if (component) {
             return Object.keys(
@@ -442,11 +462,13 @@ export class Form extends React.Component<FormProps> {
      * @param {string} componentName name of the component
      * @returns array of mirror instances
      */
-    private getMirrors = (componentName: string): MirrorInstance[] => {
+    private getMirrors = (
+        componentName: keyof FormComponents,
+    ): MirrorInstance[] => {
         return this.mirrorRefs[componentName] || [];
     };
 
-    private handleMount = (componentName: string) => {
+    private handleMount = (componentName: keyof FormComponents) => {
         // Reflect all mirrors
         this.getMirrors(componentName).forEach((mirror: MirrorInstance) =>
             mirror.reflect(),
@@ -458,7 +480,7 @@ export class Form extends React.Component<FormProps> {
      * will be executed on any related components, and mirrors updated to reflect the new value.
      * @param {string} componentName name of the component
      */
-    private handleUpdate = (componentName: string) => {
+    private handleUpdate = (componentName: keyof FormComponents) => {
         // Cross-validate if necessary
         this.getRelatedComponents(componentName).forEach((relName: string) => {
             this.componentRefs[relName].validate();
@@ -470,15 +492,18 @@ export class Form extends React.Component<FormProps> {
         );
     };
 
-    private handleChange = (componentName: string, value: any) => {
+    private handleChange = (
+        componentName: keyof FormComponents,
+        value: any,
+    ) => {
         this.props.onChange(componentName, value);
     };
 
-    private handleBlur = (componentName: string) => {
+    private handleBlur = (componentName: keyof FormComponents) => {
         this.props.onBlur(componentName, this.getValue(componentName));
     };
 
-    private handleFocus = (componentName: string) => {
+    private handleFocus = (componentName: keyof FormComponents) => {
         this.props.onFocus(componentName, this.getValue(componentName));
     };
 
@@ -504,11 +529,11 @@ export class Form extends React.Component<FormProps> {
         };
     };
 
-    private handleValidSubmit = (values: ValueMap) => {
+    private handleValidSubmit = (values: FormComponents) => {
         this.props.onValidSubmit(values);
     };
 
-    private handleInvalidSubmit = (values: ValueMap) => {
+    private handleInvalidSubmit = (values: FormComponents) => {
         this.validate();
         this.props.onInvalidSubmit(values);
     };

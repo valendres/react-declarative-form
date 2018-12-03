@@ -237,7 +237,7 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
             Number(values[targetKey]) > Number(values[key])
         ) {
             return {
-                key: 'gt',
+                key: 'gtTarget',
                 context: ValidatorContext.Danger,
                 message: `Value must be > ${values[targetKey]}`,
             };
@@ -250,7 +250,7 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
             Number(values[targetKey]) >= Number(values[key])
         ) {
             return {
-                key: 'gte',
+                key: 'gteTarget',
                 context: ValidatorContext.Danger,
                 message: `Value must be >= ${values[targetKey]}`,
             };

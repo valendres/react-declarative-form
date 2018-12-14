@@ -56,7 +56,7 @@ Each bound component registers itself with the closest `<Form />` ancestor, allo
 Programmatically submit form
 
 ###### `getValue(componentName: string): any`
-Retrieves the current value for a component
+Retrieves the current value for a component. Note: if the value is an object, it will be frozen. Objects used by the form should not be mutated.
 
 ###### `getValues(): ValueMap`
 Retrieves current values for all components

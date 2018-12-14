@@ -271,6 +271,8 @@ export function bind<ComponentProps extends BoundComponentProps>(
          *  2. internally managed value when the user changes input
          *  3. value provided to initialValues prop on form component
          *  4. default value specified on individual form component
+         *
+         * Note: the form values should not be mutated
          */
         getValue = () => {
             const { name, defaultValue, value } = this.props;
@@ -279,9 +281,16 @@ export function bind<ComponentProps extends BoundComponentProps>(
                 ? this.formApi.getInitialValue(name)
                 : undefined;
 
-            return [value, stateValue, initialValue, defaultValue].find(
-                v => v !== undefined,
-            );
+            const dynamicValue = [
+                value,
+                stateValue,
+                initialValue,
+                defaultValue,
+            ].find(v => v !== undefined);
+
+            return dynamicValue instanceof Object
+                ? Object.freeze(dynamicValue)
+                : dynamicValue;
         };
 
         setValue = (value: any): Promise<void> =>

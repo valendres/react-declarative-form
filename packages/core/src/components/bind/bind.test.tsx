@@ -40,6 +40,27 @@ describe('module: bind', () => {
         ...api,
     });
 
+    describe('func: getValue', () => {
+        it('should freeze objects to prevent modification', () => {
+            const props = mockProps({
+                value: {
+                    firstName: 'Peter',
+                },
+            });
+            const wrapper = mount(
+                <Form>
+                    <BoundComponentClass {...props} />
+                </Form>,
+            );
+            const instance = wrapper
+                .find(BoundComponentClass)
+                .instance() as any;
+
+            const value = instance.getValue();
+            expect(Object.isFrozen(value)).toBe(true);
+        });
+    });
+
     describe('func: setValue', () => {
         it('should call setState with new value, response for value and set pristine to false', async () => {
             const props = mockProps();

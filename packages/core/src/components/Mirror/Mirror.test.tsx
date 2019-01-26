@@ -150,5 +150,47 @@ describe('Component: Mirror', () => {
                 values.lastName,
             );
         });
+
+        it('should return undefined for reflected names if component does not exist', async () => {
+            const wrapper = mount(
+                <Form>
+                    <Mirror name="age">
+                        {({ age }) => <div id="mirroredAge">{age}</div>}
+                    </Mirror>
+                </Form>,
+            );
+
+            // Should be an empty string because the target component does not exist
+            expect(wrapper.find({ id: 'mirroredAge' }).text()).toEqual('');
+
+            // Wait unti next event loop
+            await delay(10);
+            wrapper.update();
+
+            // Should still be an empty string
+            expect(wrapper.find({ id: 'mirroredAge' }).text()).toEqual('');
+        });
+
+        it('should return undefined for reflected names if placed outside of a form', async () => {
+            const wrapper = mount(
+                <Mirror name="age">
+                    {({ age }) => (
+                        <React.Fragment>
+                            <div id="mirroredAge">{age}</div>
+                        </React.Fragment>
+                    )}
+                </Mirror>,
+            );
+
+            // Should be an empty string because there is no value to reflect
+            expect(wrapper.find({ id: 'mirroredAge' }).text()).toEqual('');
+
+            // Wait unti next event loop
+            await delay(10);
+            wrapper.update();
+
+            // Should still be an empty string
+            expect(wrapper.find({ id: 'mirroredAge' }).text()).toEqual('');
+        });
     });
 });

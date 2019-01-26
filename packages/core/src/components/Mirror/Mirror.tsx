@@ -46,16 +46,7 @@ export class Mirror extends React.Component<MirrorProps> {
             <FormContext.Consumer>
                 {(api: FormApi) => {
                     this.formApi = api;
-
-                    return this.props.children(
-                        this.getNames().reduce(
-                            (output, singleName) => ({
-                                ...output,
-                                [singleName]: api.getValue(singleName),
-                            }),
-                            {},
-                        ),
-                    );
+                    return this.props.children(this.getValues());
                 }}
             </FormContext.Consumer>
         );
@@ -70,6 +61,18 @@ export class Mirror extends React.Component<MirrorProps> {
     getNames = (): string[] => {
         const { name } = this.props;
         return Array.isArray(name) ? name : [name];
+    };
+
+    getValues = () => {
+        return this.getNames().reduce(
+            (output, name) => ({
+                ...output,
+                [name]: this.isInsideForm()
+                    ? this.formApi.getValue(name)
+                    : undefined,
+            }),
+            {},
+        );
     };
 
     isInsideForm = (): boolean => {

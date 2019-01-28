@@ -13,6 +13,8 @@ export interface FormApi {
     registerMirror: Form<any>['registerMirror'];
     unregisterMirror: Form<any>['unregisterMirror'];
     validate: Form<any>['validate'];
+    setStickyValue: Form<any>['setStickyValue'];
+    getStickyValue: Form<any>['getStickyValue'];
     getInitialValue: Form<any>['getInitialValue'];
     getResponse: Form<any>['getResponse'];
     getValue: Form<any>['getValue'];
@@ -84,6 +86,13 @@ export interface FormProps<FormFields extends ValueMap>
      * to work.
      */
     withHiddenSubmit?: boolean;
+
+    /**
+     * Whether the form component values should be sticky and retain their value in between
+     * component unmounts and mounts. By default,form component state is bound to the mounted
+     * instance - if the instance is unmounted, its value will be lost.
+     */
+    sticky?: boolean;
 }
 
 export class Form<FormComponents extends ValueMap = {}> extends React.Component<
@@ -97,6 +106,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         onValidSubmit: () => {},
         onInvalidSubmit: () => {},
         initialValues: {},
+        sticky: false,
     };
 
     private componentRefs: {
@@ -107,10 +117,13 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         [ComponentName in keyof FormComponents]: MirrorInstance[]
     };
 
+    private stickyValues: { [ComponentName in keyof FormComponents]: any };
+
     public constructor(props: FormProps<FormComponents>) {
         super(props as any);
         this.componentRefs = {} as any;
         this.mirrorRefs = {} as any;
+        this.stickyValues = {} as any;
     }
 
     /**
@@ -164,6 +177,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * Note: this will have no effect if the valueProp has been provided.
      */
     public reset = (): void => {
+        // Clear all sticky values before calling individual component.reset's
+        this.stickyValues = {} as any;
+
         Object.keys(this.componentRefs).forEach(
             (componentName: keyof FormComponents) => {
                 const component = this.componentRefs[componentName];
@@ -282,6 +298,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             registerMirror: this.registerMirror,
             unregisterMirror: this.unregisterMirror,
             validate: this.validate,
+            setStickyValue: this.setStickyValue,
+            getStickyValue: this.getStickyValue,
             getInitialValue: this.getInitialValue,
             getResponse: this.getResponse,
             getValue: this.getValue,
@@ -362,6 +380,21 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
                 this.mirrorRefs[componentName].splice(index, 1);
             }
         }
+    };
+
+    /** Sets the sticky component value using internal form state */
+    private setStickyValue = (
+        componentName: keyof FormComponents,
+        value: any,
+    ) => {
+        if (this.props.sticky) {
+            this.stickyValues[componentName] = value;
+        }
+    };
+
+    /** Retrieves the sticky component value from internal form state */
+    private getStickyValue = (componentName: keyof FormComponents): any => {
+        return this.props.sticky ? this.stickyValues[componentName] : undefined;
     };
 
     /** Retrieves the initial component value from the initialValues prop */
@@ -468,7 +501,19 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         return this.mirrorRefs[componentName] || [];
     };
 
-    private handleMount = (componentName: keyof FormComponents) => {
+    /**
+     * Event handler to be fired whenever a bound form component is mounted. When called, the components
+     * mirrors updated to reflect the new value. If the form is in sticky mode, the sticky value state will
+     * also be updated.
+     * @param {string} componentName name of the component
+     * @param {any} value value which the component was updated with
+     */
+    private handleMount = (componentName: keyof FormComponents, value: any) => {
+        // Update sticky value state
+        if (this.props.sticky) {
+            this.setStickyValue(componentName, value);
+        }
+
         // Reflect all mirrors
         this.getMirrors(componentName).forEach((mirror: MirrorInstance) =>
             mirror.reflect(),
@@ -477,10 +522,20 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
     /**
      * Event handler to be fired whenever a bound form component is updated. When called, validation rules
-     * will be executed on any related components, and mirrors updated to reflect the new value.
+     * will be executed on any related components, and mirrors updated to reflect the new value. If the form
+     * is in sticky mode, the sticky value state will also be updated.
      * @param {string} componentName name of the component
+     * @param {any} value value which the component was updated with
      */
-    private handleUpdate = (componentName: keyof FormComponents) => {
+    private handleUpdate = (
+        componentName: keyof FormComponents,
+        value: any,
+    ) => {
+        // Update sticky value state
+        if (this.props.sticky) {
+            this.setStickyValue(componentName, value);
+        }
+
         // Cross-validate if necessary
         this.getRelatedComponents(componentName).forEach((relName: string) => {
             this.componentRefs[relName].validate();

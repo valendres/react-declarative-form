@@ -30,6 +30,8 @@ describe('module: bind', () => {
         unregisterMirror: jest.fn(),
         validate: jest.fn(),
         getResponse: jest.fn(),
+        setStickyValue: jest.fn(),
+        getStickyValue: jest.fn().mockReturnValue(undefined),
         getInitialValue: jest.fn().mockReturnValue(undefined),
         getValue: jest.fn().mockReturnValue(undefined),
         onMount: jest.fn(),

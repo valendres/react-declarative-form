@@ -102,7 +102,7 @@ export function bind<ComponentProps extends BoundComponentProps>(
         public componentDidMount() {
             if (this.isInsideForm()) {
                 this.formApi.registerComponent(this.props.name, this);
-                this.formApi.onMount(this.props.name);
+                this.formApi.onMount(this.props.name, this.getValue());
             } else {
                 console.error(
                     'Bound form components must be placed inside of a <Form/> component.',
@@ -122,7 +122,7 @@ export function bind<ComponentProps extends BoundComponentProps>(
             if (this.isInsideForm()) {
                 // Notify form of when this component has been updated, this
                 // allows for any attached mirrors to reflect this components value.
-                this.formApi.onUpdate(this.props.name);
+                this.formApi.onUpdate(this.props.name, this.getValue());
             }
 
             // Only update state if necessary to prevent setState loops
@@ -265,18 +265,22 @@ export function bind<ComponentProps extends BoundComponentProps>(
         };
 
         /**
-         * Determines the value to be provided to the wrapped component. There are 4 ways a
+         * Determines the value to be provided to the wrapped component. There are 5 ways a
          * component value can be provied (in order of precedence):
          *  1. externally managed value prop provided to the component
          *  2. internally managed value when the user changes input
-         *  3. value provided to initialValues prop on form component
-         *  4. default value specified on individual form component
+         *  3. form internal state if the form is in sticky mode
+         *  4. value provided to initialValues prop on form component
+         *  5. default value specified on individual form component
          *
          * Note: the form values should not be mutated
          */
         getValue = () => {
             const { name, defaultValue, value } = this.props;
             const stateValue = this.state.value;
+            const stickyValue = this.isInsideForm()
+                ? this.formApi.getStickyValue(name)
+                : undefined;
             const initialValue = this.isInsideForm()
                 ? this.formApi.getInitialValue(name)
                 : undefined;
@@ -284,6 +288,7 @@ export function bind<ComponentProps extends BoundComponentProps>(
             const dynamicValue = [
                 value,
                 stateValue,
+                stickyValue,
                 initialValue,
                 defaultValue,
             ].find(v => v !== undefined);

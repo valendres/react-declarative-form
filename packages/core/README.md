@@ -23,23 +23,38 @@ Each bound component registers itself with the closest `<Form />` ancestor, allo
 
 <!-- toc -->
 
-- [Documentation](#documentation)
-  * [API](#api)
-    + [`<Form />`](#form)
-      - [Form API](#form-api)
-      - [Form Props](#form-props)
-    + [`bind HOC`](#bind-hoc)
-      - [Wrapped component props](#wrapped-component-props)
-      - [Higher order component props](#higher-order-component-props)
-  * [Validator rules](#validator-rules)
-    + [Built-in validator rules](#built-in-validator-rules)
-    + [Adding custom validator rules](#adding-custom-validator-rules)
-  * [Types](#types)
-  * [Examples](#examples)
-    + [Example: Adding additional validator rules](#example-adding-additional-validator-rules)
-    + [Example: Form Binding HOC](#example-form-binding-hoc)
-    + [Example: Form Usage](#example-form-usage)
-- [Authors](#authors)
+- [@react-declarative-form/core](#react-declarative-formcore)
+  - [Overview](#overview)
+    - [Requirements](#requirements)
+  - [Getting started](#getting-started)
+  - [How does it work?](#how-does-it-work)
+  - [Table of Contents](#table-of-contents)
+  - [Documentation](#documentation)
+    - [API](#api)
+      - [`<Form/>`](#form)
+        - [Form API](#form-api)
+          - [`submit(): void`](#submit-void)
+          - [`getValue(componentName: string): any`](#getvaluecomponentname-string-any)
+          - [`getValues(): ValueMap`](#getvalues-valuemap)
+          - [`clear(): void`](#clear-void)
+          - [`reset(): void`](#reset-void)
+          - [`validate(componentName?: string | string[]): void`](#validatecomponentname-string--string-void)
+          - [`isValid(): boolean`](#isvalid-boolean)
+          - [`setResponse(componentName: string, response: ValidatorResponse): void`](#setresponsecomponentname-string-response-validatorresponse-void)
+          - [`setResponses(responses: {[componentName: string]: ValidatorResponse}): void`](#setresponsesresponses-componentname-string-validatorresponse-void)
+        - [Form Props](#form-props)
+      - [`bind HOC`](#bind-hoc)
+        - [Wrapped component props](#wrapped-component-props)
+        - [Higher order component props](#higher-order-component-props)
+    - [Validator rules](#validator-rules)
+      - [Built-in validator rules](#built-in-validator-rules)
+      - [Adding additional validator rules](#adding-additional-validator-rules)
+    - [Types](#types)
+    - [Examples](#examples)
+      - [Example: Adding validator rules](#example-adding-validator-rules)
+      - [Example: Form Binding HOC](#example-form-binding-hoc)
+      - [Example: Form Usage](#example-form-usage)
+  - [Authors](#authors)
 
 <!-- tocstop -->
 
@@ -81,14 +96,16 @@ Injects custom validator responses on form components.
 
 ##### Form Props
 
-| Name              | Type                                        | Required | Description                                                                                                                                                     |
-| ----------------- | ------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `onChange`        | (componentName: string, value: any) => void | false    | Called when the value of a bound form component has been changed. The new value is provided.                                                                    |
-| `onBlur`          | (componentName: string, value: any) => void | false    | Called when a bound form component has been blurred. The current value is provided.                                                                             |
-| `onFocus`         | (componentName: string, value: any) => void | false    | Called when a bound form component has been focused. The current value is provided.                                                                             |
-| `onSubmit`        | (values: ValueMap) => void                  | false    | Called when the form is programmatically submitted, or a button with `type="submit"` is clicked. The current values for all bound form components are provided. |
-| `onValidSubmit`   | (values: ValueMap) => void                  | false    | Called after `onSubmit` if all bound form components are valid. The current values for all bound form components are provided.                                  |
-| `onInvalidSubmit` | (values: ValueMap) => void                  | false    | Called after `onSubmit` at least 1 bound form component is invalid. The current values for all bound form components are provided.                              |
+| Name               | Type                                        | Required | Description                                                                                                                                                     |
+| ------------------ | ------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `onChange`         | (componentName: string, value: any) => void | false    | Called when the value of a bound form component has been changed. The new value is provided.                                                                    |
+| `onBlur`           | (componentName: string, value: any) => void | false    | Called when a bound form component has been blurred. The current value is provided.                                                                             |
+| `onFocus`          | (componentName: string, value: any) => void | false    | Called when a bound form component has been focused. The current value is provided.                                                                             |
+| `onSubmit`         | (values: ValueMap) => void                  | false    | Called when the form is programmatically submitted, or a button with `type="submit"` is clicked. The current values for all bound form components are provided. |
+| `onValidSubmit`    | (values: ValueMap) => void                  | false    | Called after `onSubmit` if all bound form components are valid. The current values for all bound form components are provided.                                  |
+| `onInvalidSubmit`  | (values: ValueMap) => void                  | false    | Called after `onSubmit` at least 1 bound form component is invalid. The current values for all bound form components are provided.                              |
+| `withHiddenSubmit` | boolean                                     | false    | Whether a hidden submit button should be included in the form.                                                                                                  |
+| `sticky`           | boolean                                     | false    | Whether the form component values should be sticky and retain their value in between component unmounts and mounts.                                             |
 
 
 #### `bind HOC`

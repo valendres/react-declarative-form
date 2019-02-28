@@ -192,5 +192,110 @@ describe('Component: Mirror', () => {
             // Should still be an empty string
             expect(wrapper.find({ id: 'mirroredAge' }).text()).toEqual('');
         });
+
+        it('should reflect the new name if name is updated', async () => {
+            const values = {
+                target: 'firstName',
+                firstName: 'Peter',
+                lastName: 'Weller',
+            };
+
+            // Use target as a dummy Mirror to assist in testing the update lifecycle
+            const wrapper = mount<Form<any>>(
+                <Form initialValues={values}>
+                    <TextField name="target" />
+                    <TextField name="firstName" />
+                    <TextField name="lastName" />
+                    <Mirror name="target">
+                        {({ target }) => (
+                            <Mirror name={target}>
+                                {mirroredValues => (
+                                    <React.Fragment>
+                                        <div id="mirroredChild">
+                                            {mirroredValues[target]}
+                                        </div>
+                                    </React.Fragment>
+                                )}
+                            </Mirror>
+                        )}
+                    </Mirror>
+                </Form>,
+            );
+
+            // Should reflect the initial name
+            expect(wrapper.find({ id: 'mirroredChild' }).text()).toEqual(
+                values.firstName,
+            );
+
+            // Change what should be reflected
+            wrapper.instance().setValue('target' as any, 'lastName');
+
+            // Wait unti next event loop
+            await delay(10);
+            wrapper.update();
+
+            // Should reflect the new name
+            expect(wrapper.find({ id: 'mirroredChild' }).text()).toEqual(
+                values.lastName,
+            );
+        });
+
+        it('should reflect multiple new names if names are updated', async () => {
+            const values = {
+                targets: ['firstName', 'lastName'],
+                firstName: 'Peter',
+                lastName: 'Weller',
+                age: '52',
+            };
+
+            // Use target as a dummy Mirror to assist in testing the update lifecycle
+            const wrapper = mount<Form<any>>(
+                <Form initialValues={values}>
+                    <TextField name="targets" />
+                    <TextField name="firstName" />
+                    <TextField name="lastName" />
+                    <TextField name="age" />
+                    <Mirror name="targets">
+                        {({ targets }) => (
+                            <Mirror name={targets}>
+                                {mirroredValues => (
+                                    <React.Fragment>
+                                        <div id="mirroredChildA">
+                                            {mirroredValues[targets[0]]}
+                                        </div>
+                                        <div id="mirroredChildB">
+                                            {mirroredValues[targets[1]]}
+                                        </div>
+                                    </React.Fragment>
+                                )}
+                            </Mirror>
+                        )}
+                    </Mirror>
+                </Form>,
+            );
+
+            // Should reflect the initial names
+            expect(wrapper.find({ id: 'mirroredChildA' }).text()).toEqual(
+                values.firstName,
+            );
+            expect(wrapper.find({ id: 'mirroredChildB' }).text()).toEqual(
+                values.lastName,
+            );
+
+            // Change what should be reflected
+            wrapper.instance().setValue('targets' as any, ['lastName', 'age']);
+
+            // Wait unti next event loop
+            await delay(10);
+            wrapper.update();
+
+            // Should reflect the new name
+            expect(wrapper.find({ id: 'mirroredChildA' }).text()).toEqual(
+                values.lastName,
+            );
+            expect(wrapper.find({ id: 'mirroredChildB' }).text()).toEqual(
+                values.age,
+            );
+        });
     });
 });

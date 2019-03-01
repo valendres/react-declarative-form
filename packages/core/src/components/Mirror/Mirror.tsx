@@ -20,7 +20,7 @@ export class Mirror extends React.Component<MirrorProps> {
 
     public componentDidMount() {
         if (this.isInsideForm()) {
-            this.getNames().map(name =>
+            this.getNames().forEach(name =>
                 this.formApi.registerMirror(name, this),
             );
 
@@ -33,9 +33,23 @@ export class Mirror extends React.Component<MirrorProps> {
         }
     }
 
+    public componentDidUpdate(prevProps: MirrorProps) {
+        const names = this.getNames();
+        const prevNames = this.getNames(prevProps);
+
+        // Unregister names no longer included
+        prevNames
+            .filter(name => !names.includes(name))
+            .forEach(name => this.formApi.unregisterMirror(name, this));
+        // Register names that were not included before
+        names
+            .filter(name => !prevNames.includes(name))
+            .forEach(name => this.formApi.registerMirror(name, this));
+    }
+
     public componentWillUnmount() {
         if (this.isInsideForm()) {
-            this.getNames().map(name =>
+            this.getNames().forEach(name =>
                 this.formApi.unregisterMirror(name, this),
             );
         }
@@ -58,8 +72,8 @@ export class Mirror extends React.Component<MirrorProps> {
         document && this.forceUpdate();
     };
 
-    getNames = (): string[] => {
-        const { name } = this.props;
+    getNames = (props: MirrorProps = this.props): string[] => {
+        const { name } = props;
         return Array.isArray(name) ? name : [name];
     };
 

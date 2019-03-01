@@ -37,11 +37,14 @@ export class Mirror extends React.Component<MirrorProps> {
         const names = this.getNames();
         const prevNames = this.getNames(prevProps);
 
-        const toUnregister = prevNames.filter(name => !names.includes(name));
-        const toRegister = names.filter(name => !prevNames.includes(name));
-
-        toUnregister.forEach(name => this.formApi.unregisterMirror(name, this));
-        toRegister.forEach(name => this.formApi.registerMirror(name, this));
+        // Unregister names no longer included
+        prevNames
+            .filter(name => !names.includes(name))
+            .forEach(name => this.formApi.unregisterMirror(name, this));
+        // Register names that were not included before
+        names
+            .filter(name => !prevNames.includes(name))
+            .forEach(name => this.formApi.registerMirror(name, this));
     }
 
     public componentWillUnmount() {
@@ -69,8 +72,8 @@ export class Mirror extends React.Component<MirrorProps> {
         document && this.forceUpdate();
     };
 
-    getNames = (props?: MirrorProps): string[] => {
-        const { name } = props || this.props;
+    getNames = (props: MirrorProps = this.props): string[] => {
+        const { name } = props;
         return Array.isArray(name) ? name : [name];
     };
 

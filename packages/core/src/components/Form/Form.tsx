@@ -183,7 +183,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         Object.keys(this.componentRefs).forEach(
             (componentName: keyof FormComponents) => {
                 const component = this.componentRefs[componentName];
-                component.reset();
+                // Check if the component still exists because some of the
+                // conditionally mounted components might have been unregistered with the form
+                if (component) {
+                    component.reset();
+                }
             },
         );
     };

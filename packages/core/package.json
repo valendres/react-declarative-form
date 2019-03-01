@@ -3,8 +3,8 @@
     "name": "@react-declarative-form/core",
     "version": "1.1.5",
     "description": "Declarative react form validator",
-    "main": "./dist/index",
-    "typings": "./dist/index",
+    "main": "./src/index",
+    "typings": "./src/index",
     "repository": "valendres/react-declarative-form",
     "author": {
         "name": "Peter Weller",

@@ -310,11 +310,13 @@ export function bind<ComponentProps extends BoundComponentProps>(
                                 ? this.getResponse(value)
                                 : this.state.response,
                     },
-                    resolve,
+                    () => {
+                        if (this.isInsideForm()) {
+                            this.formApi.onChange(this.props.name, value);
+                        }
+                        resolve();
+                    },
                 );
-                if (this.isInsideForm()) {
-                    this.formApi.onChange(this.props.name, value);
-                }
             });
 
         handleBlur = (event?: React.FocusEvent<any>): void => {

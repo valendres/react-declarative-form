@@ -94,19 +94,22 @@ describe('module: bind', () => {
             });
         });
 
-        it('should call onChange with component name and new value if inside a form', () => {
+        it('should call onChange with component name and new value if inside a form', async () => {
+            const handleChange = jest.fn();
             const props = mockProps();
-            const instance = new BoundComponentClass(props);
-            const nextValue = 'test';
-
-            instance.formApi = mockFormApi();
-            jest.spyOn(instance, 'isInsideForm').mockReturnValue(true);
-            instance.setValue(nextValue);
-
-            expect(instance.formApi.onChange).toHaveBeenCalledWith(
-                props.name,
-                nextValue,
+            const wrapper = mount(
+                <Form onChange={handleChange}>
+                    <BoundComponentClass {...props} />
+                </Form>,
             );
+
+            const instance = wrapper
+                .find(BoundComponentClass)
+                .instance() as any;
+
+            const nextValue = 'test';
+            await instance.setValue(nextValue);
+            expect(handleChange).toHaveBeenCalledWith(props.name, nextValue);
         });
     });
 

@@ -292,6 +292,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             onValidSubmit,
             onInvalidSubmit,
             initialValues,
+            sticky,
             // Injected
             ...restProps
         } = this.props;

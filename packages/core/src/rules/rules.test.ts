@@ -24,12 +24,12 @@ describe('Misc. validator rules', () => {
 
         it('should return danger context if value is undefined or empty string', () => {
             expect(required('name', {})).toEqual({
-                key: 'required',
+                name: 'required',
                 context: ValidatorContext.Danger,
                 message: 'This field is required',
             });
             expect(required('name', { name: '' })).toEqual({
-                key: 'required',
+                name: 'required',
                 context: ValidatorContext.Danger,
                 message: 'This field is required',
             });
@@ -47,7 +47,7 @@ describe('Numeric validator rules', () => {
 
         it('should return danger context if value is less than minValue', () => {
             expect(minValue('age', { age: 16 }, 18)).toEqual({
-                key: 'minValue',
+                name: 'minValue',
                 context: ValidatorContext.Danger,
                 message: 'Value must be >= 18',
             });
@@ -63,7 +63,7 @@ describe('Numeric validator rules', () => {
 
         it('should return danger context if value is greater than maxValue', () => {
             expect(maxValue('age', { age: 21 }, 18)).toEqual({
-                key: 'maxValue',
+                name: 'maxValue',
                 context: ValidatorContext.Danger,
                 message: 'Value must be <= 18',
             });
@@ -79,7 +79,7 @@ describe('Numeric validator rules', () => {
 
         it('should return danger context if value is not divisible by criteria', () => {
             expect(isDivisibleBy('age', { age: '10' }, 3)).toEqual({
-                key: 'isDivisibleBy',
+                name: 'isDivisibleBy',
                 context: ValidatorContext.Danger,
                 message: '10 must be divisible by 3',
             });
@@ -95,7 +95,7 @@ describe('Numeric validator rules', () => {
 
         it('should return danger context if value is not an integer', () => {
             expect(isInteger('age', { age: 'test' })).toEqual({
-                key: 'isInteger',
+                name: 'isInteger',
                 context: ValidatorContext.Danger,
                 message: 'Must be an integer',
             });
@@ -111,7 +111,7 @@ describe('Numeric validator rules', () => {
 
         it('should return danger context if value is not a decimal', () => {
             expect(isDecimal('age', { age: 'test' })).toEqual({
-                key: 'isDecimal',
+                name: 'isDecimal',
                 context: ValidatorContext.Danger,
                 message: 'Must be a decimal',
             });
@@ -127,7 +127,7 @@ describe('Numeric validator rules', () => {
 
         it('should return danger context if value is not a number', () => {
             expect(isNumeric('age', { age: '$10.52' })).toEqual({
-                key: 'isNumeric',
+                name: 'isNumeric',
                 context: ValidatorContext.Danger,
                 message: 'Must be a number',
             });
@@ -312,7 +312,7 @@ describe('Regex validator rules', () => {
 
         it('should return danger context if value does not match pattern', () => {
             expect(matches('greeting', { greeting: 'hi' }, /hell.*/i)).toEqual({
-                key: 'matches',
+                name: 'matches',
                 context: ValidatorContext.Danger,
                 message: 'Invalid input',
             });
@@ -388,7 +388,7 @@ describe('Regex validator rules', () => {
                 { value: 'www.google.com.au', ...response },
                 { value: 'http://www.google.com', ...response },
                 { value: 'http://www.google.com/', ...response },
-                { value: 'http://www.google.com/test?key=value', ...response },
+                { value: 'http://www.google.com/test?name=value', ...response },
             ]);
         });
     });
@@ -608,7 +608,7 @@ describe('Cross field validator rules', () => {
                     'passwordConfirm',
                 ),
             ).toEqual({
-                key: 'eqTarget',
+                name: 'eqTarget',
                 context: ValidatorContext.Danger,
                 message: 'Values do not match',
             });

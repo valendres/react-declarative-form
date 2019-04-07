@@ -1,7 +1,7 @@
 import {
     ValidatorRule,
     ValidatorMessages,
-    ValidatorResponse,
+    ValidatorData,
     ValidatorContext,
     ValidatorRuleMap,
     ValidatorMessageGenerator,
@@ -49,7 +49,7 @@ export const validate = (
         readonly [name: string]: any;
     } = {},
     customMessages: ValidatorMessages = {},
-): ValidatorResponse => {
+): ValidatorData => {
     const { required, custom, ...restRules } = targetRules;
 
     // Execute required rule first (if it exists)
@@ -66,29 +66,25 @@ export const validate = (
     }
 
     // Excute rest rules
-    let cachedResponse: ValidatorResponse;
+    let cachedValidatorData: ValidatorData;
     Object.keys(restRules).some((ruleKey: string) => {
         const criteria = targetRules[ruleKey];
         if (ruleKey in validatorRules) {
-            const response = validatorRules[ruleKey](
-                valueKey,
-                values,
-                criteria,
-            );
+            const data = validatorRules[ruleKey](valueKey, values, criteria);
 
-            // Break early if danger response is encountered
-            if (response && response.context === ValidatorContext.Danger) {
-                cachedResponse = response;
+            // Break early if danger context is encountered
+            if (data && data.context === ValidatorContext.Danger) {
+                cachedValidatorData = data;
                 return true;
             }
 
-            // Cache first warning response, don't break because there might be an error later on
+            // Cache first warning context, don't break because there might be an error later on
             if (
-                response &&
-                response.context === ValidatorContext.Warning &&
-                !cachedResponse
+                data &&
+                data.context === ValidatorContext.Warning &&
+                !cachedValidatorData
             ) {
-                cachedResponse = response;
+                cachedValidatorData = data;
             }
         } else {
             console.warn(`Rule "${ruleKey}" does not exist.`);
@@ -98,10 +94,10 @@ export const validate = (
         return false;
     });
 
-    // If we have a cached response, return it
-    if (cachedResponse) {
+    // If we have a cached validatorData, return it
+    if (cachedValidatorData) {
         // Use custom error message if available
-        const ruleKey = cachedResponse.key;
+        const ruleKey = cachedValidatorData.name;
         if (ruleKey in customMessages) {
             const customMessage =
                 customMessages[ruleKey] instanceof Function
@@ -113,12 +109,12 @@ export const validate = (
                     : (customMessages[ruleKey] as string);
 
             return {
-                ...cachedResponse,
+                ...cachedValidatorData,
                 message: customMessage,
             };
         }
 
-        return cachedResponse;
+        return cachedValidatorData;
     }
 
     // If we don't have a cached response, assume validator is successful

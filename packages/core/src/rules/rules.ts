@@ -15,16 +15,16 @@ import { ValidatorContext, ValidatorRuleMap, ValueMap } from '../types';
 import { isDefined } from '../utils';
 
 const patterns: {
-    [key: string]: RegExp;
+    [componentName: string]: RegExp;
 } = {
     isDate: /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{4})$/,
 };
 
 const miscValidatorRules: ValidatorRuleMap = {
-    required: (key: string, values: ValueMap) => {
-        if (!isDefined(key, values)) {
+    required: (componentName: string, values: ValueMap) => {
+        if (!isDefined(componentName, values)) {
             return {
-                key: 'required',
+                name: 'required',
                 context: ValidatorContext.Danger,
                 message: 'This field is required',
             };
@@ -33,58 +33,73 @@ const miscValidatorRules: ValidatorRuleMap = {
 };
 
 const numericValidatorRules: ValidatorRuleMap = {
-    minValue: (key: string, values: ValueMap, minValue: number) => {
-        if (isDefined(key, values) && values[key] < minValue) {
+    minValue: (componentName: string, values: ValueMap, minValue: number) => {
+        if (
+            isDefined(componentName, values) &&
+            values[componentName] < minValue
+        ) {
             return {
-                key: 'minValue',
+                name: 'minValue',
                 context: ValidatorContext.Danger,
                 message: `Value must be >= ${minValue}`,
             };
         }
     },
-    maxValue: (key: string, values: ValueMap, maxValue: number) => {
-        if (isDefined(key, values) && values[key] > maxValue) {
+    maxValue: (componentName: string, values: ValueMap, maxValue: number) => {
+        if (
+            isDefined(componentName, values) &&
+            values[componentName] > maxValue
+        ) {
             return {
-                key: 'maxValue',
+                name: 'maxValue',
                 context: ValidatorContext.Danger,
                 message: `Value must be <= ${maxValue}`,
             };
         }
     },
-    isDivisibleBy: (key: string, values: ValueMap, num: number) => {
+    isDivisibleBy: (componentName: string, values: ValueMap, num: number) => {
         if (
-            isDefined(key, values) &&
-            !isDivisibleBy(String(values[key]), num)
+            isDefined(componentName, values) &&
+            !isDivisibleBy(String(values[componentName]), num)
         ) {
             return {
-                key: 'isDivisibleBy',
+                name: 'isDivisibleBy',
                 context: ValidatorContext.Danger,
-                message: `${values[key]} must be divisible by ${num}`,
+                message: `${values[componentName]} must be divisible by ${num}`,
             };
         }
     },
-    isInteger: (key: string, values: ValueMap) => {
-        if (isDefined(key, values) && !isInteger(String(values[key]))) {
+    isInteger: (componentName: string, values: ValueMap) => {
+        if (
+            isDefined(componentName, values) &&
+            !isInteger(String(values[componentName]))
+        ) {
             return {
-                key: 'isInteger',
+                name: 'isInteger',
                 context: ValidatorContext.Danger,
                 message: 'Must be an integer',
             };
         }
     },
-    isDecimal: (key: string, values: ValueMap) => {
-        if (isDefined(key, values) && !isDecimal(String(values[key]))) {
+    isDecimal: (componentName: string, values: ValueMap) => {
+        if (
+            isDefined(componentName, values) &&
+            !isDecimal(String(values[componentName]))
+        ) {
             return {
-                key: 'isDecimal',
+                name: 'isDecimal',
                 context: ValidatorContext.Danger,
                 message: 'Must be a decimal',
             };
         }
     },
-    isNumeric: (key: string, values: ValueMap) => {
-        if (isDefined(key, values) && !isNumeric(String(values[key]))) {
+    isNumeric: (componentName: string, values: ValueMap) => {
+        if (
+            isDefined(componentName, values) &&
+            !isNumeric(String(values[componentName]))
+        ) {
             return {
-                key: 'isNumeric',
+                name: 'isNumeric',
                 context: ValidatorContext.Danger,
                 message: 'Must be a number',
             };
@@ -93,46 +108,61 @@ const numericValidatorRules: ValidatorRuleMap = {
 };
 
 const stringValidatorRules: ValidatorRuleMap = {
-    minLength: (key: string, values: ValueMap, minLength: number) => {
-        if (isDefined(key, values) && String(values[key]).length < minLength) {
+    minLength: (componentName: string, values: ValueMap, minLength: number) => {
+        if (
+            isDefined(componentName, values) &&
+            String(values[componentName]).length < minLength
+        ) {
             return {
-                key: 'minLength',
+                name: 'minLength',
                 context: ValidatorContext.Danger,
                 message: `Length must be >= ${minLength}`,
             };
         }
     },
-    maxLength: (key: string, values: ValueMap, maxLength: number) => {
-        if (isDefined(key, values) && String(values[key]).length > maxLength) {
+    maxLength: (componentName: string, values: ValueMap, maxLength: number) => {
+        if (
+            isDefined(componentName, values) &&
+            String(values[componentName]).length > maxLength
+        ) {
             return {
-                key: 'maxLength',
+                name: 'maxLength',
                 context: ValidatorContext.Danger,
                 message: `Length must be <= ${maxLength}`,
             };
         }
     },
-    isLength: (key: string, values: ValueMap, length: number) => {
-        if (isDefined(key, values) && String(values[key]).length !== length) {
+    isLength: (componentName: string, values: ValueMap, length: number) => {
+        if (
+            isDefined(componentName, values) &&
+            String(values[componentName]).length !== length
+        ) {
             return {
-                key: 'isLength',
+                name: 'isLength',
                 context: ValidatorContext.Danger,
                 message: `Length must be ${length}`,
             };
         }
     },
-    isLowercase: (key: string, values: ValueMap) => {
-        if (isDefined(key, values) && !isLowercase(String(values[key]))) {
+    isLowercase: (componentName: string, values: ValueMap) => {
+        if (
+            isDefined(componentName, values) &&
+            !isLowercase(String(values[componentName]))
+        ) {
             return {
-                key: 'isLowercase',
+                name: 'isLowercase',
                 context: ValidatorContext.Danger,
                 message: `Must be all lowercase`,
             };
         }
     },
-    isUppercase: (key: string, values: ValueMap) => {
-        if (isDefined(key, values) && !isUppercase(String(values[key]))) {
+    isUppercase: (componentName: string, values: ValueMap) => {
+        if (
+            isDefined(componentName, values) &&
+            !isUppercase(String(values[componentName]))
+        ) {
             return {
-                key: 'isUppercase',
+                name: 'isUppercase',
                 context: ValidatorContext.Danger,
                 message: `Must be all uppercase`,
             };
@@ -141,74 +171,99 @@ const stringValidatorRules: ValidatorRuleMap = {
 };
 
 const regexValidatorRules: ValidatorRuleMap = {
-    matches: (key: string, values: ValueMap, pattern: RegExp) => {
-        if (isDefined(key, values) && pattern && !pattern.test(values[key])) {
+    matches: (componentName: string, values: ValueMap, pattern: RegExp) => {
+        if (
+            isDefined(componentName, values) &&
+            pattern &&
+            !pattern.test(values[componentName])
+        ) {
             return {
-                key: 'matches',
+                name: 'matches',
                 context: ValidatorContext.Danger,
                 message: 'Invalid input',
             };
         }
     },
-    isEmail: (key: string, values: ValueMap) => {
-        if (isDefined(key, values) && !isEmail(String(values[key]))) {
+    isEmail: (componentName: string, values: ValueMap) => {
+        if (
+            isDefined(componentName, values) &&
+            !isEmail(String(values[componentName]))
+        ) {
             return {
-                key: 'isEmail',
+                name: 'isEmail',
                 context: ValidatorContext.Danger,
                 message: 'Invalid email',
             };
         }
     },
-    isUrl: (key: string, values: ValueMap) => {
-        if (isDefined(key, values) && !isUrl(String(values[key]))) {
+    isUrl: (componentName: string, values: ValueMap) => {
+        if (
+            isDefined(componentName, values) &&
+            !isUrl(String(values[componentName]))
+        ) {
             return {
-                key: 'isUrl',
+                name: 'isUrl',
                 context: ValidatorContext.Danger,
                 message: 'Invalid url',
             };
         }
     },
-    isCreditCard: (key: string, values: ValueMap) => {
-        if (isDefined(key, values) && !isCreditCard(String(values[key]))) {
+    isCreditCard: (componentName: string, values: ValueMap) => {
+        if (
+            isDefined(componentName, values) &&
+            !isCreditCard(String(values[componentName]))
+        ) {
             return {
-                key: 'isCreditCard',
+                name: 'isCreditCard',
                 context: ValidatorContext.Danger,
                 message: 'Invalid credit card number',
             };
         }
     },
-    isHexColor: (key: string, values: ValueMap) => {
-        if (isDefined(key, values) && !isHexColor(String(values[key]))) {
+    isHexColor: (componentName: string, values: ValueMap) => {
+        if (
+            isDefined(componentName, values) &&
+            !isHexColor(String(values[componentName]))
+        ) {
             return {
-                key: 'isHexColor',
+                name: 'isHexColor',
                 context: ValidatorContext.Danger,
                 message: 'Invalid hex color',
             };
         }
     },
-    isIp: (key: string, values: ValueMap) => {
-        if (isDefined(key, values) && !isIP(String(values[key]))) {
+    isIp: (componentName: string, values: ValueMap) => {
+        if (
+            isDefined(componentName, values) &&
+            !isIP(String(values[componentName]))
+        ) {
             return {
-                key: 'isIp',
+                name: 'isIp',
                 context: ValidatorContext.Danger,
                 message: 'Invalid IP address',
             };
         }
     },
-    isPort: (key: string, values: ValueMap) => {
-        if (isDefined(key, values) && !isPort(String(values[key]))) {
+    isPort: (componentName: string, values: ValueMap) => {
+        if (
+            isDefined(componentName, values) &&
+            !isPort(String(values[componentName]))
+        ) {
             return {
-                key: 'isPort',
+                name: 'isPort',
                 context: ValidatorContext.Danger,
                 message: 'Invalid port',
             };
         }
     },
-    isDate: (key: string, values: ValueMap) => {
+    isDate: (componentName: string, values: ValueMap) => {
         // TODO: refactor this so date format is configurable
-        if (isDefined(key, values) && !patterns.isDate.test(values[key])) {
+        if (
+            isDefined(componentName, values) &&
+            !patterns.isDate.test(values[componentName])
+        ) {
             return {
-                key,
+                name: componentName,
                 context: ValidatorContext.Danger,
                 message: 'Invalid date format, expected: dd/mm/yyyy',
             };
@@ -217,68 +272,88 @@ const regexValidatorRules: ValidatorRuleMap = {
 };
 
 const crossFieldValidatorRules: ValidatorRuleMap = {
-    eqTarget: (key: string, values: ValueMap, targetKey: string) => {
+    eqTarget: (
+        componentName: string,
+        values: ValueMap,
+        targetcomponentName: string,
+    ) => {
         if (
-            isDefined(key, values) &&
-            isDefined(targetKey, values) &&
-            values[key] !== values[targetKey]
+            isDefined(componentName, values) &&
+            isDefined(targetcomponentName, values) &&
+            values[componentName] !== values[targetcomponentName]
         ) {
             return {
-                key: 'eqTarget',
+                name: 'eqTarget',
                 context: ValidatorContext.Danger,
                 message: 'Values do not match',
             };
         }
     },
-    gtTarget: (key: string, values: ValueMap, targetKey: string) => {
+    gtTarget: (
+        componentName: string,
+        values: ValueMap,
+        targetcomponentName: string,
+    ) => {
         if (
-            isDefined(key, values) &&
-            isDefined(targetKey, values) &&
-            Number(values[targetKey]) > Number(values[key])
+            isDefined(componentName, values) &&
+            isDefined(targetcomponentName, values) &&
+            Number(values[targetcomponentName]) > Number(values[componentName])
         ) {
             return {
-                key: 'gtTarget',
+                name: 'gtTarget',
                 context: ValidatorContext.Danger,
-                message: `Value must be > ${values[targetKey]}`,
+                message: `Value must be > ${values[targetcomponentName]}`,
             };
         }
     },
-    gteTarget: (key: string, values: ValueMap, targetKey: string) => {
+    gteTarget: (
+        componentName: string,
+        values: ValueMap,
+        targetcomponentName: string,
+    ) => {
         if (
-            isDefined(key, values) &&
-            isDefined(targetKey, values) &&
-            Number(values[targetKey]) >= Number(values[key])
+            isDefined(componentName, values) &&
+            isDefined(targetcomponentName, values) &&
+            Number(values[targetcomponentName]) >= Number(values[componentName])
         ) {
             return {
-                key: 'gteTarget',
+                name: 'gteTarget',
                 context: ValidatorContext.Danger,
-                message: `Value must be >= ${values[targetKey]}`,
+                message: `Value must be >= ${values[targetcomponentName]}`,
             };
         }
     },
-    ltTarget: (key: string, values: ValueMap, targetKey: string) => {
+    ltTarget: (
+        componentName: string,
+        values: ValueMap,
+        targetcomponentName: string,
+    ) => {
         if (
-            isDefined(key, values) &&
-            isDefined(targetKey, values) &&
-            Number(values[targetKey]) < Number(values[key])
+            isDefined(componentName, values) &&
+            isDefined(targetcomponentName, values) &&
+            Number(values[targetcomponentName]) < Number(values[componentName])
         ) {
             return {
-                key: 'ltTarget',
+                name: 'ltTarget',
                 context: ValidatorContext.Danger,
-                message: `Value must be < ${values[targetKey]}`,
+                message: `Value must be < ${values[targetcomponentName]}`,
             };
         }
     },
-    lteTarget: (key: string, values: ValueMap, targetKey: string) => {
+    lteTarget: (
+        componentName: string,
+        values: ValueMap,
+        targetcomponentName: string,
+    ) => {
         if (
-            isDefined(key, values) &&
-            isDefined(targetKey, values) &&
-            Number(values[targetKey]) <= Number(values[key])
+            isDefined(componentName, values) &&
+            isDefined(targetcomponentName, values) &&
+            Number(values[targetcomponentName]) <= Number(values[componentName])
         ) {
             return {
-                key: 'lteTarget',
+                name: 'lteTarget',
                 context: ValidatorContext.Danger,
-                message: `Value must be <= ${values[targetKey]}`,
+                message: `Value must be <= ${values[targetcomponentName]}`,
             };
         }
     },

@@ -1,28 +1,37 @@
 import * as React from 'react';
+import update from 'update-immutable';
 
-import { ValidatorResponse, ValueMap, Omit } from '../../types';
-import { validate } from '../../validator';
+import {
+    ValidatorData,
+    ValueMap,
+    Omit,
+    OptionalPromise,
+    ValidatorContext,
+} from '../../types';
 import { BoundComponentInstance } from '../bind';
 import { MirrorInstance, Mirror } from '../Mirror';
+import { ensurePromise } from '../../utils';
+import { validate } from '../../validator';
 
 export const FormContext = React.createContext(undefined as FormApi);
 
 export interface FormApi {
-    registerComponent: Form<any>['registerComponent'];
-    unregisterComponent: Form<any>['unregisterComponent'];
+    clear: Form<any>['clear'];
+    reset: Form<any>['reset'];
+    validate: Form<any>['validate'];
+    isValid: Form<any>['isValid'];
+    isPristine: Form<any>['isPristine'];
+    getValidatorData: Form<any>['getValidatorData'];
+    setValidatorData: Form<any>['setValidatorData'];
+    getValue: Form<any>['getValue'];
+    setValue: Form<any>['setValue'];
+    onComponentMount: Form<any>['handleComponentMount'];
+    onComponentUnmount: Form<any>['handleComponentUnmount'];
+    onComponentUpdate: Form<any>['handleComponentUpdate'];
+    onComponentBlur: Form<any>['handleComponentBlur'];
+    onComponentFocus: Form<any>['handleComponentFocus'];
     registerMirror: Form<any>['registerMirror'];
     unregisterMirror: Form<any>['unregisterMirror'];
-    validate: Form<any>['validate'];
-    setStickyValue: Form<any>['setStickyValue'];
-    getStickyValue: Form<any>['getStickyValue'];
-    getInitialValue: Form<any>['getInitialValue'];
-    getResponse: Form<any>['getResponse'];
-    getValue: Form<any>['getValue'];
-    onMount: Form<any>['handleMount'];
-    onUpdate: Form<any>['handleUpdate'];
-    onChange: Form<any>['handleChange'];
-    onBlur: Form<any>['handleBlur'];
-    onFocus: Form<any>['handleFocus'];
 }
 
 export interface FormProps<FormFields extends ValueMap>
@@ -42,14 +51,22 @@ export interface FormProps<FormFields extends ValueMap>
      * @param {string} componentName name of the component
      * @param {object} value current value
      */
-    onBlur?: (componentName: keyof FormFields, value: any) => void;
+    onBlur?: (
+        componentName: keyof FormFields,
+        value: any,
+        event: React.FocusEvent<any>,
+    ) => OptionalPromise<void>;
 
     /**
      * Called when a bound form component has been focused.
      * @param {string} componentName name of the component
      * @param {object} value current value
      */
-    onFocus?: (componentName: keyof FormFields, value: any) => void;
+    onFocus?: (
+        componentName: keyof FormFields,
+        value: any,
+        event: React.FocusEvent<any>,
+    ) => OptionalPromise<void>;
 
     /**
      * 	Called when the form is programmatically submitted, or a button with type="submit" is clicked.
@@ -109,181 +126,31 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         sticky: false,
     };
 
-    private componentRefs: {
-        [ComponentName in keyof FormComponents]: BoundComponentInstance
+    private components: {
+        [ComponentName in keyof FormComponents]: {
+            name: string;
+            pristine: boolean;
+            value?: any;
+            validatorData?: ValidatorData;
+            instance?: BoundComponentInstance;
+        }
     };
 
     private mirrorRefs: {
         [ComponentName in keyof FormComponents]: MirrorInstance[]
     };
 
-    private stickyValues: { [ComponentName in keyof FormComponents]: any };
-
-    public constructor(props: FormProps<FormComponents>) {
+    constructor(props: FormProps<FormComponents>) {
         super(props as any);
-        this.componentRefs = {} as any;
+        this.components = {} as any;
         this.mirrorRefs = {} as any;
-        this.stickyValues = {} as any;
     }
 
-    /**
-     * Programmatically submit form
-     */
-    public submit = () => {
-        return this.handleSubmit();
-    };
-
-    /**
-     * Retrieves the current value for a component
-     * @param {string} componentName name of the component
-     */
-    public getValue = (componentName: keyof FormComponents): any => {
-        const component = this.componentRefs[componentName];
-        return component
-            ? component.getValue()
-            : this.props.initialValues[componentName];
-    };
-
-    /**
-     * Retrieves current values for all components
-     */
-    public getValues = (): FormComponents => {
-        return Object.keys(this.componentRefs).reduce(
-            (values: FormComponents, componentName: keyof FormComponents) => {
-                values[componentName] = this.getValue(componentName);
-                return values;
-            },
-            {} as FormComponents,
-        );
-    };
-
-    /**
-     * Clears the form. The value and validator for each form component will be
-     * set to undefined. Note: this will have no effect if the valueProp has
-     * been provided.
-     */
-    public clear = (): void => {
-        Object.keys(this.componentRefs).forEach(
-            (componentName: keyof FormComponents) => {
-                const component = this.componentRefs[componentName];
-                component.clear();
-            },
-        );
-    };
-
-    /**
-     * Resets the form using the initialValue prop for each form component. If
-     * the initialValue prop has not been provided, the new value will be undefined.
-     * Note: this will have no effect if the valueProp has been provided.
-     */
-    public reset = (): void => {
-        // Clear all sticky values before calling individual component.reset's
-        this.stickyValues = {} as any;
-
-        Object.keys(this.componentRefs).forEach(
-            (componentName: keyof FormComponents) => {
-                const component = this.componentRefs[componentName];
-                // Check if the component still exists because some of the
-                // conditionally mounted components might have been unregistered with the form
-                if (component) {
-                    component.reset();
-                }
-            },
-        );
-    };
-
-    /**
-     * Validates specified component(s). If no component names are provided,
-     * all components within the form will be validated.
-     */
-    public validate = (
-        componentName?: keyof FormComponents | (keyof FormComponents)[],
-    ): void => {
-        (componentName !== undefined
-            ? Array.isArray(componentName)
-                ? componentName
-                : [componentName]
-            : Object.keys(this.componentRefs)
-        ).forEach((componentName: string) => {
-            this.componentRefs[componentName].validate();
-        });
-    };
-
-    /**
-     * Executes validator rules on all component
-     * @returns true if all all components are valid
-     */
-    public isValid = (): boolean => {
-        return !Object.keys(this.componentRefs).some(
-            (componentName: string) => {
-                const component = this.componentRefs[componentName];
-                return !component.isValid();
-            },
-        );
-    };
-
-    /**
-     * Inject a custom value on a form component
-     * @param {string} componentName name of the component
-     * @param {any} value custom value to be injected
-     */
-    public setValue = (
-        componentName: keyof FormComponents,
-        value: any,
-    ): Promise<void> =>
-        componentName in this.componentRefs
-            ? this.componentRefs[componentName].setValue(value)
-            : Promise.reject(
-                  `Failed to set value for "${componentName}" component. It does not exist in form context.`,
-              );
-
-    /**
-     * Injects custom values for form components
-     * @param {object} values component name / value map
-     */
-    public setValues = (
-        values: { [ComponentName in keyof FormComponents]: any },
-    ): Promise<void[]> =>
-        Promise.all(
-            Object.keys(values).map((componentName: string) =>
-                this.setValue(componentName, values[componentName]),
-            ),
-        );
-
-    /**
-     * Inject a custom validator response on a form component
-     * @param {string} componentName name of the component
-     * @param {object} response custom validator response to be injected
-     */
-    public setResponse = (
-        componentName: keyof FormComponents,
-        response: ValidatorResponse,
-    ): Promise<void> =>
-        componentName in this.componentRefs
-            ? this.componentRefs[componentName].setResponse(response)
-            : Promise.reject(
-                  `Failed to set response for "${componentName}" component. It does not exist in form context.`,
-              );
-
-    /**
-     * Injects custom validator responses for form components
-     * @param {object} responses component name / validator response map
-     */
-    public setResponses = (
-        responses: {
-            [ComponentName in keyof FormComponents]: ValidatorResponse
-        },
-    ): Promise<void[]> =>
-        Promise.all(
-            Object.keys(responses).map((componentName: keyof FormComponents) =>
-                this.setResponse(componentName, responses[componentName]),
-            ),
-        );
-
-    public render() {
+    render() {
         const {
             children,
             withHiddenSubmit,
+
             // Omitted
             onChange,
             onBlur,
@@ -293,31 +160,33 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             onInvalidSubmit,
             initialValues,
             sticky,
+
             // Injected
             ...restProps
         } = this.props;
 
         const api: FormApi = {
-            registerComponent: this.registerComponent,
-            unregisterComponent: this.unregisterComponent,
+            clear: this.clear,
+            reset: this.reset,
+            validate: this.validate,
+            isValid: this.isValid,
+            isPristine: this.isPristine,
+            getValidatorData: this.getValidatorData,
+            setValidatorData: this.setValidatorData,
+            getValue: this.getValue,
+            setValue: this.setValue,
+            onComponentMount: this.handleComponentMount,
+            onComponentUnmount: this.handleComponentUnmount,
+            onComponentUpdate: this.handleComponentUpdate,
+            onComponentBlur: this.handleComponentBlur,
+            onComponentFocus: this.handleComponentFocus,
             registerMirror: this.registerMirror,
             unregisterMirror: this.unregisterMirror,
-            validate: this.validate,
-            setStickyValue: this.setStickyValue,
-            getStickyValue: this.getStickyValue,
-            getInitialValue: this.getInitialValue,
-            getResponse: this.getResponse,
-            getValue: this.getValue,
-            onMount: this.handleMount,
-            onUpdate: this.handleUpdate,
-            onChange: this.handleChange,
-            onBlur: this.handleBlur,
-            onFocus: this.handleFocus,
         };
 
         return (
             <FormContext.Provider value={api}>
-                <form {...restProps as any} onSubmit={this.handleSubmit}>
+                <form {...restProps as any} onSubmit={this.handleFormSubmit}>
                     {children}
                     {withHiddenSubmit && (
                         <button type="submit" style={{ display: 'none' }} />
@@ -326,34 +195,204 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             </FormContext.Provider>
         );
     }
+    //#region Public commands
+    public submit = () => {
+        return this.handleFormSubmit();
+    };
 
-    /**
-     * Registers a component with the form, allowing it to be managed.
-     * @param {string} componentName name of the component
-     * @param {object} componentRef react component reference to be monitored
-     */
-    private registerComponent = (
+    public clear = async (
+        componentName?: keyof FormComponents | (keyof FormComponents)[],
+    ): Promise<void[]> => {
+        return Promise.all(
+            this.getComponentNames(componentName).map(componentName =>
+                this.setValue(componentName, null),
+            ),
+        );
+    };
+
+    public reset = (
+        componentName?: keyof FormComponents | (keyof FormComponents)[],
+    ): Promise<void[]> => {
+        return Promise.all(
+            this.getComponentNames(componentName).map(componentName => {
+                this.components = update(this.components, {
+                    [componentName]: {
+                        $unset: ['value', 'validatorData', 'pristine'],
+                    },
+                });
+                return this.updateComponent(componentName);
+            }),
+        );
+    };
+
+    public validate = (
+        componentName?: keyof FormComponents | (keyof FormComponents)[],
+    ): Promise<void[]> => {
+        return Promise.all(
+            this.getComponentNames(componentName).map(componentName => {
+                return this.setValidatorData(
+                    componentName,
+                    this.executeValidator(componentName),
+                );
+            }),
+        );
+    };
+    //#endregion
+
+    //#region Public evaluators
+    public isValid = (
+        componentName?: keyof FormComponents | (keyof FormComponents)[],
+    ): boolean => {
+        const results = this.getComponentNames(componentName).map(
+            componentName => {
+                const { context } = this.executeValidator(componentName);
+                return context !== ValidatorContext.Danger;
+            },
+        );
+        return !results.includes(false);
+    };
+
+    public isPristine = (
+        componentName?: keyof FormComponents | (keyof FormComponents)[],
+    ): boolean => {
+        const results = this.getComponentNames(componentName).map(
+            componentName =>
+                componentName in this.components
+                    ? this.components[componentName].pristine
+                    : true,
+        );
+        return !results.includes(false);
+    };
+    // #endregion
+
+    //#region Public getters
+    public getValidatorData = (
         componentName: keyof FormComponents,
-        componentRef: BoundComponentInstance,
-    ): void => {
-        // Only register if this form component has not been mounted yet
-        if (!(componentName in this.componentRefs)) {
-            this.componentRefs[componentName] = componentRef;
-        } else {
-            console.error(`Duplicate form component: "${componentName}"`);
+        componentProps: BoundComponentInstance['props'] = this.getComponentProps(
+            componentName,
+        ),
+    ): ValidatorData => {
+        // Return user provided validatorData (if exists)
+        if (componentProps.validatorData) {
+            return componentProps.validatorData;
         }
+
+        if (componentName in this.components) {
+            return this.components[componentName].validatorData;
+        }
+
+        return {
+            context: undefined,
+            message: undefined,
+        };
     };
 
-    /**
-     * Unregisters a component with the form, so it will no longer be managed
-     * @param {string} componentName name of the component
-     */
-    private unregisterComponent = (
+    public getValue = (
         componentName: keyof FormComponents,
-    ): void => {
-        delete this.componentRefs[componentName];
+        componentProps: BoundComponentInstance['props'] = this.getComponentProps(
+            componentName,
+        ),
+    ): any => {
+        const propValue = componentProps && componentProps.value;
+        const defaultValue = componentProps && componentProps.defaultValue;
+        const stateValue =
+            this.components[componentName] &&
+            this.components[componentName].value;
+        const initialValue = this.props.initialValues[componentName];
+
+        const dynamicValue = [
+            propValue,
+            stateValue,
+            initialValue,
+            defaultValue,
+        ].find(v => v !== undefined);
+
+        return dynamicValue instanceof Object
+            ? Object.freeze(dynamicValue)
+            : dynamicValue;
     };
 
+    public getValues = (
+        componentNames?: (keyof FormComponents)[],
+    ): FormComponents => {
+        return this.getComponentNames(componentNames).reduce(
+            (values: FormComponents, componentName: keyof FormComponents) => ({
+                ...values,
+                [componentName]: this.getValue(componentName),
+            }),
+            {} as FormComponents,
+        );
+    };
+    //#endregion
+
+    //#region Public setters
+    public setValidatorData = async (
+        componentName: keyof FormComponents,
+        data: ValidatorData,
+    ): Promise<void> => {
+        // Don't set data if component is unknown
+        if (!(componentName in this.components)) {
+            throw `Failed to set validatorData for "${componentName}" component. It does not exist in form context.`;
+        }
+
+        this.components = update(this.components, {
+            [componentName]: {
+                pristine: {
+                    $set: false,
+                },
+                validatorData: {
+                    $set: data,
+                },
+            },
+        });
+
+        return this.updateComponent(componentName);
+    };
+
+    public setValue = async (
+        componentName: keyof FormComponents,
+        value: any,
+        pristine: boolean = false,
+    ): Promise<void> => {
+        // Don't set value if component is unknown
+        if (!(componentName in this.components)) {
+            return;
+        }
+
+        const validatorData = this.executeValidator(componentName, value);
+
+        // Update component state
+        this.components = update(this.components, {
+            [componentName]: {
+                pristine: {
+                    $set: pristine,
+                },
+                value: {
+                    $set: value,
+                },
+                validatorData: {
+                    $set: validatorData,
+                },
+            },
+        });
+
+        // Trigger component re-render
+        await this.updateComponent(componentName);
+    };
+
+    public setValues = (
+        values: { [ComponentName in keyof FormComponents]: any },
+        pristine?: boolean,
+    ): Promise<void[]> => {
+        return Promise.all(
+            Object.keys(values).map((componentName: string) =>
+                this.setValue(componentName, values[componentName], pristine),
+            ),
+        );
+    };
+    //#endregion
+
+    //#region Private component registration/unregistration
     /**
      * Registers a mirror with the form, allowing it to reflect a component.
      * @param {string} componentName name of the component to mirror
@@ -386,188 +425,17 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             }
         }
     };
+    //#endregion
 
-    /** Sets the sticky component value using internal form state */
-    private setStickyValue = (
-        componentName: keyof FormComponents,
-        value: any,
-    ) => {
-        if (this.props.sticky) {
-            this.stickyValues[componentName] = value;
-        }
-    };
-
-    /** Retrieves the sticky component value from internal form state */
-    private getStickyValue = (componentName: keyof FormComponents): any => {
-        return this.props.sticky ? this.stickyValues[componentName] : undefined;
-    };
-
-    /** Retrieves the initial component value from the initialValues prop */
-    private getInitialValue = (componentName: keyof FormComponents): any => {
-        const { initialValues } = this.props;
-        return initialValues ? initialValues[componentName] : undefined;
-    };
-
-    /**
-     * Executes validator object for the specified component name. If no custom value
-     * is provided, the current value will be retrieved from the form component.
-     * @param {string} componentName name of the component
-     * @param {any} value (optional) custom value to be used when validating
-     * @param {boolean} required (default: false) whether or not a value is required
-     * @returns validator response: context, message
-     */
-    private getResponse = (
-        componentName: keyof FormComponents,
-        value?: any,
-        required: boolean = false,
-    ): ValidatorResponse => {
-        const values = this.getValues();
-        const component = this.componentRefs[componentName];
-        return validate(
-            componentName as string,
-            {
-                ...(values as ValueMap),
-                [componentName]:
-                    value !== undefined ? value : values[componentName],
-            },
-            {
-                required,
-                ...(component ? component.getValidatorRules() : {}),
-            },
-            component ? component.getValidatorMessages() : {},
-        );
-    };
-
-    /**
-     * Recursively builds a dependency map for components that are part of the
-     * validator trigger tree.
-     */
-    private buildDependencyMap = (
-        componentNames: (keyof FormComponents)[],
-        mappedNames: FormComponents = {} as any,
-    ): (keyof FormComponents)[] => {
-        // tslint:disable-next-line:no-parameter-reassignment
-        mappedNames = componentNames.reduce(
-            (names: any, name: string) => ({ ...names, [name]: true }),
-            mappedNames,
-        );
-
-        return componentNames.reduce(
-            (output: any, name: keyof FormComponents) => {
-                const validatorTrigger: string[] =
-                    (this.componentRefs[name] &&
-                        this.componentRefs[name].getValidatorTriggers()) ||
-                    [];
-                const namesToMap = validatorTrigger.filter(
-                    (n: string) => !(n in mappedNames),
-                );
-
-                // Only recurse if necessary
-                if (namesToMap.length > 0) {
-                    return {
-                        ...output,
-                        ...this.buildDependencyMap(namesToMap, mappedNames),
-                    };
-                }
-
-                return output;
-            },
-            mappedNames,
-        );
-    };
-
-    /**
-     * Returns an array of component names that should be validated when validating
-     * a specific component. Determined using the validator trigger tree.
-     * @returns array of componentNames
-     */
-    private getRelatedComponents = (
-        componentName: keyof FormComponents,
-    ): string[] => {
-        const component = this.componentRefs[componentName];
-        if (component) {
-            return Object.keys(
-                this.buildDependencyMap(component.getValidatorTriggers()),
-            ).filter(
-                (dependencyName: string) => dependencyName !== componentName,
-            );
-        }
-        return [];
-    };
-
-    /**
-     * Returns an array of mirror instances that are currently reflecting the specified component.
-     * @param {string} componentName name of the component
-     * @returns array of mirror instances
-     */
-    private getMirrors = (
-        componentName: keyof FormComponents,
-    ): MirrorInstance[] => {
-        return this.mirrorRefs[componentName] || [];
-    };
-
-    /**
-     * Event handler to be fired whenever a bound form component is mounted. When called, the components
-     * mirrors updated to reflect the new value. If the form is in sticky mode, the sticky value state will
-     * also be updated.
-     * @param {string} componentName name of the component
-     * @param {any} value value which the component was updated with
-     */
-    private handleMount = (componentName: keyof FormComponents, value: any) => {
-        // Update sticky value state
-        if (this.props.sticky) {
-            this.setStickyValue(componentName, value);
-        }
-
-        // Reflect all mirrors
-        this.getMirrors(componentName).forEach((mirror: MirrorInstance) =>
-            mirror.reflect(),
-        );
-    };
-
-    /**
-     * Event handler to be fired whenever a bound form component is updated. When called, validation rules
-     * will be executed on any related components, and mirrors updated to reflect the new value. If the form
-     * is in sticky mode, the sticky value state will also be updated.
-     * @param {string} componentName name of the component
-     * @param {any} value value which the component was updated with
-     */
-    private handleUpdate = (
-        componentName: keyof FormComponents,
-        value: any,
-    ) => {
-        // Update sticky value state
-        if (this.props.sticky) {
-            this.setStickyValue(componentName, value);
-        }
-
-        // Cross-validate if necessary
-        this.getRelatedComponents(componentName).forEach((relName: string) => {
-            this.componentRefs[relName].validate();
-        });
-
-        // Reflect all mirrors
-        this.getMirrors(componentName).forEach((mirror: MirrorInstance) =>
-            mirror.reflect(),
-        );
-    };
-
-    private handleChange = (
+    //#region Private event handlers
+    private handleFormChange = (
         componentName: keyof FormComponents,
         value: any,
     ) => {
         this.props.onChange(componentName, value);
     };
 
-    private handleBlur = (componentName: keyof FormComponents) => {
-        this.props.onBlur(componentName, this.getValue(componentName));
-    };
-
-    private handleFocus = (componentName: keyof FormComponents) => {
-        this.props.onFocus(componentName, this.getValue(componentName));
-    };
-
-    private handleSubmit = (event?: React.FormEvent<HTMLFormElement>) => {
+    private handleFormSubmit = (event?: React.FormEvent<HTMLFormElement>) => {
         if (event) {
             event.preventDefault();
         }
@@ -576,9 +444,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         const values = this.getValues();
 
         if (isValid) {
-            this.handleValidSubmit(values);
+            this.handleFormValidSubmit(values);
         } else {
-            this.handleInvalidSubmit(values);
+            this.handleFormInvalidSubmit(values);
         }
 
         this.props.onSubmit(values);
@@ -589,12 +457,256 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         };
     };
 
-    private handleValidSubmit = (values: FormComponents) => {
+    private handleFormValidSubmit = (values: FormComponents) => {
         this.props.onValidSubmit(values);
     };
 
-    private handleInvalidSubmit = (values: FormComponents) => {
+    private handleFormInvalidSubmit = (values: FormComponents) => {
         this.validate();
         this.props.onInvalidSubmit(values);
     };
+
+    private handleComponentMount = async (
+        componentName: keyof FormComponents,
+        componentRef: BoundComponentInstance,
+    ) => {
+        // Return early if a ref has already been refistered
+        if (
+            componentName in this.components &&
+            !!this.components[componentName].instance
+        ) {
+            console.error(
+                `Failed to handle componentMount for "${componentName}", a component with this name already exists.`,
+            );
+            return;
+        }
+
+        // Update component state
+        this.components = update(this.components, {
+            [componentName]: {
+                name: {
+                    $set: componentName,
+                },
+                instance: {
+                    $set: componentRef,
+                },
+            },
+        });
+
+        // Finally, reflect all mirrors
+        this.getMirrors(componentName).forEach((mirror: MirrorInstance) =>
+            mirror.reflect(),
+        );
+    };
+
+    private handleComponentUnmount = async (
+        componentName: keyof FormComponents,
+    ) => {
+        if (
+            !(componentName in this.components) ||
+            !this.components[componentName].instance
+        ) {
+            console.error(
+                `Failed to unregister ref for "${componentName}", not registered.`,
+            );
+            return;
+        }
+
+        if (this.props.sticky) {
+            // Remove instance without destroying associated data
+            this.components = update(this.components, {
+                [componentName]: {
+                    $unset: 'instance',
+                },
+            });
+        } else {
+            // Else, remove component entirely
+            this.components = update(this.components, {
+                $unset: componentName,
+            });
+        }
+    };
+
+    private handleComponentUpdate = async (
+        componentName: keyof FormComponents,
+    ) => {
+        // Cross-validate if necessary
+        await Promise.all(
+            this.getRelatedComponentNames(componentName).map(
+                (relatedComponentName: string) => {
+                    return this.validate(relatedComponentName);
+                },
+            ),
+        );
+
+        // Reflect all mirrors
+        this.getMirrors(componentName).forEach((mirror: MirrorInstance) =>
+            mirror.reflect(),
+        );
+    };
+
+    private handleComponentBlur = async (
+        componentName: keyof FormComponents,
+        event: React.FocusEvent<any>,
+    ) => {
+        const value = this.getValue(componentName);
+        await ensurePromise(this.props.onBlur(componentName, value, event));
+        return event;
+    };
+
+    private handleComponentFocus = async (
+        componentName: keyof FormComponents,
+        event: React.FocusEvent<any>,
+    ) => {
+        const value = this.getValue(componentName);
+        await ensurePromise(this.props.onFocus(componentName, value, event));
+        return event;
+    };
+    //#endregion
+
+    //#region Private helpers
+    /**
+     * Returns an array of mirror instances that are currently reflecting the specified component.
+     * @param {string} componentName name of the component
+     * @returns array of mirror instances
+     */
+    getMirrors = (componentName: keyof FormComponents): MirrorInstance[] => {
+        return this.mirrorRefs[componentName] || [];
+    };
+
+    getComponentNames = (
+        componentName?: keyof FormComponents | (keyof FormComponents)[],
+    ): (keyof FormComponents)[] => {
+        // If no component name(s) was provided, return all component names
+        if (!componentName) {
+            return Object.keys(this.components);
+        }
+
+        // If explicit component names were provided, return them instead
+        if (Array.isArray(componentName)) {
+            return componentName;
+        }
+
+        // If a singular component name was provided, return it as an array
+        if (typeof componentName === 'string') {
+            return [componentName];
+        }
+
+        throw `Failed to get component names from ${componentName}`;
+    };
+
+    getComponentInstance = (
+        componentName: keyof FormComponents,
+    ): BoundComponentInstance => {
+        return componentName in this.components
+            ? this.components[componentName].instance
+            : undefined;
+    };
+
+    getComponentProps = (componentName: keyof FormComponents) => {
+        const instance = this.getComponentInstance(componentName);
+        return instance ? instance.props : undefined;
+    };
+
+    getComponentValidatorTriggers = (
+        componentName: keyof FormComponents,
+    ): string[] => {
+        const props = this.getComponentProps(componentName);
+        const validatorTrigger = props.validatorTrigger || [];
+        return Array.isArray(validatorTrigger)
+            ? validatorTrigger
+            : [validatorTrigger];
+    };
+
+    /**
+     * Recursively builds a dependency map for components that are part of the
+     * validator trigger tree.
+     */
+    getCompomentDependencyMap = (
+        componentNames: (keyof FormComponents)[],
+        mappedNames: FormComponents = {} as any,
+    ): (keyof FormComponents)[] => {
+        // tslint:disable-next-line:no-parameter-reassignment
+        mappedNames = componentNames.reduce(
+            (names: any, name: string) => ({ ...names, [name]: true }),
+            mappedNames,
+        );
+
+        return componentNames.reduce(
+            (dependencyMap: any, componentName: keyof FormComponents) => {
+                const validatorTrigger = this.getComponentValidatorTriggers(
+                    componentName,
+                );
+                const namesToMap = validatorTrigger.filter(
+                    (n: string) => !(n in mappedNames),
+                );
+
+                // Only recurse if necessary
+                if (namesToMap.length > 0) {
+                    return {
+                        ...dependencyMap,
+                        ...this.getCompomentDependencyMap(
+                            namesToMap,
+                            mappedNames,
+                        ),
+                    };
+                }
+
+                return dependencyMap;
+            },
+            mappedNames,
+        );
+    };
+
+    /**
+     * Returns an array of component names that should be validated when validating
+     * a specific component. Determined using the validator trigger tree.
+     * @returns array of componentNames
+     */
+    getRelatedComponentNames = (
+        componentName: keyof FormComponents,
+    ): (keyof FormComponents)[] => {
+        const component = this.components[componentName];
+        if (component) {
+            return Object.keys(
+                this.getCompomentDependencyMap(
+                    this.getComponentValidatorTriggers(componentName),
+                ),
+            ).filter(
+                (dependencyName: string) => dependencyName !== componentName,
+            );
+        }
+        return [];
+    };
+
+    updateComponent = (componentName: keyof FormComponents): Promise<void> => {
+        const component = this.components[componentName];
+        if (component && component.instance) {
+            return component.instance.update();
+        }
+    };
+
+    executeValidator = (
+        componentName: keyof FormComponents,
+        value: any = this.getValue(componentName),
+    ): ValidatorData => {
+        const props = this.getComponentProps(componentName);
+        return validate(
+            componentName as string,
+            {
+                ...this.getValues(),
+                ...(value !== undefined
+                    ? {
+                          [componentName]: value,
+                      }
+                    : {}),
+            },
+            {
+                required: props && props.required,
+                ...((props && props.validatorRules) || {}),
+            },
+            (props && props.validatorMessages) || {},
+        );
+    };
+    //#endregion
 }

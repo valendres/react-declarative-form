@@ -393,6 +393,60 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     //#endregion
 
     //#region Private component registration/unregistration
+    private registerComponent = (
+        componentName: keyof FormComponents,
+        componentRef: BoundComponentInstance,
+    ) => {
+        // Return early if a ref has already been refistered
+        if (
+            componentName in this.components &&
+            !!this.components[componentName].instance
+        ) {
+            console.error(
+                `Failed to handle register component: "${componentName}", a component with this name already exists.`,
+            );
+            return;
+        }
+
+        // Update component state
+        this.components = update(this.components, {
+            [componentName]: {
+                name: {
+                    $set: componentName,
+                },
+                instance: {
+                    $set: componentRef,
+                },
+            },
+        });
+    };
+
+    private unregisterComponent = (componentName: keyof FormComponents) => {
+        if (
+            !(componentName in this.components) ||
+            !this.components[componentName].instance
+        ) {
+            console.error(
+                `Failed to unregister ref for "${componentName}", not registered.`,
+            );
+            return;
+        }
+
+        if (this.props.sticky) {
+            // Remove instance without destroying associated data
+            this.components = update(this.components, {
+                [componentName]: {
+                    $unset: 'instance',
+                },
+            });
+        } else {
+            // Else, remove component entirely
+            this.components = update(this.components, {
+                $unset: componentName,
+            });
+        }
+    };
+
     /**
      * Registers a mirror with the form, allowing it to reflect a component.
      * @param {string} componentName name of the component to mirror
@@ -470,61 +524,15 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         componentRef: BoundComponentInstance,
     ) => {
-        // Return early if a ref has already been refistered
-        if (
-            componentName in this.components &&
-            !!this.components[componentName].instance
-        ) {
-            console.error(
-                `Failed to handle componentMount for "${componentName}", a component with this name already exists.`,
-            );
-            return;
-        }
-
-        // Update component state
-        this.components = update(this.components, {
-            [componentName]: {
-                name: {
-                    $set: componentName,
-                },
-                instance: {
-                    $set: componentRef,
-                },
-            },
-        });
-
-        // Finally, reflect all mirrors
-        this.getMirrors(componentName).forEach((mirror: MirrorInstance) =>
-            mirror.reflect(),
-        );
+        this.registerComponent(componentName, componentRef);
+        this.reflectComponentMirrors(componentName);
     };
 
     private handleComponentUnmount = async (
         componentName: keyof FormComponents,
     ) => {
-        if (
-            !(componentName in this.components) ||
-            !this.components[componentName].instance
-        ) {
-            console.error(
-                `Failed to unregister ref for "${componentName}", not registered.`,
-            );
-            return;
-        }
-
-        if (this.props.sticky) {
-            // Remove instance without destroying associated data
-            this.components = update(this.components, {
-                [componentName]: {
-                    $unset: 'instance',
-                },
-            });
-        } else {
-            // Else, remove component entirely
-            this.components = update(this.components, {
-                $unset: componentName,
-            });
-        }
+        this.unregisterComponent(componentName);
+        this.reflectComponentMirrors(componentName);
     };
 
     private handleComponentUpdate = async (
@@ -540,9 +548,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         );
 
         // Reflect all mirrors
-        this.getMirrors(componentName).forEach((mirror: MirrorInstance) =>
-            mirror.reflect(),
-        );
+        this.reflectComponentMirrors(componentName);
     };
 
     private handleComponentBlur = async (
@@ -684,6 +690,16 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         if (component && component.instance) {
             return component.instance.update();
         }
+    };
+
+    reflectComponentMirrors = (
+        componentName: keyof FormComponents,
+    ): Promise<void[]> => {
+        return Promise.all(
+            this.getMirrors(componentName).map((mirror: MirrorInstance) =>
+                mirror.reflect(),
+            ),
+        );
     };
 
     executeValidator = (

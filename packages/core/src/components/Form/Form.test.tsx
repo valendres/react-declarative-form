@@ -193,13 +193,13 @@ describe('component: Form', () => {
                 .instance();
 
             // Should store a reference for both mirrors
-            expect(form.mirrorRefs[componentName]).toEqual([mirror1, mirror2]);
+            expect(form.mirrors[componentName]).toEqual([mirror1, mirror2]);
 
             // Trigger mirror unregistration
             wrapper.unmount();
 
             // Refs should be empty again
-            expect(form.mirrorRefs).toMatchObject({});
+            expect(form.mirrors).toMatchObject({});
         });
     });
 

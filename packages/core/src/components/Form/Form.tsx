@@ -136,14 +136,14 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         }
     };
 
-    private mirrorRefs: {
+    private mirrors: {
         [ComponentName in keyof FormComponents]: MirrorInstance[]
     };
 
     constructor(props: FormProps<FormComponents>) {
         super(props as any);
         this.components = {} as any;
-        this.mirrorRefs = {} as any;
+        this.mirrors = {} as any;
     }
 
     render() {
@@ -437,16 +437,16 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     /**
      * Registers a mirror with the form, allowing it to reflect a component.
      * @param {string} componentName name of the component to mirror
-     * @param {object} mirrorRef react mirror reference to be registered
+     * @param {object} mirror react mirror reference to be registered
      */
     private registerMirror = (
         componentName: keyof FormComponents,
-        mirrorRef: Mirror,
+        mirror: Mirror,
     ): void => {
-        if (componentName in this.mirrorRefs) {
-            this.mirrorRefs[componentName].push(mirrorRef);
+        if (componentName in this.mirrors) {
+            this.mirrors[componentName].push(mirror);
         } else {
-            this.mirrorRefs[componentName] = [mirrorRef];
+            this.mirrors[componentName] = [mirror];
         }
     };
 
@@ -459,10 +459,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         mirrorRef: Mirror,
     ): void => {
-        if (componentName in this.mirrorRefs) {
-            const index = this.mirrorRefs[componentName].indexOf(mirrorRef);
+        if (componentName in this.mirrors) {
+            const index = this.mirrors[componentName].indexOf(mirrorRef);
             if (index > -1) {
-                this.mirrorRefs[componentName].splice(index, 1);
+                this.mirrors[componentName].splice(index, 1);
             }
         }
     };
@@ -566,7 +566,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     getComponentMirrors = (
         componentName: keyof FormComponents,
     ): MirrorInstance[] => {
-        return this.mirrorRefs[componentName] || [];
+        return this.mirrors[componentName] || [];
     };
 
     getComponentNames = (

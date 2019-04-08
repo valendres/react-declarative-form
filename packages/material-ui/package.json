@@ -3,8 +3,8 @@
     "name": "@react-declarative-form/material-ui",
     "version": "1.0.17",
     "description": "Bound Material UI form components",
-    "main": "./dist/index",
-    "typings": "./dist/index",
+    "main": "./src/index",
+    "typings": "./src/index",
     "repository": "valendres/react-declarative-form",
     "author": {
         "name": "Peter Weller",

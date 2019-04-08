@@ -117,11 +117,6 @@ export function bind<ComponentProps extends BoundComponentProps>(
                             ? this.getValidatorData()
                             : undefined;
 
-                        console.log(
-                            'BoundComponentInstance render called:',
-                            this.props.name,
-                            validatorData,
-                        );
                         return (
                             <WrappedComponent
                                 {...restProps}

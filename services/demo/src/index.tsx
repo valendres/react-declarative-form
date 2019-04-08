@@ -5,16 +5,16 @@ import { CssBaseline } from '@material-ui/core';
 import 'typeface-roboto';
 
 import {
-    LoginForm,
+    // LoginForm,
     // DefaultValuesForm,
-    // StickyValuesForm,
+    StickyValuesForm,
 } from './forms';
 
 const App = () => (
     <React.Fragment>
-        <LoginForm />
+        {/* <LoginForm /> */}
         {/* <DefaultValuesForm /> */}
-        {/* <StickyValuesForm /> */}
+        <StickyValuesForm />
     </React.Fragment>
 );
 

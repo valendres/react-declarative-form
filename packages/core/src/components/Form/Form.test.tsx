@@ -4,6 +4,7 @@ import { bind, BoundComponentProps } from '../bind';
 import { Form, FormProps } from './Form';
 import { Mirror } from '../Mirror';
 import { ValidatorContext, ValidatorData } from '@types';
+const delay = require('delay');
 
 describe('component: Form', () => {
     interface TextFieldProps extends BoundComponentProps {
@@ -153,14 +154,14 @@ describe('component: Form', () => {
 
             // Should log an error when attempting to register duplicate firstName component
             expect(console.error).toHaveBeenCalledWith(
-                `Failed to handle componentMount for "${componentName}", a component with this name already exists.`,
+                `Failed to register component: "${componentName}", a component with this name already exists.`,
             );
 
             // Trigger component unregistration
             wrapper.unmount();
 
             // Refs should be empty again
-            expect(form.componentRefs).toMatchObject({});
+            expect(form.components).toMatchObject({});
 
             // Cleanup
             (console.error as any).mockRestore();
@@ -203,7 +204,7 @@ describe('component: Form', () => {
     });
 
     describe('event handlers', () => {
-        it('should call change handler if a form component has been changed', () => {
+        it('should call change handler if a form component has been changed', async () => {
             const firstName = 'Peter';
             const props = mockProps();
             const wrapper = mount(
@@ -217,6 +218,8 @@ describe('component: Form', () => {
                 .find({ name: 'firstName' })
                 .find('input')
                 .simulate('change', mockEvent(firstName));
+
+            await delay(10);
 
             // Ensure handler has been called
             expect(props.onChange).toHaveBeenCalledWith('firstName', firstName);
@@ -242,7 +245,14 @@ describe('component: Form', () => {
                 .simulate('blur');
 
             // Ensure handler has been called with current value
-            expect(props.onBlur).toHaveBeenCalledWith('firstName', firstName);
+            const [
+                componentName,
+                value,
+                event,
+            ] = (props.onBlur as any).mock.calls[0];
+            expect(componentName).toBe('firstName');
+            expect(value).toBe(firstName);
+            expect(event.type).toBe('blur');
         });
 
         it('should call focus handler if a form component has been focused', () => {
@@ -265,7 +275,14 @@ describe('component: Form', () => {
                 .simulate('focus');
 
             // Ensure handler has been called with current value
-            expect(props.onFocus).toHaveBeenCalledWith('firstName', firstName);
+            const [
+                componentName,
+                value,
+                event,
+            ] = (props.onFocus as any).mock.calls[0];
+            expect(componentName).toBe('firstName');
+            expect(value).toBe(firstName);
+            expect(event.type).toBe('focus');
         });
 
         it('should call valid form handlers if submitting without an invalid component', async () => {

@@ -356,7 +356,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     ): Promise<void> => {
         // Don't set value if component is unknown
         if (!(componentName in this.components)) {
-            return;
+            throw `Failed to set value for "${componentName}" component. It does not exist in form context.`;
         }
 
         const validatorData = this.executeValidator(componentName, value);
@@ -378,6 +378,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
         // Trigger component re-render
         await this.updateComponent(componentName);
+        return this.props.onChange(componentName, value);
     };
 
     public setValues = (
@@ -403,7 +404,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             !!this.components[componentName].instance
         ) {
             console.error(
-                `Failed to handle register component: "${componentName}", a component with this name already exists.`,
+                `Failed to register component: "${componentName}", a component with this name already exists.`,
             );
             return;
         }
@@ -576,7 +577,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * @param {string} componentName name of the component
      * @returns array of mirror instances
      */
-    getMirrors = (componentName: keyof FormComponents): MirrorInstance[] => {
+    getComponentMirrors = (
+        componentName: keyof FormComponents,
+    ): MirrorInstance[] => {
         return this.mirrorRefs[componentName] || [];
     };
 
@@ -696,8 +699,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
     ): Promise<void[]> => {
         return Promise.all(
-            this.getMirrors(componentName).map((mirror: MirrorInstance) =>
-                mirror.reflect(),
+            this.getComponentMirrors(componentName).map(
+                (mirror: MirrorInstance) => mirror.reflect(),
             ),
         );
     };

@@ -214,14 +214,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
         return Promise.all(
-            this.getComponentNames(componentName).map(componentName => {
-                this.components = update(this.components, {
-                    [componentName]: {
-                        $unset: ['value', 'validatorData', 'pristine'],
-                    },
-                });
-                return this.updateComponent(componentName);
-            }),
+            this.getComponentNames(componentName).map(componentName =>
+                this.updateComponent(componentName, {
+                    $unset: ['value', 'validatorData', 'pristine'],
+                }),
+            ),
         );
     };
 
@@ -335,18 +332,14 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             throw `Failed to set validatorData for "${componentName}" component. It does not exist in form context.`;
         }
 
-        this.components = update(this.components, {
-            [componentName]: {
-                pristine: {
-                    $set: false,
-                },
-                validatorData: {
-                    $set: data,
-                },
+        return this.updateComponent(componentName, {
+            pristine: {
+                $set: false,
+            },
+            validatorData: {
+                $set: data,
             },
         });
-
-        return this.updateComponent(componentName);
     };
 
     public setValue = async (
@@ -359,25 +352,18 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             throw `Failed to set value for "${componentName}" component. It does not exist in form context.`;
         }
 
-        const validatorData = this.executeValidator(componentName, value);
-
-        // Update component state
-        this.components = update(this.components, {
-            [componentName]: {
-                pristine: {
-                    $set: pristine,
-                },
-                value: {
-                    $set: value,
-                },
-                validatorData: {
-                    $set: validatorData,
-                },
+        await this.updateComponent(componentName, {
+            pristine: {
+                $set: pristine,
+            },
+            value: {
+                $set: value,
+            },
+            validatorData: {
+                $set: this.executeValidator(componentName, value),
             },
         });
 
-        // Trigger component re-render
-        await this.updateComponent(componentName);
         return this.props.onChange(componentName, value);
     };
 
@@ -688,7 +674,18 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         return [];
     };
 
-    updateComponent = (componentName: keyof FormComponents): Promise<void> => {
+    updateComponent = (
+        componentName: keyof FormComponents,
+        componentTransform: any,
+    ): Promise<void> => {
+        if (!(componentName in this.components)) {
+            throw `Unable to update "${componentName}" compoment. It does not exist in form context.`;
+        }
+
+        this.components = update(this.components, {
+            [componentName]: componentTransform,
+        });
+
         const component = this.components[componentName];
         if (component && component.instance) {
             return new Promise(resolve => {

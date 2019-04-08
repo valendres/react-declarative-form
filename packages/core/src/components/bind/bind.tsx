@@ -50,7 +50,7 @@ export type BoundComponentProps = BoundComponentInjectedProps &
 
 export interface BoundComponentInstance {
     props: BoundComponentProps;
-    update: () => Promise<void>;
+    forceUpdate: (callback: () => void) => void;
 }
 
 export function bind<ComponentProps extends BoundComponentProps>(
@@ -64,12 +64,6 @@ export function bind<ComponentProps extends BoundComponentProps>(
             onBlur: () => {},
             onFocus: () => {},
         };
-
-        // public constructor(props: ComponentProps) {
-        //     super(props);
-        //     this.getResponse = this.getResponse.bind(this);
-        //     this.isInsideForm = this.isInsideForm.bind(this);
-        // }
 
         public componentDidMount() {
             if (this.isInsideForm()) {
@@ -234,12 +228,6 @@ export function bind<ComponentProps extends BoundComponentProps>(
             throw `Failed to handle focus for "${
                 this.props.name
             }", not inside form.`;
-        };
-
-        update = (): Promise<void> => {
-            return new Promise(resolve => {
-                this.forceUpdate(resolve);
-            });
         };
 
         isInsideForm(): boolean {

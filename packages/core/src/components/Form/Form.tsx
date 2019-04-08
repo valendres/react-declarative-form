@@ -81,7 +81,7 @@ export interface FormProps<FormFields extends ValueMap>
     onValidSubmit?: (values: FormFields) => void;
 
     /**
-     * Called after onSubmit at least 1 bound form component is invalid.
+     * Called after onSubmit at least 1 bound form component is invalid.x
      * @param {object} values name/value pairs for all bound form components.
      */
     onInvalidSubmit?: (values: FormFields) => void;
@@ -691,7 +691,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     updateComponent = (componentName: keyof FormComponents): Promise<void> => {
         const component = this.components[componentName];
         if (component && component.instance) {
-            return component.instance.update();
+            return new Promise(resolve => {
+                return component.instance.forceUpdate(resolve);
+            });
         }
     };
 

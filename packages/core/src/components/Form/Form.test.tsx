@@ -544,8 +544,8 @@ describe('component: Form', () => {
             return (wrapper.instance() as Form<any>)
                 .setValue('lastName', 'abc')
                 .catch(error => {
-                    expect(error).toBe(
-                        'Failed to set value for "lastName" component. It does not exist in form context.',
+                    expect(error).toMatchInlineSnapshot(
+                        `[UnknownComponentError: Failed to set value for "lastName" component. Not a descendant of this <Form/> component.]`,
                     );
                 });
         });
@@ -780,8 +780,8 @@ describe('component: Form', () => {
                     message: 'Something went wrong :(',
                 })
                 .catch(error => {
-                    expect(error).toBe(
-                        'Failed to set validatorData for "lastName" component. It does not exist in form context.',
+                    expect(error).toMatchInlineSnapshot(
+                        `[UnknownComponentError: Failed to set validatorData for "lastName" component. Not a descendant of this <Form/> component.]`,
                     );
                 });
         });

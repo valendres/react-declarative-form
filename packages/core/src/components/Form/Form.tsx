@@ -12,6 +12,7 @@ import { BoundComponentInstance } from '../bind';
 import { MirrorInstance, Mirror } from '../Mirror';
 import { ensurePromise } from '../../utils';
 import { validate } from '../../validator';
+import { UnknownComponentError } from '../../errors';
 
 export const FormContext = React.createContext(undefined as FormApi);
 
@@ -22,8 +23,8 @@ export interface FormApi {
     isValid: Form<any>['isValid'];
     isPristine: Form<any>['isPristine'];
     getValidatorData: Form<any>['getValidatorData'];
-    setValidatorData: Form<any>['setValidatorData'];
     getValue: Form<any>['getValue'];
+    setValidatorData: Form<any>['setValidatorData'];
     setValue: Form<any>['setValue'];
     onComponentMount: Form<any>['handleComponentMount'];
     onComponentUnmount: Form<any>['handleComponentUnmount'];
@@ -329,7 +330,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     ): Promise<void> => {
         // Don't set data if component is unknown
         if (!(componentName in this.components)) {
-            throw `Failed to set validatorData for "${componentName}" component. It does not exist in form context.`;
+            throw new UnknownComponentError(
+                `set validatorData for "${componentName}" component`,
+            );
         }
 
         return this.updateComponent(componentName, {
@@ -349,7 +352,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     ): Promise<void> => {
         // Don't set value if component is unknown
         if (!(componentName in this.components)) {
-            throw `Failed to set value for "${componentName}" component. It does not exist in form context.`;
+            throw new UnknownComponentError(
+                `set value for "${componentName}" component`,
+            );
         }
 
         await this.updateComponent(componentName, {
@@ -587,7 +592,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             return [componentName];
         }
 
-        throw `Failed to get component names from ${componentName}`;
+        throw new UnknownComponentError(
+            `get component names from ${componentName}`,
+        );
     };
 
     getComponentInstance = (
@@ -679,7 +686,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentTransform: any,
     ): Promise<void> => {
         if (!(componentName in this.components)) {
-            throw `Unable to update "${componentName}" compoment. It does not exist in form context.`;
+            throw new UnknownComponentError(
+                `Unable to update "${componentName}" compoment`,
+            );
         }
 
         this.components = update(this.components, {

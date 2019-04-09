@@ -369,7 +369,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             },
         });
 
-        return this.props.onChange(componentName, value);
+        return this.handleFormChange(componentName, value);
     };
 
     public setValues = (
@@ -478,7 +478,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         value: any,
     ) => {
-        this.props.onChange(componentName, value);
+        return this.props.onChange(componentName, value);
     };
 
     private handleFormSubmit = (event?: React.FormEvent<HTMLFormElement>) => {

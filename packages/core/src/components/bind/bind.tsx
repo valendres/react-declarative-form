@@ -6,6 +6,7 @@ import {
     ValidatorMessageGenerator,
 } from '../../types';
 import { FormContext, FormApi } from '../Form';
+import { OutsideFormError } from '../../errors';
 
 export interface BoundComponentCommonProps {
     /** Unique form component identifier */
@@ -50,6 +51,15 @@ export type BoundComponentProps = BoundComponentInjectedProps &
 
 export interface BoundComponentInstance {
     props: BoundComponentProps;
+    clear: () => Promise<void[]>;
+    reset: () => Promise<void[]>;
+    validate: () => Promise<void[]>;
+    isValid: () => boolean;
+    isPristine: () => boolean;
+    getValidatorData: () => ValidatorData;
+    getValue: () => any;
+    setValidatorData: (data: ValidatorData) => Promise<void>;
+    setValue: (value: any) => Promise<void>;
     forceUpdate: (callback: () => void) => void;
 }
 
@@ -66,25 +76,24 @@ export function bind<ComponentProps extends BoundComponentProps>(
         };
 
         public componentDidMount() {
-            if (this.isInsideForm()) {
-                this.formApi.onComponentMount(this.props.name, this);
-            } else {
+            const { name } = this.props;
+            if (!this.formApi) {
                 console.error(
-                    'Bound form components must be placed inside of a <Form/> component.',
+                    `Bound "${name}" form component must be a descendant of a <Form/>.`,
                 );
+                return;
             }
+            this.formApi.onComponentMount(name, this);
         }
 
         public componentWillUnmount() {
-            if (this.isInsideForm()) {
-                this.formApi.onComponentUnmount(this.props.name);
-            }
+            const { name } = this.props;
+            return this.formApi && this.formApi.onComponentUnmount(name);
         }
 
         public componentDidUpdate() {
-            if (this.isInsideForm()) {
-                this.formApi.onComponentUpdate(this.props.name);
-            }
+            const { name } = this.props;
+            return this.formApi && this.formApi.onComponentUpdate(name);
         }
 
         public render() {
@@ -100,26 +109,21 @@ export function bind<ComponentProps extends BoundComponentProps>(
                 <FormContext.Consumer>
                     {(api: FormApi) => {
                         this.formApi = api;
-
-                        const value = this.isInsideForm()
-                            ? this.getValue()
-                            : null;
-                        const isPristine = this.isInsideForm()
-                            ? this.isPristine()
-                            : true;
-                        const validatorData = this.isInsideForm()
-                            ? this.getValidatorData()
-                            : undefined;
-
                         return (
                             <WrappedComponent
                                 {...restProps}
-                                value={value}
-                                pristine={isPristine}
-                                validatorData={validatorData}
+                                value={this.formApi ? this.getValue() : null}
+                                pristine={
+                                    this.formApi ? this.isPristine() : true
+                                }
+                                validatorData={
+                                    this.formApi
+                                        ? this.getValidatorData()
+                                        : undefined
+                                }
                                 setValue={this.setValue}
-                                onBlur={this.UNSAFE_handleBlur}
-                                onFocus={this.UNSAFE_handleFocus}
+                                onBlur={this._handleBlur}
+                                onFocus={this._handleFocus}
                             />
                         );
                     }}
@@ -127,112 +131,110 @@ export function bind<ComponentProps extends BoundComponentProps>(
             );
         }
 
-        //#region Public functions
+        //#region Public commands
         clear = () => {
-            if (this.isInsideForm()) {
-                return this.formApi.clear(this.props.name);
+            const { name } = this.props;
+            if (!this.formApi) {
+                throw new OutsideFormError(`clear "${name}"`);
             }
-            throw `Failed to clear "${this.props.name}", not inside form.`;
+            return this.formApi.clear(name);
         };
 
         reset = () => {
-            if (this.isInsideForm()) {
-                return this.formApi.reset(this.props.name);
+            const { name } = this.props;
+            if (!this.formApi) {
+                throw new OutsideFormError(`reset "${name}"`);
             }
-            throw `Failed to reset "${this.props.name}", not inside form.`;
+            return this.formApi.reset(name);
         };
 
         validate = () => {
-            if (this.isInsideForm()) {
-                return this.formApi.validate(this.props.name);
+            const { name } = this.props;
+            if (!this.formApi) {
+                throw new OutsideFormError(`validate "${name}"`);
             }
-            throw `Failed to validate "${this.props.name}", not inside form.`;
-        };
-
-        isValid = () => {
-            if (this.isInsideForm()) {
-                return this.formApi.isValid(this.props.name);
-            }
-            throw `Failed to determine if "${
-                this.props.name
-            }" is valid, not inside form.`;
-        };
-
-        isPristine = () => {
-            if (this.isInsideForm()) {
-                return this.formApi.isPristine(this.props.name);
-            }
-            throw `Failed to determine if "${
-                this.props.name
-            }" is pristine, not inside form.`;
-        };
-
-        setValidatorData = (data: ValidatorData): Promise<void> => {
-            if (this.isInsideForm()) {
-                return this.formApi.setValidatorData(this.props.name, data);
-            }
-            throw `Failed to set set validator data for "${
-                this.props.name
-            }", not inside form.`;
-        };
-
-        getValidatorData = () => {
-            if (this.isInsideForm()) {
-                return this.formApi.getValidatorData(
-                    this.props.name,
-                    this.props,
-                );
-            }
-            throw `Failed to get validator data for "${
-                this.props.name
-            }", not inside form.`;
-        };
-
-        getValue = () => {
-            if (this.isInsideForm()) {
-                return this.formApi.getValue(this.props.name, this.props);
-            }
-            throw `Failed to get value for "${
-                this.props.name
-            }", not inside form.`;
-        };
-
-        setValue = async (value: any) => {
-            if (this.isInsideForm()) {
-                return this.formApi.setValue(this.props.name, value);
-            }
-            throw `Failed to set value for "${
-                this.props.name
-            }", not inside form.`;
+            return this.formApi.validate(name);
         };
         //#endregion
 
-        //#region Private functions
-        // tslint:disable-next-line:variable-name
-        UNSAFE_handleBlur = async (event?: React.FocusEvent<any>) => {
-            if (this.isInsideForm()) {
-                await this.formApi.onComponentBlur(this.props.name, event);
-                return this.props.onBlur(event);
+        //#region Public evaluators
+        isValid = () => {
+            const { name } = this.props;
+            if (!this.formApi) {
+                throw new OutsideFormError(`determine if "${name}" is valid`);
             }
-            throw `Failed to handle blur for "${
-                this.props.name
-            }", not inside form.`;
+            return this.formApi.isValid(name);
         };
 
-        // tslint:disable-next-line:variable-name
-        UNSAFE_handleFocus = async (event?: React.FocusEvent<any>) => {
-            if (this.isInsideForm()) {
-                await this.formApi.onComponentFocus(this.props.name, event);
-                return this.props.onFocus(event);
+        isPristine = () => {
+            const { name } = this.props;
+            if (!this.formApi) {
+                throw new OutsideFormError(
+                    `determine if "${name}" is pristine`,
+                );
             }
-            throw `Failed to handle focus for "${
-                this.props.name
-            }", not inside form.`;
+            return this.formApi.isPristine(name);
+        };
+        //#endregion
+
+        //#region Public getters
+        getValidatorData = () => {
+            const { name } = this.props;
+            if (!this.formApi) {
+                throw new OutsideFormError(`get validator data for "${name}"`);
+            }
+            return this.formApi.getValidatorData(name, this.props);
         };
 
-        isInsideForm(): boolean {
-            return !!this.formApi;
-        }
+        getValue = () => {
+            const { name } = this.props;
+            if (!this.formApi) {
+                throw new OutsideFormError(`get value for "${name}"`);
+            }
+            return this.formApi.getValue(name, this.props);
+        };
+        //#endregion
+
+        //#region Public setters
+        setValidatorData = async (data: ValidatorData): Promise<void> => {
+            const { name } = this.props;
+            if (!this.formApi) {
+                throw new OutsideFormError(`set validator data for "${name}"`);
+            }
+            return this.formApi.setValidatorData(name, data);
+        };
+
+        setValue = async (value: any) => {
+            const { name } = this.props;
+            if (!this.formApi) {
+                throw new OutsideFormError(`set value for "${name}"`);
+            }
+            return this.formApi.setValue(name, value);
+        };
+        //#endregion
+
+        //#region Private event handlers
+        // tslint:disable:variable-name
+        _handleBlur = async (event?: React.FocusEvent<any>) => {
+            const { name } = this.props;
+            if (!this.formApi) {
+                throw new OutsideFormError(`handle blur for "${name}"`);
+            }
+
+            await this.formApi.onComponentBlur(name, event);
+            return this.props.onBlur(event);
+        };
+
+        _handleFocus = async (event?: React.FocusEvent<any>) => {
+            const { name } = this.props;
+            if (!this.formApi) {
+                throw new OutsideFormError(`handle focus for "${name}"`);
+            }
+
+            await this.formApi.onComponentFocus(name, event);
+            return this.props.onFocus(event);
+        };
+        // tslint:enable:variable-name
         //#endregion
     };
 }

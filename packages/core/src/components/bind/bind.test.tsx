@@ -1,182 +1,368 @@
-// import * as React from 'react';
-// import { mount } from 'enzyme';
+import * as React from 'react';
 
-// import { bind, BoundComponentProps } from './bind';
-// import { FormApi, Form } from '../Form';
-// import { ValidatorData, ValidatorContext } from '../../types';
+import { bind, BoundComponentProps, BoundComponentInstance } from './bind';
+import { FormApi, FormContext } from '../Form';
+import { mount } from 'enzyme';
+import { ValidatorData, ValidatorContext } from '@types';
 
-// describe('module: bind', () => {
-//     class ComponentClass extends React.Component<any> {
-//         render() {
-//             return <div />;
-//         }
-//     }
+describe('module: bind', () => {
+    class FakeForm extends React.Component<{
+        api: FormApi;
+    }> {
+        render() {
+            const { api, children } = this.props;
+            return (
+                <FormContext.Provider value={api}>
+                    {children}
+                </FormContext.Provider>
+            );
+        }
+    }
 
-//     const BoundComponentClass = bind(ComponentClass);
+    class ComponentClass extends React.Component<any> {
+        render() {
+            return <div />;
+        }
+    }
 
-//     const mockProps = (
-//         props: Partial<BoundComponentProps> = {},
-//     ): BoundComponentProps => ({
-//         name: 'test',
-//         onBlur: jest.fn(),
-//         onFocus: jest.fn(),
-//         ...props,
-//     });
+    const BoundComponentClass = bind(ComponentClass);
 
-//     const mockFormApi = (api: Partial<FormApi> = {}): FormApi => ({
-//         registerComponent: jest.fn(),
-//         unregisterComponent: jest.fn(),
-//         registerMirror: jest.fn(),
-//         unregisterMirror: jest.fn(),
-//         validate: jest.fn(),
-//         getResponse: jest.fn(),
-//         setStickyValue: jest.fn(),
-//         getStickyValue: jest.fn().mockReturnValue(undefined),
-//         getInitialValue: jest.fn().mockReturnValue(undefined),
-//         getValue: jest.fn().mockReturnValue(undefined),
-//         onMount: jest.fn(),
-//         onUpdate: jest.fn(),
-//         onChange: jest.fn(),
-//         onBlur: jest.fn(),
-//         onFocus: jest.fn(),
-//         ...api,
-//     });
+    const mockProps = (
+        props: Partial<BoundComponentProps> = {},
+    ): BoundComponentProps => ({
+        name: 'test',
+        onBlur: jest.fn(),
+        onFocus: jest.fn(),
+        ...props,
+    });
 
-//     describe('func: getValue', () => {
-//         it('should freeze objects to prevent modification', () => {
-//             const props = mockProps({
-//                 value: {
-//                     firstName: 'Peter',
-//                 },
-//             });
-//             const wrapper = mount(
-//                 <Form>
-//                     <BoundComponentClass {...props} />
-//                 </Form>,
-//             );
-//             const instance = wrapper
-//                 .find(BoundComponentClass)
-//                 .instance() as any;
+    const mockFormApi = (api: Partial<FormApi> = {}): FormApi => ({
+        clear: jest.fn().mockResolvedValue(undefined),
+        reset: jest.fn().mockResolvedValue(undefined),
+        validate: jest.fn().mockResolvedValue(undefined),
+        isValid: jest.fn(),
+        isPristine: jest.fn(),
+        getValidatorData: jest.fn().mockResolvedValue(undefined),
+        getValue: jest.fn().mockResolvedValue(undefined),
+        setValidatorData: jest.fn().mockResolvedValue(undefined),
+        setValue: jest.fn().mockResolvedValue(undefined),
+        onComponentMount: jest.fn().mockResolvedValue(undefined),
+        onComponentUnmount: jest.fn().mockResolvedValue(undefined),
+        onComponentUpdate: jest.fn().mockResolvedValue(undefined),
+        onComponentBlur: jest.fn().mockResolvedValue(undefined),
+        onComponentFocus: jest.fn().mockResolvedValue(undefined),
+        registerMirror: jest.fn(),
+        unregisterMirror: jest.fn(),
+        ...api,
+    });
 
-//             const value = instance.getValue();
-//             expect(Object.isFrozen(value)).toBe(true);
-//         });
-//     });
+    describe('Public commands', () => {
+        describe('func: clear', () => {
+            it('should call clear on Form ancestor', () => {
+                const formApi = mockFormApi();
+                const props = mockProps();
+                const wrapper = mount(
+                    <FakeForm api={formApi}>
+                        <BoundComponentClass {...props} />
+                    </FakeForm>,
+                );
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                instance.clear();
+                expect(formApi.clear).toHaveBeenCalledWith(props.name);
+            });
 
-//     describe('func: setValue', () => {
-//         it('should call setState with new value, response for value and set pristine to false', async () => {
-//             const props = mockProps();
-//             const wrapper = mount(
-//                 <Form>
-//                     <BoundComponentClass {...props} />
-//                 </Form>,
-//             );
-//             const instance = wrapper
-//                 .find(BoundComponentClass)
-//                 .instance() as any;
+            it('should throw an error if called outside of a Form', () => {
+                const props = mockProps();
+                const wrapper = mount(<BoundComponentClass {...props} />);
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                expect(instance.clear).toThrowErrorMatchingInlineSnapshot(
+                    `"Failed to clear \\"test\\". Must be descendant of a <Form/> descendant."`,
+                );
+            });
+        });
 
-//             const nextValue = 'test';
-//             const nextResponse: ValidatorData = {
-//                 name: 'test',
-//                 context: ValidatorContext.Danger,
-//                 message: 'Not valid!',
-//             };
+        describe('func: reset', () => {
+            it('should call reset on Form ancestor', () => {
+                const formApi = mockFormApi();
+                const props = mockProps();
+                const wrapper = mount(
+                    <FakeForm api={formApi}>
+                        <BoundComponentClass {...props} />
+                    </FakeForm>,
+                );
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                instance.reset();
+                expect(formApi.reset).toHaveBeenCalledWith(props.name);
+            });
 
-//             jest.spyOn(instance, 'getResponse').mockReturnValue(nextResponse);
-//             jest.spyOn(instance, 'setState');
-//             await instance.setValue(nextValue);
+            it('should throw an error if called outside of a Form', () => {
+                const props = mockProps();
+                const wrapper = mount(<BoundComponentClass {...props} />);
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                expect(instance.reset).toThrowErrorMatchingInlineSnapshot(
+                    `"Failed to reset \\"test\\". Must be descendant of a <Form/> descendant."`,
+                );
+            });
+        });
 
-//             expect(instance.getResponse).toHaveBeenCalledWith(nextValue);
-//             expect(instance.setState.mock.calls[0][0]).toEqual({
-//                 value: nextValue,
-//                 response: nextResponse,
-//                 pristine: false,
-//             });
-//         });
+        describe('func: validate', () => {
+            it('should call validate on Form ancestor', () => {
+                const formApi = mockFormApi();
+                const props = mockProps();
+                const wrapper = mount(
+                    <FakeForm api={formApi}>
+                        <BoundComponentClass {...props} />
+                    </FakeForm>,
+                );
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                instance.validate();
+                expect(formApi.validate).toHaveBeenCalledWith(props.name);
+            });
 
-//         it('should call onChange with component name and new value if inside a form', async () => {
-//             const handleChange = jest.fn();
-//             const props = mockProps();
-//             const wrapper = mount(
-//                 <Form onChange={handleChange}>
-//                     <BoundComponentClass {...props} />
-//                 </Form>,
-//             );
+            it('should throw an error if called outside of a Form', () => {
+                const props = mockProps();
+                const wrapper = mount(<BoundComponentClass {...props} />);
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                expect(instance.validate).toThrowErrorMatchingInlineSnapshot(
+                    `"Failed to validate \\"test\\". Must be descendant of a <Form/> descendant."`,
+                );
+            });
+        });
+    });
 
-//             const instance = wrapper
-//                 .find(BoundComponentClass)
-//                 .instance() as any;
+    describe('Public evaluators', () => {
+        describe('func: isValid', () => {
+            it('should call isValid on Form ancestor', () => {
+                const expectedReturnValue = true;
+                const formApi = mockFormApi({
+                    isValid: jest.fn().mockReturnValue(expectedReturnValue),
+                });
+                const props = mockProps();
+                const wrapper = mount(
+                    <FakeForm api={formApi}>
+                        <BoundComponentClass {...props} />
+                    </FakeForm>,
+                );
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                const result = instance.isValid();
+                expect(result).toBe(expectedReturnValue);
+                expect(formApi.isValid).toHaveBeenCalledWith(props.name);
+            });
 
-//             const nextValue = 'test';
-//             await instance.setValue(nextValue);
-//             expect(handleChange).toHaveBeenCalledWith(props.name, nextValue);
-//         });
-//     });
+            it('should throw an error if called outside of a Form', () => {
+                const props = mockProps();
+                const wrapper = mount(<BoundComponentClass {...props} />);
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                expect(instance.isValid).toThrowErrorMatchingInlineSnapshot(
+                    `"Failed to determine if \\"test\\" is valid. Must be descendant of a <Form/> descendant."`,
+                );
+            });
+        });
 
-//     describe('func: handleBlur', () => {
-//         it('should not call formApi.onBlur if outside a form', () => {
-//             const props = mockProps();
-//             const instance = new BoundComponentClass(props);
-//             instance.formApi = mockFormApi();
-//             jest.spyOn(instance, 'isInsideForm').mockReturnValue(false);
+        describe('func: isPristine', () => {
+            it('should call isPristine on Form ancestor', () => {
+                const expectedReturnValue = true;
+                const formApi = mockFormApi({
+                    isPristine: jest.fn().mockReturnValue(expectedReturnValue),
+                });
+                const props = mockProps();
+                const wrapper = mount(
+                    <FakeForm api={formApi}>
+                        <BoundComponentClass {...props} />
+                    </FakeForm>,
+                );
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                const result = instance.isPristine();
+                expect(result).toBe(expectedReturnValue);
+                expect(formApi.isPristine).toHaveBeenCalledWith(props.name);
+            });
 
-//             instance.handleBlur();
-//             expect(instance.formApi.onBlur).not.toHaveBeenCalled();
-//             // This should always get executed
-//             expect(instance.props.onBlur).toHaveBeenCalled();
-//         });
+            it('should throw an error if called outside of a Form', () => {
+                const props = mockProps();
+                const wrapper = mount(<BoundComponentClass {...props} />);
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                expect(instance.isPristine).toThrowErrorMatchingInlineSnapshot(
+                    `"Failed to determine if \\"test\\" is pristine. Must be descendant of a <Form/> descendant."`,
+                );
+            });
+        });
+    });
 
-//         it('should call formApi.onBlur if inside a form', () => {
-//             const props = mockProps();
-//             const instance = new BoundComponentClass(props);
-//             instance.formApi = mockFormApi();
-//             jest.spyOn(instance, 'isInsideForm').mockReturnValue(true);
+    describe('Public getters', () => {
+        describe('func: getValidatorData', () => {
+            it('should call getValidatorData on Form ancestor', () => {
+                const expectedReturnValue: ValidatorData = {
+                    context: ValidatorContext.Success,
+                    message: '',
+                };
+                const formApi = mockFormApi({
+                    getValidatorData: jest
+                        .fn()
+                        .mockReturnValue(expectedReturnValue),
+                });
+                const props = mockProps();
+                const wrapper = mount(
+                    <FakeForm api={formApi}>
+                        <BoundComponentClass {...props} />
+                    </FakeForm>,
+                );
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                const result = instance.getValidatorData();
+                expect(result).toBe(expectedReturnValue);
+                expect(formApi.getValidatorData).toHaveBeenCalledWith(
+                    props.name,
+                    props,
+                );
+            });
 
-//             instance.handleBlur();
-//             expect(instance.formApi.onBlur).toHaveBeenCalled();
-//             // This should always get executed
-//             expect(instance.props.onBlur).toHaveBeenCalled();
-//         });
-//     });
+            it('should throw an error if called outside of a Form', () => {
+                const props = mockProps();
+                const wrapper = mount(<BoundComponentClass {...props} />);
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                expect(
+                    instance.getValidatorData,
+                ).toThrowErrorMatchingInlineSnapshot(
+                    `"Failed to get validator data for \\"test\\". Must be descendant of a <Form/> descendant."`,
+                );
+            });
+        });
 
-//     describe('func: handleFocus', () => {
-//         it('should not call formApi.onFocus if outside a form', () => {
-//             const props = mockProps();
-//             const instance = new BoundComponentClass(props);
-//             instance.formApi = mockFormApi();
-//             jest.spyOn(instance, 'isInsideForm').mockReturnValue(false);
+        describe('func: getValue', () => {
+            it('should call getValue on Form ancestor', () => {
+                const expectedReturnValue: any = 'abc';
+                const formApi = mockFormApi({
+                    getValue: jest.fn().mockReturnValue(expectedReturnValue),
+                });
+                const props = mockProps();
+                const wrapper = mount(
+                    <FakeForm api={formApi}>
+                        <BoundComponentClass {...props} />
+                    </FakeForm>,
+                );
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                const result = instance.getValue();
+                expect(result).toBe(expectedReturnValue);
+                expect(formApi.getValue).toHaveBeenCalledWith(
+                    props.name,
+                    props,
+                );
+            });
 
-//             instance.handleFocus();
-//             expect(instance.formApi.onFocus).not.toHaveBeenCalled();
-//             // This should always get executed
-//             expect(instance.props.onFocus).toHaveBeenCalled();
-//         });
+            it('should throw an error if called outside of a Form', () => {
+                const props = mockProps();
+                const wrapper = mount(<BoundComponentClass {...props} />);
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                expect(instance.getValue).toThrowErrorMatchingInlineSnapshot(
+                    `"Failed to get value for \\"test\\". Must be descendant of a <Form/> descendant."`,
+                );
+            });
+        });
+    });
 
-//         it('should call formApi.onFocus if inside a form', () => {
-//             const props = mockProps();
-//             const instance = new BoundComponentClass(props);
-//             instance.formApi = mockFormApi();
-//             jest.spyOn(instance, 'isInsideForm').mockReturnValue(true);
+    describe('Public setters', () => {
+        describe('func: setValidatorData', () => {
+            const validatorData: ValidatorData = {
+                context: ValidatorContext.Danger,
+                message: 'custom error message',
+            };
 
-//             instance.handleFocus();
-//             expect(instance.formApi.onFocus).toHaveBeenCalled();
-//             // This should always get executed
-//             expect(instance.props.onFocus).toHaveBeenCalled();
-//         });
-//     });
+            it('should call setValidatorData on Form ancestor', () => {
+                const formApi = mockFormApi({
+                    setValidatorData: jest.fn().mockResolvedValue(undefined),
+                });
+                const props = mockProps();
+                const wrapper = mount(
+                    <FakeForm api={formApi}>
+                        <BoundComponentClass {...props} />
+                    </FakeForm>,
+                );
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                instance.setValidatorData(validatorData);
+                expect(formApi.setValidatorData).toHaveBeenCalledWith(
+                    props.name,
+                    validatorData,
+                );
+            });
 
-//     it.each([
-//         // Api will be undefined if outside the scope of a form
-//         [undefined, false],
-//         // Api will be defined if inside the scope of a form
-//         [mockFormApi(), true],
-//     ])(
-//         'should return true if a form api exists',
-//         (formApi: FormApi, result: boolean) => {
-//             const props = mockProps();
-//             const instance = new BoundComponentClass(props);
-//             instance.formApi = formApi;
-//             expect(instance.isInsideForm()).toBe(result);
-//         },
-//     );
-// });
+            it('should throw an error if called outside of a Form', async () => {
+                const props = mockProps();
+                const wrapper = mount(<BoundComponentClass {...props} />);
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                await expect(
+                    instance.setValidatorData(validatorData),
+                ).rejects.toMatchInlineSnapshot(
+                    `[OutsideFormError: Failed to set validator data for "test". Must be descendant of a <Form/> descendant.]`,
+                );
+            });
+        });
+
+        describe('func: setValue', () => {
+            const value: any = 'abc';
+
+            it('should call setValue on Form ancestor', () => {
+                const formApi = mockFormApi({
+                    setValue: jest.fn().mockResolvedValue(undefined),
+                });
+                const props = mockProps();
+                const wrapper = mount(
+                    <FakeForm api={formApi}>
+                        <BoundComponentClass {...props} />
+                    </FakeForm>,
+                );
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                instance.setValue(value);
+                expect(formApi.setValue).toHaveBeenCalledWith(
+                    props.name,
+                    value,
+                );
+            });
+
+            it('should throw an error if called outside of a Form', async () => {
+                const props = mockProps();
+                const wrapper = mount(<BoundComponentClass {...props} />);
+                const instance: BoundComponentInstance = wrapper
+                    .find(BoundComponentClass)
+                    .instance() as any;
+                await expect(
+                    instance.setValue(value),
+                ).rejects.toMatchInlineSnapshot(
+                    `[OutsideFormError: Failed to set value for "test". Must be descendant of a <Form/> descendant.]`,
+                );
+            });
+        });
+    });
+});

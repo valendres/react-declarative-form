@@ -106,9 +106,9 @@ export interface FormProps<FormFields extends ValueMap>
     withHiddenSubmit?: boolean;
 
     /**
-     * Whether the form component values should be sticky and retain their value in between
-     * component unmounts and mounts. By default,form component state is bound to the mounted
-     * instance - if the instance is unmounted, its value will be lost.
+     * Whether the form component values should be sticky and retain their value in
+     * between component unmounts and mounts. By default, form component state is
+     * lost when a component is unmounted.
      */
     sticky?: boolean;
 }
@@ -196,11 +196,21 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             </FormContext.Provider>
         );
     }
+
     //#region Public commands
+    /**
+     * Programatically submit the form. If you don't want to manually call this, a button
+     * with type submit should be provided to the form. This can be provided in your form
+     * implementation, or automatically using the `withHiddenSubmit` prop on the Form.
+     */
     public submit = () => {
         return this.handleFormSubmit();
     };
 
+    /**
+     * Clears the specified component(s) by setting their value to null. If no component
+     * names are provided, all components within the form will be cleared.
+     */
     public clear = async (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
@@ -211,6 +221,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         );
     };
 
+    /**
+     * Resets the specified component(s) by unsetting their value, validator and pristine
+     * state. If no component names are provided, all components within the form will be
+     * reset.
+     */
     public reset = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
@@ -223,6 +238,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         );
     };
 
+    /**
+     * Validates specified component(s) by executing the validator and updating the
+     * components to reflect their validator state. If no component names are provided,
+     * all components within the form will be validated.
+     */
     public validate = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
@@ -238,6 +258,12 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     //#endregion
 
     //#region Public evaluators
+
+    /**
+     * Determines if all the specified component(s) are valid by executing the validator
+     * using the components current value. If no component names are provided, all
+     * components within the form will be tested.
+     */
     public isValid = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): boolean => {
@@ -250,6 +276,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         return !results.includes(false);
     };
 
+    /**
+     * Determines if all the specified component(s) are pristine - the component has not
+     * been modified by the user or by programatically calling setValue. If no component
+     * names are provided, all components within the form will checked.
+     */
     public isPristine = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): boolean => {
@@ -264,6 +295,16 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     // #endregion
 
     //#region Public getters
+
+    /**
+     * Returns the components current  validatorData. There are 2 ways a components
+     * validator data can be retrieved (in order of precedence):
+     *  1. externally managed validatorData prop provided to the component
+     *  2. internally managed validatorData when the user changes input
+     *
+     * **Note**: If the component has no validatorData, then an object with undefined
+     * context & message will be returned.
+     */
     public getValidatorData = (
         componentName: keyof FormComponents,
         componentProps: BoundComponentInstance['props'] = this.getComponentProps(
@@ -285,6 +326,16 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         };
     };
 
+    /**
+     * Determines the value to be provided to the wrapped component. There are four
+     * ways a component value can be provied (in order of precedence):
+     *  1. externally managed value prop provided to the component
+     *  2. internally managed state value when the user changes input
+     *  3. value provided to initialValues prop on form component
+     *  4. default value specified on individual form component
+     *
+     * **Note**: the form values should not be mutated
+     */
     public getValue = (
         componentName: keyof FormComponents,
         componentProps: BoundComponentInstance['props'] = this.getComponentProps(
@@ -310,6 +361,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             : dynamicValue;
     };
 
+    /**
+     * Gets the values of the provided component names using the same logic as
+     * `getValue`.
+     */
     public getValues = (
         componentNames?: (keyof FormComponents)[],
     ): FormComponents => {
@@ -324,6 +379,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     //#endregion
 
     //#region Public setters
+
+    /**
+     * Sets the component internally managed validatorData & updates the component
+     * to reflect its new state.
+     */
     public setValidatorData = async (
         componentName: keyof FormComponents,
         data: ValidatorData,
@@ -345,6 +405,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         });
     };
 
+    /**
+     * Sets the component internally managed state value & updates the component
+     * validatorData using the provided value. By default, the components pristine state
+     * will be set to `false` to indivate that the component has been modified.
+     */
     public setValue = async (
         componentName: keyof FormComponents,
         value: any,
@@ -372,6 +437,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         return this.handleFormChange(componentName, value);
     };
 
+    /**
+     * Sets the components internally managed state values & updates their component
+     * validatorData using the provided values. By default, the components pristine state
+     * will be set to `false` to indivate that the components have been modified.
+     */
     public setValues = (
         values: { [ComponentName in keyof FormComponents]: any },
         pristine?: boolean,

@@ -202,6 +202,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * Programatically submit the form. If you don't want to manually call this, a button
      * with type submit should be provided to the form. This can be provided in your form
      * implementation, or automatically using the `withHiddenSubmit` prop on the Form.
+     * @returns an object with 2 properties:
+     *  - isValid: whether the entire form was valid when submitting
+     *  - values: all of the form values at the time of submission
      */
     public submit = () => {
         return this.handleFormSubmit();
@@ -210,6 +213,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     /**
      * Clears the specified component(s) by setting their value to null. If no component
      * names are provided, all components within the form will be cleared.
+     * @param {string|string[]} componentName component name(s) to be cleared
+     * @returns a promise which is resolved once the react components have been re-rendered
      */
     public clear = async (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
@@ -225,6 +230,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * Resets the specified component(s) by unsetting their value, validator and pristine
      * state. If no component names are provided, all components within the form will be
      * reset.
+     * @param {string|string[]} componentName component name(s) to be reset
+     * @returns a promise which is resolved once the react components have been re-rendered
      */
     public reset = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
@@ -242,6 +249,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * Validates specified component(s) by executing the validator and updating the
      * components to reflect their validator state. If no component names are provided,
      * all components within the form will be validated.
+     * @param {string|string[]} componentName component name(s) to be validated.
+     * @returns a promise which is resolved once the react components have been re-rendered.
      */
     public validate = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
@@ -263,6 +272,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * Determines if all the specified component(s) are valid by executing the validator
      * using the components current value. If no component names are provided, all
      * components within the form will be tested.
+     * @param {string|string[]} componentName component name(s) to be tested
+     * @returns a boolean flag to indicate whether all the components are valid
      */
     public isValid = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
@@ -280,6 +291,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * Determines if all the specified component(s) are pristine - the component has not
      * been modified by the user or by programatically calling setValue. If no component
      * names are provided, all components within the form will checked.
+     * @param {string|string[]} componentName component name(s) to be tested
+     * @returns a boolean flag to indicate whether all the components are pristine
      */
     public isPristine = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
@@ -295,7 +308,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     // #endregion
 
     //#region Public getters
-
     /**
      * Returns the components current  validatorData. There are 2 ways a components
      * validator data can be retrieved (in order of precedence):
@@ -304,6 +316,12 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      *
      * **Note**: If the component has no validatorData, then an object with undefined
      * context & message will be returned.
+     *
+     * @param {string} componentName name of the component to get validator data for
+     * @param {object} componentProps component props to extract validator data from.
+     *       It's not necessary to provide this prop as its intended to be used by the
+     *      form library internally.
+     * @returns component validator data
      */
     public getValidatorData = (
         componentName: keyof FormComponents,
@@ -335,6 +353,12 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      *  4. default value specified on individual form component
      *
      * **Note**: the form values should not be mutated
+     *
+     * @param {string} componentName name of the component to get value for
+     * @param {object} componentProps component props to extract value from. It's
+     *      not necessary to provide this prop as its intended to be used by the
+     *      form library internally.
+     * @returns component value
      */
     public getValue = (
         componentName: keyof FormComponents,
@@ -364,6 +388,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     /**
      * Gets the values of the provided component names using the same logic as
      * `getValue`.
+     * @param {string} componentNames component names to retrieve values for
+     * @returns an object with componentName:value pairs
      */
     public getValues = (
         componentNames?: (keyof FormComponents)[],
@@ -379,10 +405,12 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     //#endregion
 
     //#region Public setters
-
     /**
      * Sets the component internally managed validatorData & updates the component
      * to reflect its new state.
+     * @param {string} componentName name of the component which should be updated
+     * @param {object} validatorData the new validator data to be stored in Form state
+     * @returns a promise which is resolved once the react component has been re-rendered.
      */
     public setValidatorData = async (
         componentName: keyof FormComponents,
@@ -409,6 +437,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * Sets the component internally managed state value & updates the component
      * validatorData using the provided value. By default, the components pristine state
      * will be set to `false` to indivate that the component has been modified.
+     * @param {string} componentName name of the component to set value for
+     * @param {any} value the new value to be stored in Form state
+     * @param {boolean} pristine the new pristine state when setting this value (default: false).
+     * @returns a promise which is resolved once the react component has been re-rendered.
      */
     public setValue = async (
         componentName: keyof FormComponents,
@@ -441,6 +473,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * Sets the components internally managed state values & updates their component
      * validatorData using the provided values. By default, the components pristine state
      * will be set to `false` to indivate that the components have been modified.
+     * @param {object} values the values to be saved in Form state: componentName:value map
+     * @returns a promise which is resolved once the react components have been re-rendered.
      */
     public setValues = (
         values: { [ComponentName in keyof FormComponents]: any },
@@ -455,6 +489,12 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     //#endregion
 
     //#region Private component registration/unregistration
+    /**
+     * Registers a component with the form, allowing it to be managed.
+     * @param {string} componentName name of the component
+     * @param {object} componentRef react component reference to be monitored
+     * @returns void
+     */
     private registerComponent = (
         componentName: keyof FormComponents,
         componentRef: BoundComponentInstance,
@@ -483,6 +523,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         });
     };
 
+    /**
+     * Unregisters a component with the form, so it will no longer be managed
+     * @param {string} componentName name of the component
+     * @returns void
+     */
     private unregisterComponent = (componentName: keyof FormComponents) => {
         if (
             !(componentName in this.components) ||
@@ -513,6 +558,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * Registers a mirror with the form, allowing it to reflect a component.
      * @param {string} componentName name of the component to mirror
      * @param {object} mirror react mirror reference to be registered
+     * @returns void
      */
     private registerMirror = (
         componentName: keyof FormComponents,
@@ -529,6 +575,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * Unregisters a mirror with the form, so it will no longer reflect
      * @param {string} componentName name of the component to mirror
      * @param {object} mirrorRef react mirror reference to be unregistered
+     * @returns void
      */
     private unregisterMirror = (
         componentName: keyof FormComponents,
@@ -644,6 +691,15 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         return this.mirrors[componentName] || [];
     };
 
+    /** Helper function for retrieving an array of component names. This is used by
+     * functions which can iterate over a single, multiple or all components within
+     * the form.
+     * * If a singilar component name is provided, it will be returned as an array.
+     * * If multiple component names are provided, they will be returned unchanged.
+     * * If no component names are provided, all component names will be returend.
+     * @param {string|string[]} componentName component name(s)
+     * @returns array of component names
+     */
     getComponentNames = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): (keyof FormComponents)[] => {
@@ -667,6 +723,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         );
     };
 
+    /**
+     * Gets the react component instance for the specified component
+     * @param {string} componentName name of the component
+     * @returns react component instance
+     */
     getComponentInstance = (
         componentName: keyof FormComponents,
     ): BoundComponentInstance => {
@@ -675,14 +736,25 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             : undefined;
     };
 
+    /**
+     * Gets the react component props for the specified component
+     * @param {string} componentName name of the component
+     * @returns react component props
+     */
     getComponentProps = (componentName: keyof FormComponents) => {
         const instance = this.getComponentInstance(componentName);
         return instance ? instance.props : undefined;
     };
 
+    /**
+     * Get an array of component names which should be updated when the
+     * specified component is updated..
+     * @param {string} componentName name of the component
+     * @returns array of component names
+     */
     getComponentValidatorTriggers = (
         componentName: keyof FormComponents,
-    ): string[] => {
+    ): (keyof FormComponents)[] => {
         const props = this.getComponentProps(componentName);
         const validatorTrigger = props.validatorTrigger || [];
         return Array.isArray(validatorTrigger)
@@ -693,6 +765,12 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     /**
      * Recursively builds a dependency map for components that are part of the
      * validator trigger tree.
+     * @param {string[]} componentNames array of component names to check
+     * @param {object} mappedNames while recursing, a mappedNames object is kept
+     * to ensure that a component is not included twice and to ensure that
+     * components cannot trigger eachother.
+     * @returns array of component names which are dependent on the specified
+     * component names.
      */
     getCompomentDependencyMap = (
         componentNames: (keyof FormComponents)[],
@@ -733,6 +811,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     /**
      * Returns an array of component names that should be validated when validating
      * a specific component. Determined using the validator trigger tree.
+     * @param {string} componentName name of the component to check
      * @returns array of componentNames
      */
     getRelatedComponentNames = (
@@ -751,6 +830,13 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         return [];
     };
 
+    /**
+     * Updates the form component state using an update-immutable transform. Once
+     * the state has been updated, the react component will be updated to reflect
+     * the change.
+     * @param {string} componentName name of the component which should be updated
+     * @returns a promise which is resolved once the react component has been re-rendered.
+     */
     updateComponent = (
         componentName: keyof FormComponents,
         componentTransform: any,
@@ -773,6 +859,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         }
     };
 
+    /**
+     * Update all the mirrors which are reflecting the specified component
+     * @param {string} componentName name of the component which should be reflected
+     * @returns a promise which is resolved once all the mirrors have been re-rendered
+     */
     reflectComponentMirrors = (
         componentName: keyof FormComponents,
     ): Promise<void[]> => {
@@ -783,6 +874,13 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         );
     };
 
+    /**
+     * Executes validator for the specified component. If no custom value is provided,
+     * the current value will be retrieved from the form component.
+     * @param {string} componentName name of the component
+     * @param {any} value (optional) custom value to be used when validating
+     * @returns validator data: context, message
+     */
     executeValidator = (
         componentName: keyof FormComponents,
         value: any = this.getValue(componentName),

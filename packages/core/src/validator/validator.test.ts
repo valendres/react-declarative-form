@@ -17,6 +17,7 @@ describe('validator rules', () => {
         ) => {
             return {
                 context: ValidatorContext.Danger,
+                message: 'An error occurred :(',
             };
         };
 

@@ -120,5 +120,6 @@ export const validate = (
     // If we don't have a cached response, assume validator is successful
     return {
         context: ValidatorContext.Success,
+        message: undefined,
     };
 };

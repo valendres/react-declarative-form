@@ -1,7 +1,6 @@
 import * as Enzyme from 'enzyme';
 import * as Adapter from 'enzyme-adapter-react-16';
 import { BoundComponentProps, ValidatorData } from '../src';
-import { shallowEqual } from 'shallow-equal-object';
 
 Enzyme.configure({ adapter: new Adapter() });
 

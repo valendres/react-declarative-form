@@ -348,6 +348,7 @@ describe('module: bind', () => {
                 expect(formApi.setValue).toHaveBeenCalledWith(
                     props.name,
                     value,
+                    undefined,
                 );
             });
 

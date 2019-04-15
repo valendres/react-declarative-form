@@ -309,7 +309,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
     //#region Public getters
     /**
-     * Returns the components current  validatorData. There are 2 ways a components
+     * Returns the components current validatorData. There are 2 ways a components
      * validator data can be retrieved (in order of precedence):
      *  1. externally managed validatorData prop provided to the component
      *  2. internally managed validatorData when the user changes input
@@ -345,7 +345,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     };
 
     /**
-     * Determines the value to be provided to the wrapped component. There are four
+     * Returns the value of the specified component. There are four
      * ways a component value can be provied (in order of precedence):
      *  1. externally managed value prop provided to the component
      *  2. internally managed state value when the user changes input
@@ -436,7 +436,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     /**
      * Sets the component internally managed state value & updates the component
      * validatorData using the provided value. By default, the components pristine state
-     * will be set to `false` to indivate that the component has been modified.
+     * will be set to `false` to indicate that the component has been modified.
      * @param {string} componentName name of the component to set value for
      * @param {any} value the new value to be stored in Form state
      * @param {boolean} pristine the new pristine state when setting this value (default: false).
@@ -472,7 +472,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     /**
      * Sets the components internally managed state values & updates their component
      * validatorData using the provided values. By default, the components pristine state
-     * will be set to `false` to indivate that the components have been modified.
+     * will be set to `false` to indicate that the components have been modified.
      * @param {object} values the values to be saved in Form state: componentName:value map
      * @returns a promise which is resolved once the react components have been re-rendered.
      */

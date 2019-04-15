@@ -132,6 +132,10 @@ export function bind<ComponentProps extends BoundComponentProps>(
         }
 
         //#region Public commands
+        /**
+         * Clears the scomponent by setting its value to null.
+         * @returns a promise which is resolved once the react component has been re-rendered
+         */
         clear = () => {
             const { name } = this.props;
             if (!this.formApi) {
@@ -140,6 +144,10 @@ export function bind<ComponentProps extends BoundComponentProps>(
             return this.formApi.clear(name);
         };
 
+        /**
+         * Resets the component by unsetting its value, validator and pristine state.
+         * @returns a promise which is resolved once the react component has been re-rendered
+         */
         reset = () => {
             const { name } = this.props;
             if (!this.formApi) {
@@ -148,6 +156,11 @@ export function bind<ComponentProps extends BoundComponentProps>(
             return this.formApi.reset(name);
         };
 
+        /**
+         * Validates the component by executing the validator and updating the component
+         * to reflect its new validator state. If no component names are provided,
+         * @returns a promise which is resolved once the react component has been re-rendered.
+         */
         validate = () => {
             const { name } = this.props;
             if (!this.formApi) {
@@ -158,6 +171,11 @@ export function bind<ComponentProps extends BoundComponentProps>(
         //#endregion
 
         //#region Public evaluators
+        /**
+         * Determines if the component is valid by executing the validator using the
+         * components current value.
+         * @returns a boolean flag to indicate whether the component is valid
+         */
         isValid = () => {
             const { name } = this.props;
             if (!this.formApi) {
@@ -166,6 +184,11 @@ export function bind<ComponentProps extends BoundComponentProps>(
             return this.formApi.isValid(name);
         };
 
+        /**
+         * Determines if the component is pristine - the component has not been modified
+         * by the user or by programatically calling setValue.
+         * @returns a boolean flag to indicate whether the component is pristine
+         */
         isPristine = () => {
             const { name } = this.props;
             if (!this.formApi) {
@@ -178,6 +201,17 @@ export function bind<ComponentProps extends BoundComponentProps>(
         //#endregion
 
         //#region Public getters
+        /**
+         * Returns the components current validatorData. There are 2 ways a components
+         * validator data can be retrieved (in order of precedence):
+         *  1. externally managed validatorData prop provided to the component
+         *  2. internally managed validatorData when the user changes input
+         *
+         * **Note**: If the component has no validatorData, then an object with undefined
+         * context & message will be returned.
+         *
+         * @returns component validator data
+         */
         getValidatorData = () => {
             const { name } = this.props;
             if (!this.formApi) {
@@ -186,6 +220,18 @@ export function bind<ComponentProps extends BoundComponentProps>(
             return this.formApi.getValidatorData(name, this.props);
         };
 
+        /**
+         * Returns the value of the component. There are four ways a component value
+         * can be provied (in order of precedence):
+         *  1. externally managed value prop provided to the component
+         *  2. internally managed state value when the user changes input
+         *  3. value provided to initialValues prop on form component
+         *  4. default value specified on individual form component
+         *
+         * **Note**: the form values should not be mutated
+         *
+         * @returns component value
+         */
         getValue = () => {
             const { name } = this.props;
             if (!this.formApi) {
@@ -196,6 +242,12 @@ export function bind<ComponentProps extends BoundComponentProps>(
         //#endregion
 
         //#region Public setters
+        /**
+         * Sets the component internally managed validatorData & updates the component
+         * to reflect its new state.
+         * @param {object} validatorData the new validator data to be stored in Form state
+         * @returns a promise which is resolved once the react component has been re-rendered.
+         */
         setValidatorData = async (data: ValidatorData): Promise<void> => {
             const { name } = this.props;
             if (!this.formApi) {
@@ -204,12 +256,20 @@ export function bind<ComponentProps extends BoundComponentProps>(
             return this.formApi.setValidatorData(name, data);
         };
 
-        setValue = async (value: any) => {
+        /**
+         * Sets the component internally managed state value & updates the component
+         * validatorData using the provided value. By default, the components pristine state
+         * will be set to `false` to indicate that the component has been modified.
+         * @param {any} value the new value to be stored in Form state
+         * @param {boolean} pristine the new pristine state when setting this value (default: false).
+         * @returns a promise which is resolved once the react component has been re-rendered.
+         */
+        setValue = async (value: any, pristine?: boolean) => {
             const { name } = this.props;
             if (!this.formApi) {
                 throw new OutsideFormError(`set value for "${name}"`);
             }
-            return this.formApi.setValue(name, value);
+            return this.formApi.setValue(name, value, pristine);
         };
         //#endregion
 

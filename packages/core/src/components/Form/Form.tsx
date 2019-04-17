@@ -37,9 +37,9 @@ export interface FormApi {
 
 export interface FormProps<FormFields extends ValueMap>
     extends Omit<
-            React.FormHTMLAttributes<HTMLFormElement>,
-            'onChange' | 'onBlur' | 'onFocus' | 'onSubmit'
-        > {
+        React.FormHTMLAttributes<HTMLFormElement>,
+        'onChange' | 'onBlur' | 'onFocus' | 'onSubmit'
+    > {
     /**
      * Called when the value of a bound form component has been changed.
      * @param {string} componentName name of the component
@@ -272,6 +272,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * Determines if all the specified component(s) are valid by executing the validator
      * using the components current value. If no component names are provided, all
      * components within the form will be tested.
+     *
+     * Note: if validatorData is being managed, the provided validatorData.context will
+     * be used instead of executing the validator.
+     *
      * @param {string|string[]} componentName component name(s) to be tested
      * @returns a boolean flag to indicate whether all the components are valid
      */
@@ -280,7 +284,13 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     ): boolean => {
         const results = this.getComponentNames(componentName).map(
             componentName => {
-                const { context } = this.executeValidator(componentName);
+                const componentProps = this.getComponentProps(componentName);
+
+                // Use managed validatorData (if exists), otherwise execute validator
+                const { context } = componentProps.validatorData
+                    ? componentProps.validatorData
+                    : this.executeValidator(componentName);
+
                 return context !== ValidatorContext.Danger;
             },
         );

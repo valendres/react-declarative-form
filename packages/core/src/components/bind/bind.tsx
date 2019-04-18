@@ -33,7 +33,7 @@ export interface BoundComponentCommonProps {
 
 export interface BoundComponentInjectedProps {
     /** Should be called when component value has changed */
-    setValue?: (value: any) => void;
+    setValue?: (value: any) => Promise<void>;
 }
 
 /** Props used by the HOC only. They are not passed to the wrapped component. */

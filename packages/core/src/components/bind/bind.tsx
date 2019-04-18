@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { shallowEqual } from 'shallow-equal-object';
 
 import {
     ValidatorData,
@@ -70,6 +71,13 @@ export function bind<ComponentProps extends BoundComponentProps>(
         implements BoundComponentInstance {
         formApi: FormApi;
 
+        // tslint:disable-next-line:variable-name
+        _state?: {
+            value?: any;
+            pristine?: boolean;
+            validatorData?: ValidatorData;
+        };
+
         static defaultProps: Partial<BoundComponentProps> = {
             onBlur: () => {},
             onFocus: () => {},
@@ -96,6 +104,16 @@ export function bind<ComponentProps extends BoundComponentProps>(
             return this.formApi && this.formApi.onComponentUpdate(name);
         }
 
+        public shouldComponentUpdate() {
+            const prevState = this._state;
+            const nextState = this._getState();
+            return (
+                prevState.value !== nextState.value ||
+                prevState.pristine !== nextState.pristine ||
+                !shallowEqual(prevState.validatorData, nextState.validatorData)
+            );
+        }
+
         public render() {
             const {
                 // Omit these
@@ -109,18 +127,14 @@ export function bind<ComponentProps extends BoundComponentProps>(
                 <FormContext.Consumer>
                     {(api: FormApi) => {
                         this.formApi = api;
+                        this._state = this._getState();
+
                         return (
                             <WrappedComponent
                                 {...restProps}
-                                value={this.formApi ? this.getValue() : null}
-                                pristine={
-                                    this.formApi ? this.isPristine() : true
-                                }
-                                validatorData={
-                                    this.formApi
-                                        ? this.getValidatorData()
-                                        : undefined
-                                }
+                                value={this._state.value}
+                                pristine={this._state.pristine}
+                                validatorData={this._state.validatorData}
                                 setValue={this.setValue}
                                 onBlur={this._handleBlur}
                                 onFocus={this._handleFocus}
@@ -293,6 +307,20 @@ export function bind<ComponentProps extends BoundComponentProps>(
 
             await this.formApi.onComponentFocus(name, event);
             return this.props.onFocus(event);
+        };
+
+        _getState = () => {
+            const value = this.formApi ? this.getValue() : null;
+            const pristine = this.formApi ? this.isPristine() : true;
+            const validatorData = this.formApi
+                ? this.getValidatorData()
+                : undefined;
+
+            return {
+                value,
+                pristine,
+                validatorData,
+            };
         };
         // tslint:enable:variable-name
         //#endregion

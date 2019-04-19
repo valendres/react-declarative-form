@@ -297,5 +297,48 @@ describe('Component: Mirror', () => {
                 values.age,
             );
         });
+
+        it('should not enter an infite loop when mirrors are reflecting eachother', async () => {
+            mount(
+                <Form>
+                    <Mirror name="endDate">
+                        {mirroredValues => (
+                            <TextField
+                                name="startDate"
+                                value={undefined}
+                                validatorRules={{
+                                    maxValue: mirroredValues.endDate,
+                                }}
+                            />
+                        )}
+                    </Mirror>
+                    <Mirror name="startDate">
+                        {mirroredValues => (
+                            <TextField
+                                name="endDate"
+                                value={new Date()}
+                                validatorRules={{
+                                    minValue: mirroredValues.startDate,
+                                }}
+                            />
+                        )}
+                    </Mirror>
+                </Form>,
+            );
+
+            /**
+             * Whenever a bound component is updated, it will cause the
+             * mirrors refelcting them to be updated. Without sufficient
+             * guards in place, the componentDidUpdate can enter into an
+             * infinite promise loop. Which means that is impossible to
+             * enter the next javascript event tick.
+             *
+             * Here we call `await delay(0)` to wait for the next tick -
+             * it is expected that this will not be resolved if we enter
+             * an infinite loop. Therefore this test will never pass or fail.
+             */
+            await delay(0);
+            expect('Promise to have been resolved').toBeTruthy();
+        });
     });
 });

@@ -65,10 +65,16 @@ export interface BoundComponentInstance
     forceUpdate: (callback: () => void) => void;
 }
 
-export function bind<ComponentProps extends BoundComponentProps>(
-    WrappedComponent: React.ComponentClass<ComponentProps>,
-) {
-    return class BoundComponent extends React.Component<ComponentProps>
+export function bind<
+    ComponentProps extends BoundComponentProps,
+    ComponentClass extends any = {}
+>(WrappedComponent: ComponentClass) {
+    return class BoundComponent
+        extends React.Component<
+            ComponentProps & {
+                innerRef?: React.RefObject<ComponentClass>;
+            }
+        >
         implements BoundComponentInstance {
         formApi: FormApi;
 
@@ -121,6 +127,7 @@ export function bind<ComponentProps extends BoundComponentProps>(
                 validatorRules,
                 validatorMessages,
                 validatorTrigger,
+                innerRef,
                 ...restProps
             } = this.props as any;
 
@@ -139,6 +146,7 @@ export function bind<ComponentProps extends BoundComponentProps>(
                                 setValue={this.setValue}
                                 onBlur={this._handleBlur}
                                 onFocus={this._handleFocus}
+                                ref={innerRef}
                             />
                         );
                     }}
@@ -341,6 +349,7 @@ export function bind<ComponentProps extends BoundComponentProps>(
         > & {
             props: ComponentProps & {
                 ref?: React.RefObject<BoundComponentInstance>;
+                innerRef?: React.RefObject<ComponentClass>;
             };
         };
     };

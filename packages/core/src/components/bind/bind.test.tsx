@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { bind, BoundComponentProps, BoundComponentInstance } from './bind';
+import { bind, BoundComponentProps, BoundComponent } from './bind';
 import { FormApi, FormContext } from '../Form';
 import { mount } from 'enzyme';
 import { ValidatorData, ValidatorContext } from '@types';
@@ -66,7 +66,7 @@ describe('module: bind', () => {
                         <BoundComponentClass {...props} />
                     </FakeForm>,
                 );
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 instance.clear();
@@ -76,7 +76,7 @@ describe('module: bind', () => {
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
                 const wrapper = mount(<BoundComponentClass {...props} />);
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 expect(instance.clear).toThrowErrorMatchingInlineSnapshot(
@@ -94,7 +94,7 @@ describe('module: bind', () => {
                         <BoundComponentClass {...props} />
                     </FakeForm>,
                 );
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 instance.reset();
@@ -104,7 +104,7 @@ describe('module: bind', () => {
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
                 const wrapper = mount(<BoundComponentClass {...props} />);
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 expect(instance.reset).toThrowErrorMatchingInlineSnapshot(
@@ -122,7 +122,7 @@ describe('module: bind', () => {
                         <BoundComponentClass {...props} />
                     </FakeForm>,
                 );
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 instance.validate();
@@ -132,7 +132,7 @@ describe('module: bind', () => {
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
                 const wrapper = mount(<BoundComponentClass {...props} />);
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 expect(instance.validate).toThrowErrorMatchingInlineSnapshot(
@@ -155,7 +155,7 @@ describe('module: bind', () => {
                         <BoundComponentClass {...props} />
                     </FakeForm>,
                 );
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 const result = instance.isValid();
@@ -166,7 +166,7 @@ describe('module: bind', () => {
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
                 const wrapper = mount(<BoundComponentClass {...props} />);
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 expect(instance.isValid).toThrowErrorMatchingInlineSnapshot(
@@ -187,7 +187,7 @@ describe('module: bind', () => {
                         <BoundComponentClass {...props} />
                     </FakeForm>,
                 );
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 const result = instance.isPristine();
@@ -198,7 +198,7 @@ describe('module: bind', () => {
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
                 const wrapper = mount(<BoundComponentClass {...props} />);
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 expect(instance.isPristine).toThrowErrorMatchingInlineSnapshot(
@@ -226,7 +226,7 @@ describe('module: bind', () => {
                         <BoundComponentClass {...props} />
                     </FakeForm>,
                 );
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 const result = instance.getValidatorData();
@@ -240,7 +240,7 @@ describe('module: bind', () => {
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
                 const wrapper = mount(<BoundComponentClass {...props} />);
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 expect(
@@ -263,7 +263,7 @@ describe('module: bind', () => {
                         <BoundComponentClass {...props} />
                     </FakeForm>,
                 );
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 const result = instance.getValue();
@@ -277,7 +277,7 @@ describe('module: bind', () => {
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
                 const wrapper = mount(<BoundComponentClass {...props} />);
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 expect(instance.getValue).toThrowErrorMatchingInlineSnapshot(
@@ -304,7 +304,7 @@ describe('module: bind', () => {
                         <BoundComponentClass {...props} />
                     </FakeForm>,
                 );
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 instance.setValidatorData(validatorData);
@@ -317,7 +317,7 @@ describe('module: bind', () => {
             it('should throw an error if called outside of a Form', async () => {
                 const props = mockProps();
                 const wrapper = mount(<BoundComponentClass {...props} />);
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 await expect(
@@ -341,7 +341,7 @@ describe('module: bind', () => {
                         <BoundComponentClass {...props} />
                     </FakeForm>,
                 );
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 instance.setValue(value);
@@ -355,7 +355,7 @@ describe('module: bind', () => {
             it('should throw an error if called outside of a Form', async () => {
                 const props = mockProps();
                 const wrapper = mount(<BoundComponentClass {...props} />);
-                const instance: BoundComponentInstance = wrapper
+                const instance: BoundComponent = wrapper
                     .find(BoundComponentClass)
                     .instance() as any;
                 await expect(

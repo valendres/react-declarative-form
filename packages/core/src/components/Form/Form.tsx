@@ -8,7 +8,7 @@ import {
     OptionalPromise,
     ValidatorContext,
 } from '../../types';
-import { BoundComponentInstance } from '../bind';
+import { BoundComponent } from '../bind';
 import { MirrorInstance, Mirror } from '../Mirror';
 import { ensurePromise } from '../../utils';
 import { validate } from '../../validator';
@@ -133,7 +133,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             pristine: boolean;
             value?: any;
             validatorData?: ValidatorData;
-            instance?: BoundComponentInstance;
+            instance?: BoundComponent;
         }
     };
 
@@ -335,7 +335,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      */
     public getValidatorData = (
         componentName: keyof FormComponents,
-        componentProps: BoundComponentInstance['props'] = this.getComponentProps(
+        componentProps: BoundComponent['props'] = this.getComponentProps(
             componentName,
         ),
     ): ValidatorData => {
@@ -372,7 +372,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      */
     public getValue = (
         componentName: keyof FormComponents,
-        componentProps: BoundComponentInstance['props'] = this.getComponentProps(
+        componentProps: BoundComponent['props'] = this.getComponentProps(
             componentName,
         ),
     ): any => {
@@ -507,7 +507,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      */
     private registerComponent = (
         componentName: keyof FormComponents,
-        componentRef: BoundComponentInstance,
+        componentRef: BoundComponent,
     ) => {
         // Return early if a ref has already been refistered
         if (
@@ -641,7 +641,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
     private handleComponentMount = async (
         componentName: keyof FormComponents,
-        componentRef: BoundComponentInstance,
+        componentRef: BoundComponent,
     ) => {
         this.registerComponent(componentName, componentRef);
         this.reflectComponentMirrors(componentName);
@@ -740,7 +740,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      */
     getComponentInstance = (
         componentName: keyof FormComponents,
-    ): BoundComponentInstance => {
+    ): BoundComponent => {
         return componentName in this.components
             ? this.components[componentName].instance
             : undefined;

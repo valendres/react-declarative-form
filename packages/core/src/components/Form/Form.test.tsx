@@ -40,7 +40,7 @@ describe('component: Form', () => {
         };
     }
 
-    const TextField = bind(UnconnectedTextField);
+    const TextField = bind<TextFieldProps>(UnconnectedTextField);
 
     const mockProps = (
         props: Partial<FormProps<any>> = {},

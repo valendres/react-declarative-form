@@ -51,8 +51,7 @@ export type BoundComponentProps = BoundComponentInjectedProps &
     BoundComponentCommonProps &
     BoundComponentHOCProps;
 
-export interface BoundComponentInstance
-    extends React.Component<BoundComponentProps> {
+export interface BoundComponent extends React.Component<BoundComponentProps> {
     clear: () => Promise<void[]>;
     reset: () => Promise<void[]>;
     validate: () => Promise<void[]>;
@@ -65,17 +64,18 @@ export interface BoundComponentInstance
     forceUpdate: (callback: () => void) => void;
 }
 
-export function bind<
-    ComponentProps extends BoundComponentProps,
-    ComponentClass extends any = {}
->(WrappedComponent: ComponentClass) {
+export function bind<WrappedComponentProps extends BoundComponentProps>(
+    WrappedComponent: React.ComponentClass<WrappedComponentProps>,
+) {
     return class BoundComponent
         extends React.Component<
-            ComponentProps & {
-                innerRef?: React.RefObject<ComponentClass>;
+            WrappedComponentProps & {
+                innerRef?: React.RefObject<
+                    React.ComponentClass<WrappedComponentProps>
+                >;
             }
         >
-        implements BoundComponentInstance {
+        implements BoundComponent {
         formApi: FormApi;
 
         // tslint:disable-next-line:variable-name
@@ -343,13 +343,15 @@ export function bind<
          * interface so that consumers are able to provide a RefObject, but they're
          * not able to use it in their wrapped component.
          */
-        new (props: ComponentProps): Omit<
-            React.Component<ComponentProps>,
+        new (props: WrappedComponentProps): Omit<
+            React.Component<WrappedComponentProps>,
             'props'
         > & {
-            props: ComponentProps & {
-                ref?: React.RefObject<BoundComponentInstance>;
-                innerRef?: React.RefObject<ComponentClass>;
+            props: WrappedComponentProps & {
+                ref?: React.RefObject<BoundComponent>;
+                innerRef?: React.RefObject<
+                    React.ComponentClass<WrappedComponentProps>
+                >;
             };
         };
     };

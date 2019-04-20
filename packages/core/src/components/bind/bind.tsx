@@ -5,6 +5,7 @@ import {
     ValidatorData,
     ValidatorRules,
     ValidatorMessageGenerator,
+    Omit,
 } from '../../types';
 import { FormContext, FormApi } from '../Form';
 import { OutsideFormError } from '../../errors';
@@ -50,8 +51,8 @@ export type BoundComponentProps = BoundComponentInjectedProps &
     BoundComponentCommonProps &
     BoundComponentHOCProps;
 
-export interface BoundComponentInstance {
-    props: BoundComponentProps;
+export interface BoundComponentInstance
+    extends React.Component<BoundComponentProps> {
     clear: () => Promise<void[]>;
     reset: () => Promise<void[]>;
     validate: () => Promise<void[]>;
@@ -324,5 +325,23 @@ export function bind<ComponentProps extends BoundComponentProps>(
         };
         // tslint:enable:variable-name
         //#endregion
+    } as {
+        /**
+         * Use explicit type for React.Component ref to allow consumers to pass a
+         * React.RefObject<BoundComponentInstance>` to ref prop of their connected
+         * component. Without explicitly typing this, the inferred type will be wrong.
+         *
+         * The custom ref prop is injected here instead of in the `ComponentProps`
+         * interface so that consumers are able to provide a RefObject, but they're
+         * not able to use it in their wrapped component.
+         */
+        new (props: ComponentProps): Omit<
+            React.Component<ComponentProps>,
+            'props'
+        > & {
+            props: ComponentProps & {
+                ref?: React.RefObject<BoundComponentInstance>;
+            };
+        };
     };
 }

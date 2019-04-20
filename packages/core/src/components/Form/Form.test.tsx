@@ -97,7 +97,7 @@ describe('component: Form', () => {
             });
             const wrapper = shallow(
                 <Form {...props}>
-                    <TextField />
+                    <TextField name="test" />
                 </Form>,
             );
 
@@ -110,7 +110,7 @@ describe('component: Form', () => {
             const props = mockProps();
             const wrapper = shallow(
                 <Form {...props}>
-                    <TextField />
+                    <TextField name="test" />
                 </Form>,
             );
 

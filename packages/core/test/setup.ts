@@ -1,7 +1,6 @@
 import * as Enzyme from 'enzyme';
 import * as Adapter from 'enzyme-adapter-react-16';
-import { BoundComponentProps, ValidatorResponse } from '../src';
-import { shallowEqual } from 'shallow-equal-object';
+import { BoundComponentProps, ValidatorData } from '../src';
 
 Enzyme.configure({ adapter: new Adapter() });
 
@@ -16,9 +15,9 @@ expect.extend({
         };
     },
 
-    toHaveResponse(
+    toHaveValidatorData(
         wrapper: Enzyme.ReactWrapper<any>,
-        expectedResponse: ValidatorResponse = {
+        expectedData: ValidatorData = {
             context: undefined,
             message: undefined,
         },
@@ -28,17 +27,16 @@ expect.extend({
             .childAt(0)
             .props();
 
-        const response: ValidatorResponse = {
-            context: props.validatorContext,
-            message: props.validatorMessage,
-        };
+        const data: ValidatorData = props.validatorData;
 
         return {
-            pass: shallowEqual(response, expectedResponse),
+            pass:
+                data.context === expectedData.context &&
+                data.message === expectedData.message,
             message: () =>
-                `expected response to equal "${JSON.stringify(
-                    expectedResponse,
-                )}", received "${JSON.stringify(response)}"`,
+                `expected data to equal "${JSON.stringify(
+                    expectedData,
+                )}", received "${JSON.stringify(data)}"`,
         };
     },
 });

@@ -24,15 +24,12 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
             value,
             setValue,
             onChange,
-            validatorContext,
-            validatorMessage,
+            validatorData,
             pristine,
             required,
             defaultValue,
             ...restProps
         } = this.props;
-
-        const hasError = validatorContext === ValidatorContext.Danger;
 
         return (
             <MaterialTextField
@@ -43,8 +40,11 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
                 name={name}
                 value={value || ''}
                 onChange={this.handleChange}
-                error={!pristine && hasError}
-                helperText={!pristine && validatorMessage}
+                error={
+                    validatorData &&
+                    validatorData.context === ValidatorContext.Danger
+                }
+                helperText={validatorData && validatorData.message}
             />
         );
     }

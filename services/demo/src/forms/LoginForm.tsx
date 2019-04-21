@@ -4,7 +4,7 @@ import {
     Form,
     ValueMap,
     ValidatorContext,
-    ValidatorResponse,
+    ValidatorData,
 } from '@react-declarative-form/core';
 import { TextField } from '@react-declarative-form/material-ui';
 import {
@@ -53,7 +53,15 @@ export interface LoginFormState {
 }
 
 export class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
-    private formRef: React.RefObject<Form>;
+    private formRef: React.RefObject<
+        Form<{
+            username: string;
+            email: string;
+            dob: Date;
+            password: string;
+            passwordConfirm: string;
+        }>
+    >;
 
     constructor(props: LoginFormProps) {
         super(props);
@@ -89,8 +97,11 @@ export class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
                             <TextField
                                 name="username"
                                 label="Username"
-                                validatorContext={ValidatorContext.Danger}
-                                validatorMessage="For some reason this field always has an error"
+                                validatorData={{
+                                    message:
+                                        'For some reason this field always has an error',
+                                    context: ValidatorContext.Danger,
+                                }}
                                 pristine={false}
                                 required
                             />
@@ -131,7 +142,7 @@ export class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
                                 label="Password"
                                 value={password}
                                 onChange={this.handlePasswordChange}
-                                validatorTrigger={['password-confirm']}
+                                validatorTrigger={['passwordConfirm']}
                                 validatorRules={{
                                     minLength: 8,
                                 }}
@@ -142,7 +153,7 @@ export class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
                         <Grid item sm={6} xs={12}>
                             {/* Cross-field validator example */}
                             <TextField
-                                name="password-confirm"
+                                name="passwordConfirm"
                                 label="Confirm password"
                                 validatorRules={{ eqTarget: 'password' }}
                                 validatorMessages={{
@@ -195,16 +206,15 @@ export class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
     };
 
     private handleFormChange = (name: string, value: any) => {
+        console.log('values', this.formRef.current.getValues());
         console.log(`${name} field value set to: ${value}`);
     };
 
     private handleFormValidSubmit = (values: ValueMap) => {
         console.log('Successfully submitted form :)', values);
-        this.formRef.current.setResponses({
-            email: {
-                context: ValidatorContext.Danger,
-                message: 'already registered!',
-            },
+        this.formRef.current.setValidatorData('email', {
+            context: ValidatorContext.Danger,
+            message: 'already registered!',
         });
     };
 
@@ -217,24 +227,21 @@ export class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
     };
 
     private handleClearButtonClick = () => {
-        this.formRef.current.clear();
+        this.formRef.current.clear(['password', 'passwordConfirm']);
     };
 
     private handleResetButtonClick = () => {
         this.formRef.current.reset();
     };
 
-    private validateDob = (
-        key: string,
-        values: ValueMap,
-    ): ValidatorResponse => {
+    private validateDob = (name: string, values: ValueMap): ValidatorData => {
         // We could have just used matches or isDate rules, but a custom regex
         // is used here to demonstrate how custom validator can be done
         const datePattern = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{4})$/;
-        if (!datePattern.test(values[key])) {
+        if (!datePattern.test(values[name])) {
             // If we have an error, return danger response.
             return {
-                key,
+                name,
                 context: ValidatorContext.Danger,
                 message: 'Invalid date format, expected: dd/mm/yyyy',
             };

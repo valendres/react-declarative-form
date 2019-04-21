@@ -3,7 +3,8 @@ import { mount, shallow } from 'enzyme';
 import { bind, BoundComponentProps } from '../bind';
 import { Form, FormProps } from './Form';
 import { Mirror } from '../Mirror';
-import { ValidatorContext } from '@types';
+import { ValidatorContext, ValidatorData } from '@types';
+const delay = require('delay');
 
 describe('component: Form', () => {
     interface TextFieldProps extends BoundComponentProps {
@@ -17,8 +18,7 @@ describe('component: Form', () => {
             const {
                 label,
                 setValue,
-                validatorContext,
-                validatorMessage,
+                validatorData,
                 pristine,
                 value,
                 ...restProps
@@ -40,7 +40,7 @@ describe('component: Form', () => {
         };
     }
 
-    const TextField = bind(UnconnectedTextField);
+    const TextField = bind<TextFieldProps>(UnconnectedTextField);
 
     const mockProps = (
         props: Partial<FormProps<any>> = {},
@@ -97,7 +97,7 @@ describe('component: Form', () => {
             });
             const wrapper = shallow(
                 <Form {...props}>
-                    <TextField />
+                    <TextField name="test" />
                 </Form>,
             );
 
@@ -110,7 +110,7 @@ describe('component: Form', () => {
             const props = mockProps();
             const wrapper = shallow(
                 <Form {...props}>
-                    <TextField />
+                    <TextField name="test" />
                 </Form>,
             );
 
@@ -142,24 +142,26 @@ describe('component: Form', () => {
             );
 
             const form = wrapper.instance() as any;
-            const component = wrapper
+            const componentInstance = wrapper
                 .find(TextField)
                 .at(0)
                 .instance();
 
             // Should store a reference to the first firstName component
-            expect(form.componentRefs[componentName]).toEqual(component);
+            expect(form.components[componentName].instance).toEqual(
+                componentInstance,
+            );
 
             // Should log an error when attempting to register duplicate firstName component
             expect(console.error).toHaveBeenCalledWith(
-                `Duplicate form component: "${componentName}"`,
+                `Failed to register component: "${componentName}", a component with this name already exists.`,
             );
 
             // Trigger component unregistration
             wrapper.unmount();
 
             // Refs should be empty again
-            expect(form.componentRefs).toMatchObject({});
+            expect(form.components).toMatchObject({});
 
             // Cleanup
             (console.error as any).mockRestore();
@@ -191,18 +193,18 @@ describe('component: Form', () => {
                 .instance();
 
             // Should store a reference for both mirrors
-            expect(form.mirrorRefs[componentName]).toEqual([mirror1, mirror2]);
+            expect(form.mirrors[componentName]).toEqual([mirror1, mirror2]);
 
             // Trigger mirror unregistration
             wrapper.unmount();
 
             // Refs should be empty again
-            expect(form.mirrorRefs).toMatchObject({});
+            expect(form.mirrors).toMatchObject({});
         });
     });
 
     describe('event handlers', () => {
-        it('should call change handler if a form component has been changed', () => {
+        it('should call change handler if a form component has been changed', async () => {
             const firstName = 'Peter';
             const props = mockProps();
             const wrapper = mount(
@@ -216,6 +218,8 @@ describe('component: Form', () => {
                 .find({ name: 'firstName' })
                 .find('input')
                 .simulate('change', mockEvent(firstName));
+
+            await delay(10);
 
             // Ensure handler has been called
             expect(props.onChange).toHaveBeenCalledWith('firstName', firstName);
@@ -241,7 +245,14 @@ describe('component: Form', () => {
                 .simulate('blur');
 
             // Ensure handler has been called with current value
-            expect(props.onBlur).toHaveBeenCalledWith('firstName', firstName);
+            const [
+                componentName,
+                value,
+                event,
+            ] = (props.onBlur as any).mock.calls[0];
+            expect(componentName).toBe('firstName');
+            expect(value).toBe(firstName);
+            expect(event.type).toBe('blur');
         });
 
         it('should call focus handler if a form component has been focused', () => {
@@ -264,7 +275,14 @@ describe('component: Form', () => {
                 .simulate('focus');
 
             // Ensure handler has been called with current value
-            expect(props.onFocus).toHaveBeenCalledWith('firstName', firstName);
+            const [
+                componentName,
+                value,
+                event,
+            ] = (props.onFocus as any).mock.calls[0];
+            expect(componentName).toBe('firstName');
+            expect(value).toBe(firstName);
+            expect(event.type).toBe('focus');
         });
 
         it('should call valid form handlers if submitting without an invalid component', async () => {
@@ -526,8 +544,8 @@ describe('component: Form', () => {
             return (wrapper.instance() as Form<any>)
                 .setValue('lastName', 'abc')
                 .catch(error => {
-                    expect(error).toBe(
-                        'Failed to set value for "lastName" component. It does not exist in form context.',
+                    expect(error).toMatchInlineSnapshot(
+                        `[UnknownComponentError: Failed to set value for "lastName" component. Not a descendant of this <Form/> component.]`,
                     );
                 });
         });
@@ -541,57 +559,53 @@ describe('component: Form', () => {
                 </Form>,
             );
 
-            // Shouldn't have a response by default
-            expect(wrapper.find({ name: 'firstName' })).toHaveResponse(
+            // Shouldn't have validatorData by default
+            expect(wrapper.find({ name: 'firstName' })).toHaveValidatorData(
                 undefined,
             );
 
             // Trigger validation by submitting
             await (wrapper.instance() as Form<any>).submit();
 
-            // Update the wrapper so the latest response can be retrieved
+            // Update the wrapper so the latest validatorData can be retrieved
             wrapper.update();
 
-            // Should have updated response
-            expect(wrapper.find({ name: 'firstName' })).toHaveResponse({
+            // Should have updated validatorData
+            expect(wrapper.find({ name: 'firstName' })).toHaveValidatorData({
                 context: ValidatorContext.Danger,
                 message: 'This field is required',
             });
         });
 
-        it('should allow consumers to manage the validation response externally', () => {
-            const response = {
+        it('should allow consumers to manage the validatorData externally', () => {
+            const validatorData: ValidatorData = {
                 context: ValidatorContext.Danger,
                 message: 'Something went wrong :(',
             };
 
             const wrapper = mount(
                 <Form>
-                    <TextField
-                        name="firstName"
-                        validatorContext={response.context}
-                        validatorMessage={response.message}
-                    />
+                    <TextField name="firstName" validatorData={validatorData} />
                 </Form>,
             );
 
-            // Should have response by default
-            expect(wrapper.find({ name: 'firstName' })).toHaveResponse(
-                response,
+            // Should have validatorData by default
+            expect(wrapper.find({ name: 'firstName' })).toHaveValidatorData(
+                validatorData,
             );
 
-            // Attempt to replace response
-            (wrapper.instance() as Form<any>).setResponse('firstName', {
+            // Attempt to replace validatorData
+            (wrapper.instance() as Form<any>).setValidatorData('firstName', {
                 context: ValidatorContext.Success,
                 message: undefined,
             });
 
-            // Update the wrapper so the latest response can be retrieved
+            // Update the wrapper so the latest validatorData can be retrieved
             wrapper.update();
 
-            // Should have the same response as externally managed value should take precedence
-            expect(wrapper.find({ name: 'firstName' })).toHaveResponse(
-                response,
+            // Should have the same validatorData as externally managed value should take precedence
+            expect(wrapper.find({ name: 'firstName' })).toHaveValidatorData(
+                validatorData,
             );
         });
 
@@ -630,13 +644,13 @@ describe('component: Form', () => {
                     </Form>,
                 );
 
-                // Shouldn't have a responses by default
-                expect(wrapper.find({ name: 'password' })).toHaveResponse(
+                // Shouldn't have validatorData by default
+                expect(wrapper.find({ name: 'password' })).toHaveValidatorData(
                     undefined,
                 );
                 expect(
                     wrapper.find({ name: 'passwordConfirm' }),
-                ).toHaveResponse(undefined);
+                ).toHaveValidatorData(undefined);
 
                 // Simulate chaging the password confirmation to something that doesn't match
                 wrapper
@@ -644,13 +658,13 @@ describe('component: Form', () => {
                     .find('input')
                     .simulate('change', mockEvent(password));
 
-                // Update the wrapper so the latest response can be retrieved
+                // Update the wrapper so the latest validatorData can be retrieved
                 wrapper.update();
 
                 // Should add incorrect password messaeg
                 expect(
                     wrapper.find({ name: 'passwordConfirm' }),
-                ).toHaveResponse({
+                ).toHaveValidatorData({
                     context: ValidatorContext.Danger,
                     message: 'Must match password',
                 });
@@ -661,17 +675,17 @@ describe('component: Form', () => {
                     .find('input')
                     .simulate('change', mockEvent(password));
 
-                // Update the wrapper so the latest response can be retrieved
+                // Update the wrapper so the latest validatorData can be retrieved
                 wrapper.update();
 
-                expect(wrapper.find({ name: 'password' })).toHaveResponse({
+                expect(wrapper.find({ name: 'password' })).toHaveValidatorData({
                     context: ValidatorContext.Success,
                     message: undefined,
                 });
 
                 expect(
                     wrapper.find({ name: 'passwordConfirm' }),
-                ).toHaveResponse({
+                ).toHaveValidatorData({
                     context: ValidatorContext.Success,
                     message: undefined,
                 });
@@ -701,25 +715,25 @@ describe('component: Form', () => {
             // Trigger all validations
             (wrapper.instance() as Form<any>).validate();
 
-            // Update the wrapper so the latest response can be retrieved
+            // Update the wrapper so the latest validatorData can be retrieved
             wrapper.update();
 
-            expect(wrapper.find({ name: 'firstName' })).toHaveResponse({
+            expect(wrapper.find({ name: 'firstName' })).toHaveValidatorData({
                 context: ValidatorContext.Danger,
                 message: 'This field is required',
             });
-            expect(wrapper.find({ name: 'lastName' })).toHaveResponse({
+            expect(wrapper.find({ name: 'lastName' })).toHaveValidatorData({
                 context: ValidatorContext.Success,
                 message: undefined,
             });
-            expect(wrapper.find({ name: 'age' })).toHaveResponse({
+            expect(wrapper.find({ name: 'age' })).toHaveValidatorData({
                 context: ValidatorContext.Warning,
                 message: 'Custom warning message',
             });
         });
 
-        it('should allow a single validation response to be programatically set', async () => {
-            const response = {
+        it('should allow validatorData to be programatically set', async () => {
+            const validatorData: ValidatorData = {
                 context: ValidatorContext.Danger,
                 message: 'Invalid first name',
             };
@@ -730,69 +744,28 @@ describe('component: Form', () => {
                 </Form>,
             );
 
-            // Shouldn't have a response by default
-            expect(wrapper.find({ name: 'firstName' })).toHaveResponse(
-                undefined,
-            );
+            // Shouldn't have validatorData by default
+            expect(wrapper.find({ name: 'firstName' })).toHaveValidatorData({
+                context: undefined,
+                message: undefined,
+            });
 
-            // Programatically set the response
-            await (wrapper.instance() as Form<any>).setResponse(
+            // Programatically set the validatorData
+            await (wrapper.instance() as Form<any>).setValidatorData(
                 'firstName',
-                response,
+                validatorData,
             );
 
-            // Update the wrapper so the latest response can be retrieved
+            // Update the wrapper so the latest validatorData can be retrieved
             wrapper.update();
 
-            // Should have updated response
-            expect(wrapper.find({ name: 'firstName' })).toHaveResponse(
-                response,
+            // Should have updated validatorData
+            expect(wrapper.find({ name: 'firstName' })).toHaveValidatorData(
+                validatorData,
             );
         });
 
-        it('should allow multiple validation responses to be programatically set', async () => {
-            const responses = {
-                firstName: {
-                    context: ValidatorContext.Danger,
-                    message: 'Invalid first name',
-                },
-                lastName: {
-                    context: ValidatorContext.Danger,
-                    message: 'Invalid last name',
-                },
-            };
-
-            const wrapper = mount(
-                <Form>
-                    <TextField name="firstName" />
-                    <TextField name="lastName" />
-                </Form>,
-            );
-
-            // Shouldn't have any responses by default
-            expect(wrapper.find({ name: 'firstName' })).toHaveResponse(
-                undefined,
-            );
-            expect(wrapper.find({ name: 'lastName' })).toHaveResponse(
-                undefined,
-            );
-
-            // Programatically set the responses
-            await (wrapper.instance() as Form<any>).setResponses(responses);
-
-            // Update the wrapper so the latest responses can be retrieved
-            wrapper.update();
-
-            // Should have updated responses
-            expect(wrapper.find({ name: 'firstName' })).toHaveResponse(
-                responses.firstName,
-            );
-            expect(wrapper.find({ name: 'lastName' })).toHaveResponse(
-                responses.lastName,
-            );
-        });
-
-        it('should return a rejected promise if attempting to set a validation response of a component which does not exist', () => {
+        it('should return a rejected promise if attempting to set validatorData for a component which does not exist', () => {
             const props = mockProps();
             const wrapper = mount(
                 <Form {...props}>
@@ -802,13 +775,13 @@ describe('component: Form', () => {
 
             expect.assertions(1);
             return (wrapper.instance() as Form<any>)
-                .setResponse('lastName', {
+                .setValidatorData('lastName', {
                     context: ValidatorContext.Danger,
                     message: 'Something went wrong :(',
                 })
                 .catch(error => {
-                    expect(error).toBe(
-                        'Failed to set response for "lastName" component. It does not exist in form context.',
+                    expect(error).toMatchInlineSnapshot(
+                        `[UnknownComponentError: Failed to set validatorData for "lastName" component. Not a descendant of this <Form/> component.]`,
                     );
                 });
         });

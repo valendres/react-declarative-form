@@ -1,11 +1,11 @@
 declare namespace jest {
     interface Matchers<R> {
         toHaveInputValue: (value: any) => object;
-        toHaveResponse: (response: any) => object;
+        toHaveValidatorData: (response: any) => object;
     }
 
     interface Expect {
         toHaveInputValue: (wrapper: any, value: any) => object;
-        toHaveResponse: (wrapper: any, response: any) => object;
+        toHaveValidatorData: (wrapper: any, validatorData: any) => object;
     }
 }

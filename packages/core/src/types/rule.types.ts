@@ -1,10 +1,10 @@
-import { ValueMap, ValidatorResponse } from './validator.types';
+import { ValueMap, ValidatorData } from './validator.types';
 
 export type ValidatorRule = (
     key: string,
     values: ValueMap,
     criteria?: any,
-) => ValidatorResponse;
+) => ValidatorData;
 
 export interface ValidatorRuleMap {
     readonly [name: string]: ValidatorRule;

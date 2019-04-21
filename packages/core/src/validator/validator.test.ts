@@ -10,9 +10,14 @@ describe('validator rules', () => {
 
     it('should should allow additional validator rules to be defined', () => {
         const customRuleKey = 'customValidatorRule';
-        const customRule = (key: string, values: ValueMap, criteria: any) => {
+        const customRule = (
+            componentName: string,
+            values: ValueMap,
+            criteria: any,
+        ) => {
             return {
                 context: ValidatorContext.Danger,
+                message: 'An error occurred :(',
             };
         };
 
@@ -33,7 +38,7 @@ describe('func: validate', () => {
     beforeAll(() => {
         addValidatorRule(
             validatorKey,
-            (key: string, values: ValueMap, criteria: any) => ({
+            (componentName: string, values: ValueMap, criteria: any) => ({
                 context: validatorContext,
                 message: validatorMessage,
             }),
@@ -68,7 +73,7 @@ describe('func: validate', () => {
             { name: '' },
             { minLength: 5, required: true },
         );
-        expect(response.key).toEqual('required');
+        expect(response.name).toEqual('required');
     });
 
     it('should execute custom rule if it is defined', () => {
@@ -92,7 +97,7 @@ describe('func: validate', () => {
             { age: 500 },
             { minValue: 1000, maxValue: 50 },
         );
-        expect(response.key).toEqual('minValue');
+        expect(response.name).toEqual('minValue');
         expect(response.context).toEqual(ValidatorContext.Danger);
     });
 
@@ -111,8 +116,12 @@ describe('func: validate', () => {
     it('should return custom error message generator if provided', () => {
         const inputValue = 10;
         const minValue = 50;
-        const generator = (key: string, values: ValueMap, criteria: number) => {
-            return `Gen: ${values[key]} is less than ${criteria}...`;
+        const generator = (
+            componentName: string,
+            values: ValueMap,
+            criteria: number,
+        ) => {
+            return `Gen: ${values[componentName]} is less than ${criteria}...`;
         };
 
         const response = validate(

@@ -14,10 +14,10 @@ export interface ValidatorMessages {
     readonly [name: string]: ValidatorMessageGenerator | string;
 }
 
-export interface ValidatorResponse {
-    readonly key?: string;
+export interface ValidatorData {
+    readonly name?: string;
     readonly context: ValidatorContext;
-    readonly message?: string;
+    readonly message: string;
 }
 
 export interface ValidatorTest {

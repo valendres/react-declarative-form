@@ -21,6 +21,7 @@ export interface BoundComponentCommonProps {
     /** Whether or not the value has been modified */
     pristine?: boolean;
 
+    /** Data which reflects the current validator state for the component. */
     validatorData?: ValidatorData;
 
     /** Current form component value */
@@ -40,11 +41,18 @@ export interface BoundComponentInjectedProps {
 
 /** Props used by the HOC only. They are not passed to the wrapped component. */
 export interface BoundComponentHOCProps {
+    /** Validation rules which should be applied to the component */
     validatorRules?: ValidatorRules;
+
+    /**  Custom validator messages for specific validator rules */
     validatorMessages?: {
         [ruleKey: string]: string | ValidatorMessageGenerator;
     };
+
+    /** Triggers validator to execute on the specified component names when this component is modified */
     validatorTrigger?: string | string[];
+
+    /** Default value to be applied if the component does not have a managed, state or initial value */
     defaultValue?: any;
 }
 
@@ -73,7 +81,6 @@ export interface BoundComponent extends React.Component<BoundComponentProps> {
     getValue: () => any;
     setValidatorData: (data: ValidatorData) => Promise<void>;
     setValue: (value: any) => Promise<void>;
-    forceUpdate: (callback: () => void) => void;
 }
 
 export function bind<
@@ -266,8 +273,8 @@ export function bind<
         /**
          * Returns the components current validatorData. There are 2 ways a components
          * validator data can be retrieved (in order of precedence):
-         *  1. externally managed validatorData prop provided to the component
-         *  2. internally managed validatorData when the user changes input
+         *  1. *externally managed validatorData* prop provided to the component
+         *  2. *internally managed validatorData* state when the user changes input
          *
          * **Note**: If the component has no validatorData, then an object with undefined
          * context & message will be returned.
@@ -285,10 +292,10 @@ export function bind<
         /**
          * Returns the value of the component. There are four ways a component value
          * can be provied (in order of precedence):
-         *  1. externally managed value prop provided to the component
-         *  2. internally managed state value when the user changes input
-         *  3. value provided to initialValues prop on form component
-         *  4. default value specified on individual form component
+         *  1. *externally managed* value prop provided to the component
+         *  2. *internally managed* state value when the user changes input
+         *  3. *initialValues* provided to the form component
+         *  4. *defaultValue* specified on individual form component
          *
          * **Note**: the form values should not be mutated
          *

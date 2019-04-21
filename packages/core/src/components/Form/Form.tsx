@@ -88,15 +88,6 @@ export interface FormProps<FormFields extends ValueMap>
     onInvalidSubmit?: (values: FormFields) => void;
 
     /**
-     * Initial values to be provided to the bound form components. This is useful for
-     * populating the form without having to manage all form values. It can be provided
-     * asynchronously. The values will be applied if the form components have not been
-     * modified. If you need to apply new values to the form, call reset on the form after
-     * updating the initialValues.
-     */
-    initialValues?: FormFields;
-
-    /**
      * Whether a hidden submit should be rendered within the form. The existance of a
      * `<button type="submit"/>` allows forms to be submitted when the enter key is pressed.
      * However, if you a form which is being submitted programatically, or it doesn't
@@ -111,6 +102,15 @@ export interface FormProps<FormFields extends ValueMap>
      * lost when a component is unmounted.
      */
     sticky?: boolean;
+
+    /**
+     * Initial values to be provided to the bound form components. This is useful for
+     * populating the form without having to manage all form values. It can be provided
+     * asynchronously. The values will be applied if the form components have not been
+     * modified. If you need to apply new values to the form, call reset on the form after
+     * updating the initialValues.
+     */
+    initialValues?: FormFields;
 }
 
 export class Form<FormComponents extends ValueMap = {}> extends React.Component<
@@ -321,8 +321,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     /**
      * Returns the components current validatorData. There are 2 ways a components
      * validator data can be retrieved (in order of precedence):
-     *  1. externally managed validatorData prop provided to the component
-     *  2. internally managed validatorData when the user changes input
+     *  1. *externally managed validatorData* prop provided to the component
+     *  2. *internally managed validatorData* state when the user changes input
      *
      * **Note**: If the component has no validatorData, then an object with undefined
      * context & message will be returned.
@@ -357,10 +357,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     /**
      * Returns the value of the specified component. There are four
      * ways a component value can be provied (in order of precedence):
-     *  1. externally managed value prop provided to the component
-     *  2. internally managed state value when the user changes input
-     *  3. value provided to initialValues prop on form component
-     *  4. default value specified on individual form component
+     *  1. *externally managed* value prop provided to the component
+     *  2. *internally managed* state value when the user changes input
+     *  3. *initialValues* provided to the form component
+     *  4. *defaultValue* specified on individual form component
      *
      * **Note**: the form values should not be mutated
      *

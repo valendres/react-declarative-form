@@ -11,13 +11,13 @@ This library requires the following:
 ## Getting started
 1. Add **@react-declarative-form/core** to your project.
     ```
-    npm i @react-declarative-form/core --save
+    yarn add @react-declarative-form/core
     ```
 2. Create bound form components using [`bind() HOC`](#bind-hoc)
 3. Use bound form components within a `<Form />` component.
 
 ## How does it work?
-Each bound component registers itself with the closest `<Form />` ancestor, allowing for event bubbling and cross-field validator. This is done using the [React 16.3 context API](https://reactjs.org/blog/2018/03/29/react-v-16-3.html). The value and validator state of the wrapped components is directly controlled by the [`bind() HOC`](#bind-hoc). Because the HOC is only concerned with its own wrapped component, then only that component will be re-rendered upon value change, assuming it is not part of a validator trigger. However, if the component does belong to a validator trigger, then the related components will also be validated and re-rendered. When the setValue function is called, the component is validated using the new value.
+Each bound component registers itself with the closest `<Form />` ancestor which allows the form to manage the value, pristine & validator state. This is done using the [React 16.3 context API](https://reactjs.org/blog/2018/03/29/react-v-16-3.html). While the form manages the component state, each component is updated individually on an as needed basis to minimise unnecessary renders. If a components value is changed, then only that component will be re-rendered, assuming it is not part of a validator trigger. However, if the component does belong to a validator trigger, then the related components will also be validated and re-rendered. When the setValue function is called, the component is validated using the new value.
 
 ## Table of Contents
 
@@ -30,22 +30,34 @@ Each bound component registers itself with the closest `<Form />` ancestor, allo
   - [How does it work?](#how-does-it-work)
   - [Table of Contents](#table-of-contents)
   - [Documentation](#documentation)
-    - [API](#api)
-      - [`<Form/>`](#form)
-        - [Form API](#form-api)
-          - [`submit(): void`](#submit-void)
-          - [`getValue(componentName: string): any`](#getvaluecomponentname-string-any)
-          - [`getValues(): ValueMap`](#getvalues-valuemap)
-          - [`clear(): void`](#clear-void)
-          - [`reset(): void`](#reset-void)
-          - [`validate(componentName?: string | string[]): void`](#validatecomponentname-string--string-void)
-          - [`isValid(): boolean`](#isvalid-boolean)
-          - [`setResponse(componentName: string, response: ValidatorResponse): void`](#setresponsecomponentname-string-response-validatorresponse-void)
-          - [`setResponses(responses: {[componentName: string]: ValidatorResponse}): void`](#setresponsesresponses-componentname-string-validatorresponse-void)
-        - [Form Props](#form-props)
-      - [`bind HOC`](#bind-hoc)
-        - [Wrapped component props](#wrapped-component-props)
-        - [Higher order component props](#higher-order-component-props)
+    - [Form component](#form-component)
+      - [Form Props](#form-props)
+      - [Form API](#form-api)
+        - [Func: submit](#func-submit)
+        - [Func: clear](#func-clear)
+        - [Func: reset](#func-reset)
+        - [Func: validate](#func-validate)
+        - [Func: isValid](#func-isvalid)
+        - [Func: isPristine](#func-ispristine)
+        - [Func: getValidatorData](#func-getvalidatordata)
+        - [Func: getValue](#func-getvalue)
+        - [Func: getValues](#func-getvalues)
+        - [Func: setValidatorData](#func-setvalidatordata)
+        - [Func: setValue](#func-setvalue)
+        - [Func: setValues](#func-setvalues)
+    - [bind HOC](#bind-hoc)
+      - [Bound component props](#bound-component-props)
+      - [Higher order component props](#higher-order-component-props)
+      - [bind HOC API](#bind-hoc-api)
+        - [Func: clear](#func-clear-1)
+        - [Func: reset](#func-reset-1)
+        - [Func: validate](#func-validate-1)
+        - [Func: isValid](#func-isvalid-1)
+        - [Func: isPristine](#func-ispristine-1)
+        - [Func: getValidatorData](#func-getvalidatordata-1)
+        - [Func: getValue](#func-getvalue-1)
+        - [Func: setValidatorData](#func-setvalidatordata-1)
+        - [Func: setValue](#func-setvalue-1)
     - [Validator rules](#validator-rules)
       - [Built-in validator rules](#built-in-validator-rules)
       - [Adding additional validator rules](#adding-additional-validator-rules)
@@ -60,41 +72,10 @@ Each bound component registers itself with the closest `<Form />` ancestor, allo
 
 ## Documentation
 
-### API
-
-#### `<Form/>`
+### Form component
 `<Form>` is a component that is to be used in place of a regular HTML form component. It supports event handlers as props, and programmatic control (accessed via ref).
 
-##### Form API
-
-###### `submit(): void`
-Programmatically submit form
-
-###### `getValue(componentName: string): any`
-Retrieves the current value for a component. Note: if the value is an object, it will be frozen. Objects used by the form should not be mutated.
-
-###### `getValues(): ValueMap`
-Retrieves current values for all components
-
-###### `clear(): void`
-Clears the form. The value and validator for each form component will be set to undefined. Note: this will have no effect if the valueProp has been provided.
-
-###### `reset(): void`
-Resets the form to the initialValue prop for each form component. If the initialValue prop has not been provided, the new value will be undefined. Note: this will have no effect if the valueProp has been provided.
-
-###### `validate(componentName?: string | string[]): void`
-Validates specified component(s). If no component names are provided, all components within the form will be validated.
-
-###### `isValid(): boolean`
-Executes validator rules on all components. True will be returned if all components are valid.
-
-###### `setResponse(componentName: string, response: ValidatorResponse): void`
-Inject a custom validator response on a form component.
-
-###### `setResponses(responses: {[componentName: string]: ValidatorResponse}): void`
-Injects custom validator responses on form components.
-
-##### Form Props
+#### Form Props
 
 | Name               | Type                                        | Required | Description                                                                                                                                                     |
 | ------------------ | ------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -106,40 +87,256 @@ Injects custom validator responses on form components.
 | `onInvalidSubmit`  | (values: ValueMap) => void                  | false    | Called after `onSubmit` at least 1 bound form component is invalid. The current values for all bound form components are provided.                              |
 | `withHiddenSubmit` | boolean                                     | false    | Whether a hidden submit button should be included in the form.                                                                                                  |
 | `sticky`           | boolean                                     | false    | Whether the form component values should be sticky and retain their value in between component unmounts and mounts.                                             |
+| `initialValues`    | ValueMap                                    | false    | Initial values to be provided to the bound form components. This is useful for populating the form without having to manage all form values.                    |
 
+#### Form API
+##### Func: submit
+`submit(): { isValid: boolean, values: ValueMap }`
 
-#### `bind HOC`
+Programatically submit the form. If you don't want to manually call this, a button with type submit should be provided to the form. This can be provided in your form implementation, or automatically using the `withHiddenSubmit` prop on the Form.
+
+**Returns:** an object with 2 properties:
+* `isValid`: whether the entire form was valid when submitting
+* `values`: all of the form values at the time of submission
+
+##### Func: clear
+`clear(componentName?: string | string[]): Promise<void>`
+
+Clears the specified component(s) by setting their value to null. If no component names are provided, all components within the form will be cleared.
+
+**Params:**
+* `componentName`: component name(s) to be cleared
+
+**Returns:** a promise which is resolved once the react components have been re-rendered
+
+##### Func: reset
+`reset(componentName?: string | string[]): Promise<void>`
+
+Resets the specified component(s) by unsetting their value, validator and pristine state. If no component names are provided, all components within the form will be reset.
+
+**Params:**
+* `componentName`: component name(s) to be reset
+
+**Returns:** a promise which is resolved once the react components have been re-rendered
+
+##### Func: validate
+`validate(componentName?: string | string[]): Promise<void>`
+
+Validates specified component(s) by executing the validator and updating the components to reflect their validator state. If no component names are provided, all components within the form will be validated.
+
+**Params:**
+* `componentName`: component name(s) to be reset
+
+**Returns:** a promise which is resolved once the react components have been re-rendered.
+
+##### Func: isValid
+`isValid(componentName?: string | string[]): boolean`
+
+Determines if all the specified component(s) are valid by executing the validator using the components current value. If no component names are provided, all components within the form will be tested.
+
+**Params:**
+* `componentName`: component name(s) to be tested
+
+**Returns:** a boolean flag to indicate whether all the components are valid
+
+**Note:** if validatorData is being managed, the provided validatorData.context will
+be used instead of executing the validator.
+
+##### Func: isPristine
+`isPristine(componentName?: string | string[]): boolean`
+
+Determines if all the specified component(s) are pristine - the component has not been modified by the user or by programatically calling setValue. If no component names are provided, all components within the form will checked.
+
+**Params:**
+* `componentName`: component name(s) to be tested
+
+**Returns:** a boolean flag to indicate whether all the components are pristine
+
+##### Func: getValidatorData
+`getValidatorData(componentName: string): ValidatorData`
+
+Returns the components current validatorData. There are 2 ways a components validator data can be retrieved (in order of precedence):
+1. *externally managed validatorData* prop provided to the component
+2. *internally managed validatorData* state when the user changes input
+
+**Params:**
+* `componentName`: name of the component to get validator data for
+
+**Returns:** component validator data if exists, otherwise an object with undefined context and message will be returned.
+
+##### Func: getValue
+`getValue(componentName: string): any`
+
+Returns the value of the specified component. There are four ways a component value can be provied (in order of precedence):
+1. *externally managed* value prop provided to the component
+2. *internally managed* state value when the user changes input
+3. *initialValues* provided to the form component
+4. *defaultValue* specified on individual form component
+
+**Params:**
+* `componentName`: name of the component to get value for
+
+**Returns:** component value
+
+**Note**: the form values should not be mutated
+
+##### Func: getValues
+`getValues(componentNames?: string[]): ValueMap`
+
+Gets the values of the provided component names using the same logic as `getValue`.
+
+**Params:**
+* `componentNames`: component names to retrieve values for
+
+**Returns:** an object with componentName:value pairs
+
+##### Func: setValidatorData
+`setValidatorData(componentName: string, data: ValidatorData): Promise<void>`
+
+Sets the component internally managed validatorData & updates the component to reflect its new state.
+
+**Params:**
+* `componentName`: name of the component which should be updated
+* `validatorData`: the new validator data to be stored in Form state
+
+**Returns:** a promise which is resolved once the react component has been re-rendered.
+
+##### Func: setValue
+`setValue(componentName: string, value: any, pristine: boolean = false): Promise<void>`
+
+Sets the component internally managed state value & updates the component validatorData using the provided value. By default, the components pristine state will be set to `false` to indicate that the component has been modified.
+
+**Params:**
+* `componentName`: name of the component to set value for
+* `value`: the new value to be stored in Form state
+* `pristine`: the new pristine state when setting this value (default: false).
+
+**Returns:** a promise which is resolved once the react component has been re-rendered.
+
+##### Func: setValues
+`setValues(values: ValueMap, pristine?: boolean): Promise<void>`
+
+Sets the components internally managed state values & updates their component validatorData using the provided values. By default, the components pristine state will be set to `false` to indicate that the components have been modified.
+
+**Params:**
+* `values`: the values to be saved in Form state (componentName:value map)
+
+**Returns:** a promise which is resolved once the react components have been re-rendered.
+
+### bind HOC
 Using the `bind()` higher order component allows **@react-declarative-form/core** to manage the form component value and validator state. Refer to [Example: Form Binding HOC](#example-form-binding-hoc) to get a better understanding of how these props can be used.
 
-##### Wrapped component props
-These props will be available to the wrapped component. The *injected* variables will always be provided to the wrapped component, even if the the the consumer did not provide them. However, a number of these props are *overridable*, meaning the consumer can override the HOC provided value.
+#### Bound component props
+These props will be available to the bound component. The *injected* variables will always be provided to the bound component, even if the the the consumer did not provide them. However, a number of these props are *overridable*, meaning the consumer can override the HOC provided value.
 
-| Name               | Type                 | Required | Injected | Overridable | Description                                       |
-| ------------------ | -------------------- | -------- | -------- | ----------- | ------------------------------------------------- |
-| `name`             | string               | true     | false    | true        | Unique form component identifier                  |
-| `required`         | boolean              | false    | false    | true        | Whether or not a value is required                |
-| `pristine`         | boolean              | false    | true     | true        | Whether or not the value has been modified        |
-| `validatorMessage` | string               | false    | true     | true        | Validator message to be displayed as help text    |
-| `validatorContext` | ValidatorContext     | false    | true     | true        | Validator context: danger, warning, success       |
-| `onBlur`           | React.EventHandler   | false    | true     | true        | Should be called when component has been blurred  |
-| `onFocus`          | React.EventHandler   | false    | true     | true        | Should be called when component has been focused  |
-| `value`            | any                  | false    | true     | true        | Current form component value                      |
-| `setValue`\*       | (value: any) => void | -        | true     | false       | Should be called when component value has changed |
+| Name            | Type                 | Required | Injected | Overridable | Description                                                        |
+| --------------- | -------------------- | -------- | -------- | ----------- | ------------------------------------------------------------------ |
+| `name`          | string               | true     | false    | true        | Unique form component identifier                                   |
+| `required`      | boolean              | false    | false    | true        | Whether or not a value is required                                 |
+| `pristine`      | boolean              | false    | true     | true        | Whether or not the value has been modified                         |
+| `validatorData` | ValidatorData        | false    | true     | true        | Data which reflects the current validator state for the component. |
+| `onBlur`        | React.EventHandler   | false    | true     | true        | Should be called when component has been blurred                   |
+| `onFocus`       | React.EventHandler   | false    | true     | true        | Should be called when component has been focused                   |
+| `value`         | any                  | false    | true     | true        | Current form component value                                       |
+| `setValue`      | (value: any) => void | -        | true     | false       | Should be called when component value has changed                  |
 
-\* ***Note:** this prop can not be overridden, providing it will have no effect.*
+***Notes***
+1. `ValidatorData` is an object: `{ message: string, context: ValidatorContext }`.
+2. `ValidatorContext` is an enum which expects strings: `danger`, `warning` & `success`.
+3. `setValue` can not be overridden, providing it will have no effect.
 
-##### Higher order component props
+#### Higher order component props
 These props are only used by the HOC and are not passed to the wrapped component.
 
-| Name                | Type           | Required | Description |
-| ------------------- | -------------- | -------- | ----------- |
-| `validatorRules`    | ValidatorRules | false    | -           |
-| `validatorMessages` | any            | false    | -           |
-| `validatorTrigger`  | string         | false    | -           |
-| `defaultValue`      | any            | false    | -           |
+| Name                | Type           | Required | Description                                                                                    |
+| ------------------- | -------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `validatorRules`    | ValidatorRules | false    | Validation rules which should be applied to the component                                      |
+| `validatorMessages` | any            | false    | Custom validator messages for specific validator rules                                         |
+| `validatorTrigger`  | string         | false    | Triggers validator to execute on the specified component names when this component is modified |
+| `defaultValue`      | any            | false    | Default value to be applied if the component does not have a managed, state or initial value   |
+
+#### bind HOC API
+##### Func: clear
+`clear(): Promise<void>`
+
+Clears the scomponent by setting its value to null.
+
+**Returns:** a promise which is resolved once the react component has been re-rendered
+
+##### Func: reset
+`reset(): Promise<void>`
+
+Resets the component by unsetting its value, validator and pristine state.
+
+**Returns:** a promise which is resolved once the react component has been re-rendered
+
+##### Func: validate
+`validate(): Promise<void>`
+
+Validates the component by executing the validator and updating the component to reflect its new validator state. If no component names are provided,
+
+**Returns:** a promise which is resolved once the react component has been re-rendered
+
+##### Func: isValid
+`isValid(): boolean`
+
+Determines if the component is valid by executing the validator using the components current value.
+
+**Returns:** a boolean flag to indicate whether the component is valid
+
+##### Func: isPristine
+`isPristine(): boolean`
+Determines if the component is pristine - the component has not been modified by the user or by programatically calling setValue.
+
+**Returns:** a boolean flag to indicate whether the component is pristine
+
+##### Func: getValidatorData
+`getValidatorData(): ValidatorData`
+
+Returns the components current validatorData. There are 2 ways a components validator data can be retrieved (in order of precedence):
+1. *externally managed validatorData* prop provided to the component
+2. *internally managed validatorData* state when the user changes input
+
+**Returns:** component validator data
+
+***Note:** If the component has no validatorData, then an object with undefined context & message will be returned.*
+
+##### Func: getValue
+`getValue(): any`
+
+Returns the value of the component. There are four ways a component value can be provied (in order of precedence):
+1. *externally managed* value prop provided to the component
+2. *internally managed* state value when the user changes input
+3. *initialValues* provided to the form component
+4. *defaultValue* specified on individual form component
+
+**Returns:** component value
+
+***Note:** the form values should not be mutated*
+
+##### Func: setValidatorData
+`setValidatorData(data: ValidatorData): Promise<void>`
+
+Sets the component internally managed validatorData & updates the component to reflect its new state.
+
+**Params:**
+* `validatorData` the new validator data to be stored in Form state
+
+**Returns:** a promise which is resolved once the react component has been re-rendered.
+
+##### Func: setValue
+`setValue(value: any, pristine?: boolean): Promise<void>`
+
+Sets the component internally managed state value & updates the component validatorData using the provided value. By default, the components pristine state will be set to `false` to indicate that the component has been modified.
+
+**Params:**
+* `value` the new value to be stored in Form state
+* `pristine` the new pristine state when setting this value (default: false).
+
+**Returns:** a promise which is resolved once the react component has been re-rendered.
 
 ### Validator rules
-Validator rules are executed sequentially (in the order in which they are defined) until a validator response has been returned, or all rules have been executed. If no rule has returned a validator response, then a response with Success context will be returned.
+Validator rules are executed sequentially (in the order in which they are defined) until validator data has been returned, or all rules have been executed. If no rule has returned validator data, then a data object with Success context will be returned.
 
 #### Built-in validator rules
 The following validator rules are built-in. By default, they will only return ValidatorContext.Danger if the a value is defined and it fails to pass the test. However, this behaviour can be customized by overriding built-in rules. See the [Adding additional validator rules](#adding-additional-validator-rules) section for more information. Additional built-in validator rules will be added in the future.
@@ -171,7 +368,7 @@ The following validator rules are built-in. By default, they will only return Va
 | `lteTarget`     | string        | Input value is <= to target input value                  |
 | `custom`        | ValidatorRule | Custom validator rule. It is executed before other rules |
 
-\* ***Note:** using the custom key allows consumers to define a custom validator rule. This is useful when one-off custom validator logic is required. Ideally, validator rules should be designed for reusability.*
+***Note:** using the custom key allows consumers to define a custom validator rule. This is useful when one-off custom validator logic is required. Ideally, validator rules should be designed for reusability.*
 
 #### Adding additional validator rules
 Adding additional validator rules can be done using the addValidatorRule function. An example can be found in [Example: Adding validator rules](#example-adding-validator-rules).
@@ -193,14 +390,14 @@ type ValidatorRule = (
     key: string,
     values: ValueMap,
     criteria?: any,
-) => ValidatorResponse;
+) => ValidatorData;
 
 interface ValidatorRuleMap {
     readonly [name: string]: ValidatorRule;
 }
 
-interface ValidatorResponse {
-    readonly key?: string;
+interface ValidatorData {
+    readonly name?: string;
     readonly context: ValidatorContext;
     readonly message?: string;
 }
@@ -266,13 +463,12 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
             value,
             setValue,
             onChange,
-            validatorContext,
-            validatorMessage,
+            validatorData,
             pristine,
             ...restProps
         } = this.props;
 
-        const hasError = validatorContext === ValidatorContext.Danger;
+        const hasError = validatorData.context === ValidatorContext.Danger;
 
         return (
             <MaterialTextField
@@ -282,7 +478,7 @@ export class UnboundTextField extends React.Component<TextFieldProps> {
                 value={value || ''}
                 onChange={this.handleChange}
                 error={!pristine && hasError}
-                helperText={!pristine && validatorMessage}
+                helperText={!pristine && validatorData.message}
             />
         );
     }

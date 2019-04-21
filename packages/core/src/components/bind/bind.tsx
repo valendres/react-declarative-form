@@ -9,6 +9,7 @@ import {
 } from '../../types';
 import { FormContext, FormApi } from '../Form';
 import { OutsideFormError } from '../../errors';
+const hoistNonReactStatics = require('hoist-non-react-statics');
 
 export interface BoundComponentCommonProps {
     /** Unique form component identifier */
@@ -75,13 +76,35 @@ export interface BoundComponent extends React.Component<BoundComponentProps> {
     forceUpdate: (callback: () => void) => void;
 }
 
-export function bind<WrappedComponentProps extends BoundComponentProps>(
+export function bind<
+    WrappedComponentProps extends BoundComponentProps,
+    WrappedComponentStatics = {}
+>(
     WrappedComponent: React.ComponentClass<WrappedComponentProps>,
-) {
-    return class BoundComponent
+): WrappedComponentStatics & {
+    /**
+     * Use explicit type for React.Component ref to allow consumers to pass a
+     * React.RefObject<BoundComponentInstance>` to ref prop of their connected
+     * component. Without explicitly typing this, the inferred type will be wrong.
+     *
+     * The custom ref prop is injected here instead of in the `ComponentProps`
+     * interface so that consumers are able to provide a RefObject, but they're
+     * not able to use it in their wrapped component.
+     */
+    new (props: WrappedComponentProps): Omit<
+        React.Component<WrappedComponentProps>,
+        'props'
+    > & {
+        props: WrappedComponentProps & {
+            ref?: React.RefObject<BoundComponent>;
+            unboundRef?: React.RefObject<any>;
+        };
+    };
+} {
+    class BoundComponent
         extends React.Component<
             WrappedComponentProps & {
-                innerRef?: React.RefObject<
+                unboundRef?: React.RefObject<
                     React.ComponentClass<WrappedComponentProps>
                 >;
             }
@@ -139,7 +162,7 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
                 validatorRules,
                 validatorMessages,
                 validatorTrigger,
-                innerRef,
+                unboundRef,
                 ...restProps
             } = this.props as any;
 
@@ -162,7 +185,7 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
                                 setValue={this.setValue}
                                 onBlur={this._handleBlur}
                                 onFocus={this._handleFocus}
-                                ref={innerRef}
+                                ref={unboundRef}
                             />
                         );
                     }}
@@ -362,26 +385,7 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
         };
         // tslint:enable:variable-name
         //#endregion
-    } as {
-        /**
-         * Use explicit type for React.Component ref to allow consumers to pass a
-         * React.RefObject<BoundComponentInstance>` to ref prop of their connected
-         * component. Without explicitly typing this, the inferred type will be wrong.
-         *
-         * The custom ref prop is injected here instead of in the `ComponentProps`
-         * interface so that consumers are able to provide a RefObject, but they're
-         * not able to use it in their wrapped component.
-         */
-        new (props: WrappedComponentProps): Omit<
-            React.Component<WrappedComponentProps>,
-            'props'
-        > & {
-            props: WrappedComponentProps & {
-                ref?: React.RefObject<BoundComponent>;
-                innerRef?: React.RefObject<
-                    React.ComponentClass<WrappedComponentProps>
-                >;
-            };
-        };
-    };
+    }
+
+    return hoistNonReactStatics(BoundComponent, WrappedComponent);
 }

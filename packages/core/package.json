@@ -42,6 +42,7 @@
         "react-dom": ">=16.3.2"
     },
     "dependencies": {
+        "hoist-non-react-statics": "3.3.0",
         "shallow-equal-object": "1.1.1",
         "update-immutable": "1.5.0",
         "validator": "10.11.0"

@@ -19,13 +19,15 @@ describe('module: bind', () => {
         }
     }
 
-    class ComponentClass extends React.Component<any> {
+    interface ComponentProps extends BoundComponentProps {}
+
+    class UnboundComponent extends React.Component<ComponentProps> {
         render() {
             return <div />;
         }
     }
 
-    const BoundComponentClass = bind(ComponentClass);
+    const Component = bind<ComponentProps>(UnboundComponent);
 
     const mockProps = (
         props: Partial<BoundComponentProps> = {},
@@ -63,11 +65,11 @@ describe('module: bind', () => {
                 const props = mockProps();
                 const wrapper = mount(
                     <FakeForm api={formApi}>
-                        <BoundComponentClass {...props} />
+                        <Component {...props} />
                     </FakeForm>,
                 );
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 instance.clear();
                 expect(formApi.clear).toHaveBeenCalledWith(props.name);
@@ -75,9 +77,9 @@ describe('module: bind', () => {
 
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
-                const wrapper = mount(<BoundComponentClass {...props} />);
+                const wrapper = mount(<Component {...props} />);
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 expect(instance.clear).toThrowErrorMatchingInlineSnapshot(
                     `"Failed to clear \\"test\\". Must be descendant of a <Form/> descendant."`,
@@ -91,11 +93,11 @@ describe('module: bind', () => {
                 const props = mockProps();
                 const wrapper = mount(
                     <FakeForm api={formApi}>
-                        <BoundComponentClass {...props} />
+                        <Component {...props} />
                     </FakeForm>,
                 );
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 instance.reset();
                 expect(formApi.reset).toHaveBeenCalledWith(props.name);
@@ -103,9 +105,9 @@ describe('module: bind', () => {
 
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
-                const wrapper = mount(<BoundComponentClass {...props} />);
+                const wrapper = mount(<Component {...props} />);
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 expect(instance.reset).toThrowErrorMatchingInlineSnapshot(
                     `"Failed to reset \\"test\\". Must be descendant of a <Form/> descendant."`,
@@ -119,11 +121,11 @@ describe('module: bind', () => {
                 const props = mockProps();
                 const wrapper = mount(
                     <FakeForm api={formApi}>
-                        <BoundComponentClass {...props} />
+                        <Component {...props} />
                     </FakeForm>,
                 );
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 instance.validate();
                 expect(formApi.validate).toHaveBeenCalledWith(props.name);
@@ -131,9 +133,9 @@ describe('module: bind', () => {
 
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
-                const wrapper = mount(<BoundComponentClass {...props} />);
+                const wrapper = mount(<Component {...props} />);
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 expect(instance.validate).toThrowErrorMatchingInlineSnapshot(
                     `"Failed to validate \\"test\\". Must be descendant of a <Form/> descendant."`,
@@ -152,11 +154,11 @@ describe('module: bind', () => {
                 const props = mockProps();
                 const wrapper = mount(
                     <FakeForm api={formApi}>
-                        <BoundComponentClass {...props} />
+                        <Component {...props} />
                     </FakeForm>,
                 );
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 const result = instance.isValid();
                 expect(result).toBe(expectedReturnValue);
@@ -165,9 +167,9 @@ describe('module: bind', () => {
 
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
-                const wrapper = mount(<BoundComponentClass {...props} />);
+                const wrapper = mount(<Component {...props} />);
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 expect(instance.isValid).toThrowErrorMatchingInlineSnapshot(
                     `"Failed to determine if \\"test\\" is valid. Must be descendant of a <Form/> descendant."`,
@@ -184,11 +186,11 @@ describe('module: bind', () => {
                 const props = mockProps();
                 const wrapper = mount(
                     <FakeForm api={formApi}>
-                        <BoundComponentClass {...props} />
+                        <Component {...props} />
                     </FakeForm>,
                 );
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 const result = instance.isPristine();
                 expect(result).toBe(expectedReturnValue);
@@ -197,9 +199,9 @@ describe('module: bind', () => {
 
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
-                const wrapper = mount(<BoundComponentClass {...props} />);
+                const wrapper = mount(<Component {...props} />);
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 expect(instance.isPristine).toThrowErrorMatchingInlineSnapshot(
                     `"Failed to determine if \\"test\\" is pristine. Must be descendant of a <Form/> descendant."`,
@@ -223,11 +225,11 @@ describe('module: bind', () => {
                 const props = mockProps();
                 const wrapper = mount(
                     <FakeForm api={formApi}>
-                        <BoundComponentClass {...props} />
+                        <Component {...props} />
                     </FakeForm>,
                 );
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 const result = instance.getValidatorData();
                 expect(result).toBe(expectedReturnValue);
@@ -239,9 +241,9 @@ describe('module: bind', () => {
 
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
-                const wrapper = mount(<BoundComponentClass {...props} />);
+                const wrapper = mount(<Component {...props} />);
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 expect(
                     instance.getValidatorData,
@@ -260,11 +262,11 @@ describe('module: bind', () => {
                 const props = mockProps();
                 const wrapper = mount(
                     <FakeForm api={formApi}>
-                        <BoundComponentClass {...props} />
+                        <Component {...props} />
                     </FakeForm>,
                 );
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 const result = instance.getValue();
                 expect(result).toBe(expectedReturnValue);
@@ -276,9 +278,9 @@ describe('module: bind', () => {
 
             it('should throw an error if called outside of a Form', () => {
                 const props = mockProps();
-                const wrapper = mount(<BoundComponentClass {...props} />);
+                const wrapper = mount(<Component {...props} />);
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 expect(instance.getValue).toThrowErrorMatchingInlineSnapshot(
                     `"Failed to get value for \\"test\\". Must be descendant of a <Form/> descendant."`,
@@ -301,11 +303,11 @@ describe('module: bind', () => {
                 const props = mockProps();
                 const wrapper = mount(
                     <FakeForm api={formApi}>
-                        <BoundComponentClass {...props} />
+                        <Component {...props} />
                     </FakeForm>,
                 );
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 instance.setValidatorData(validatorData);
                 expect(formApi.setValidatorData).toHaveBeenCalledWith(
@@ -316,9 +318,9 @@ describe('module: bind', () => {
 
             it('should throw an error if called outside of a Form', async () => {
                 const props = mockProps();
-                const wrapper = mount(<BoundComponentClass {...props} />);
+                const wrapper = mount(<Component {...props} />);
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 await expect(
                     instance.setValidatorData(validatorData),
@@ -338,11 +340,11 @@ describe('module: bind', () => {
                 const props = mockProps();
                 const wrapper = mount(
                     <FakeForm api={formApi}>
-                        <BoundComponentClass {...props} />
+                        <Component {...props} />
                     </FakeForm>,
                 );
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 instance.setValue(value);
                 expect(formApi.setValue).toHaveBeenCalledWith(
@@ -354,9 +356,9 @@ describe('module: bind', () => {
 
             it('should throw an error if called outside of a Form', async () => {
                 const props = mockProps();
-                const wrapper = mount(<BoundComponentClass {...props} />);
+                const wrapper = mount(<Component {...props} />);
                 const instance: BoundComponent = wrapper
-                    .find(BoundComponentClass)
+                    .find(Component)
                     .instance() as any;
                 await expect(
                     instance.setValue(value),
@@ -364,6 +366,56 @@ describe('module: bind', () => {
                     `[OutsideFormError: Failed to set value for "test". Must be descendant of a <Form/> descendant.]`,
                 );
             });
+        });
+    });
+
+    describe('Misc.', () => {
+        it('should hoist non-react statics', () => {
+            interface ComponentWithStaticsProps extends BoundComponentProps {}
+            interface ComponentWithStaticsStatics {
+                Title: string;
+            }
+
+            class UnboundComponentWithStatics extends React.Component<
+                ComponentWithStaticsProps
+            > {
+                static Title: string = 'Some static value';
+
+                render() {
+                    return <div />;
+                }
+            }
+
+            const ComponentWithStatics = bind<
+                ComponentWithStaticsProps,
+                ComponentWithStaticsStatics
+            >(UnboundComponentWithStatics);
+
+            expect(ComponentWithStatics.Title).toBe(
+                UnboundComponentWithStatics.Title,
+            );
+        });
+
+        it('should expose a ref to the bound component instance', () => {
+            const boundComponentRef = React.createRef<BoundComponent>();
+            mount(<Component name="test" ref={boundComponentRef} />);
+
+            const BoundClass = (boundComponentRef as any).current
+                ._reactInternalFiber.child.type;
+            expect(BoundClass.prototype.constructor.name).toBe(
+                'BoundComponent',
+            );
+        });
+
+        it('should expose a reference to the unbound component instance', () => {
+            const unboundComponentRef = React.createRef<UnboundComponent>();
+            mount(<Component name="test" unboundRef={unboundComponentRef} />);
+
+            const UnboundClass = (unboundComponentRef as any).current
+                ._reactInternalFiber.elementType;
+            expect(UnboundClass.prototype.constructor.name).toBe(
+                'UnboundComponent',
+            );
         });
     });
 });

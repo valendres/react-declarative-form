@@ -43,8 +43,8 @@
     },
     "dependencies": {
         "@material-ui/core": "3.9.3",
-        "@react-declarative-form/core": "^1.0.17",
-        "@react-declarative-form/material-ui": "^1.0.17",
+        "@react-declarative-form/core": "^1.0.0",
+        "@react-declarative-form/material-ui": "^1.0.0",
         "react": "16.8.6",
         "react-dom": "16.8.6",
         "react-hot-loader": "4.8.4",

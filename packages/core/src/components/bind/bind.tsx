@@ -51,6 +51,17 @@ export type BoundComponentProps = BoundComponentInjectedProps &
     BoundComponentCommonProps &
     BoundComponentHOCProps;
 
+/**
+ * Derived form component state from the nearest Form ancestor. This state data is
+ * used instead of `this.state` & `this.setState` to avoid unnecessary renders and
+ * duplicate component state, as the Form should always be the source of truth.
+ */
+export interface BoundComponentDerivedState {
+    pristine?: boolean;
+    validatorData?: ValidatorData;
+    value?: any;
+}
+
 export interface BoundComponent extends React.Component<BoundComponentProps> {
     clear: () => Promise<void[]>;
     reset: () => Promise<void[]>;
@@ -76,14 +87,19 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
             }
         >
         implements BoundComponent {
-        formApi: FormApi;
+        //#region Private variables
+        // tslint:disable:variable-name
+        /**
+         * Reference to the nearest Form ancestor provided via the context API
+         */
+        _formApi: FormApi;
 
-        // tslint:disable-next-line:variable-name
-        _state?: {
-            value?: any;
-            pristine?: boolean;
-            validatorData?: ValidatorData;
-        };
+        /**
+         * Cached output from the most recent `this._getState()` call.
+         */
+        _state?: BoundComponentDerivedState;
+        // tslint:enable:variable-name
+        //#endregion
 
         static defaultProps: Partial<BoundComponentProps> = {
             onBlur: () => {},
@@ -92,33 +108,29 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
 
         public componentDidMount() {
             const { name } = this.props;
-            if (!this.formApi) {
+            if (!this._formApi) {
                 console.error(
                     `Bound "${name}" form component must be a descendant of a <Form/>.`,
                 );
                 return;
             }
-            this.formApi.onComponentMount(name, this);
+            this._formApi.onComponentMount(name, this);
         }
 
         public componentWillUnmount() {
             const { name } = this.props;
-            return this.formApi && this.formApi.onComponentUnmount(name);
+            return this._formApi && this._formApi.onComponentUnmount(name);
         }
 
         public componentDidUpdate() {
             const { name } = this.props;
-            return this.formApi && this.formApi.onComponentUpdate(name);
+            return this._formApi && this._formApi.onComponentUpdate(name);
         }
 
         public shouldComponentUpdate() {
             const prevState = this._state;
             const nextState = this._getState();
-            return (
-                prevState.value !== nextState.value ||
-                prevState.pristine !== nextState.pristine ||
-                !shallowEqual(prevState.validatorData, nextState.validatorData)
-            );
+            return prevState !== nextState;
         }
 
         public render() {
@@ -134,15 +146,19 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
             return (
                 <FormContext.Consumer>
                     {(api: FormApi) => {
-                        this.formApi = api;
-                        this._state = this._getState();
+                        this._formApi = api;
+                        const {
+                            value,
+                            pristine,
+                            validatorData,
+                        } = this._getState();
 
                         return (
                             <WrappedComponent
                                 {...restProps}
-                                value={this._state.value}
-                                pristine={this._state.pristine}
-                                validatorData={this._state.validatorData}
+                                value={value}
+                                pristine={pristine}
+                                validatorData={validatorData}
                                 setValue={this.setValue}
                                 onBlur={this._handleBlur}
                                 onFocus={this._handleFocus}
@@ -161,10 +177,10 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
          */
         clear = () => {
             const { name } = this.props;
-            if (!this.formApi) {
+            if (!this._formApi) {
                 throw new OutsideFormError(`clear "${name}"`);
             }
-            return this.formApi.clear(name);
+            return this._formApi.clear(name);
         };
 
         /**
@@ -173,10 +189,10 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
          */
         reset = () => {
             const { name } = this.props;
-            if (!this.formApi) {
+            if (!this._formApi) {
                 throw new OutsideFormError(`reset "${name}"`);
             }
-            return this.formApi.reset(name);
+            return this._formApi.reset(name);
         };
 
         /**
@@ -186,10 +202,10 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
          */
         validate = () => {
             const { name } = this.props;
-            if (!this.formApi) {
+            if (!this._formApi) {
                 throw new OutsideFormError(`validate "${name}"`);
             }
-            return this.formApi.validate(name);
+            return this._formApi.validate(name);
         };
         //#endregion
 
@@ -201,10 +217,10 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
          */
         isValid = () => {
             const { name } = this.props;
-            if (!this.formApi) {
+            if (!this._formApi) {
                 throw new OutsideFormError(`determine if "${name}" is valid`);
             }
-            return this.formApi.isValid(name);
+            return this._formApi.isValid(name);
         };
 
         /**
@@ -214,12 +230,12 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
          */
         isPristine = () => {
             const { name } = this.props;
-            if (!this.formApi) {
+            if (!this._formApi) {
                 throw new OutsideFormError(
                     `determine if "${name}" is pristine`,
                 );
             }
-            return this.formApi.isPristine(name);
+            return this._formApi.isPristine(name);
         };
         //#endregion
 
@@ -237,10 +253,10 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
          */
         getValidatorData = () => {
             const { name } = this.props;
-            if (!this.formApi) {
+            if (!this._formApi) {
                 throw new OutsideFormError(`get validator data for "${name}"`);
             }
-            return this.formApi.getValidatorData(name, this.props);
+            return this._formApi.getValidatorData(name, this.props);
         };
 
         /**
@@ -257,10 +273,10 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
          */
         getValue = () => {
             const { name } = this.props;
-            if (!this.formApi) {
+            if (!this._formApi) {
                 throw new OutsideFormError(`get value for "${name}"`);
             }
-            return this.formApi.getValue(name, this.props);
+            return this._formApi.getValue(name, this.props);
         };
         //#endregion
 
@@ -273,10 +289,10 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
          */
         setValidatorData = async (data: ValidatorData): Promise<void> => {
             const { name } = this.props;
-            if (!this.formApi) {
+            if (!this._formApi) {
                 throw new OutsideFormError(`set validator data for "${name}"`);
             }
-            return this.formApi.setValidatorData(name, data);
+            return this._formApi.setValidatorData(name, data);
         };
 
         /**
@@ -289,47 +305,60 @@ export function bind<WrappedComponentProps extends BoundComponentProps>(
          */
         setValue = async (value: any, pristine?: boolean) => {
             const { name } = this.props;
-            if (!this.formApi) {
+            if (!this._formApi) {
                 throw new OutsideFormError(`set value for "${name}"`);
             }
-            return this.formApi.setValue(name, value, pristine);
+            return this._formApi.setValue(name, value, pristine);
         };
         //#endregion
 
-        //#region Private event handlers
+        //#region Private functions
         // tslint:disable:variable-name
         _handleBlur = async (event?: React.FocusEvent<any>) => {
             const { name } = this.props;
-            if (!this.formApi) {
+            if (!this._formApi) {
                 throw new OutsideFormError(`handle blur for "${name}"`);
             }
 
-            await this.formApi.onComponentBlur(name, event);
+            await this._formApi.onComponentBlur(name, event);
             return this.props.onBlur(event);
         };
 
         _handleFocus = async (event?: React.FocusEvent<any>) => {
             const { name } = this.props;
-            if (!this.formApi) {
+            if (!this._formApi) {
                 throw new OutsideFormError(`handle focus for "${name}"`);
             }
 
-            await this.formApi.onComponentFocus(name, event);
+            await this._formApi.onComponentFocus(name, event);
             return this.props.onFocus(event);
         };
 
-        _getState = () => {
-            const value = this.formApi ? this.getValue() : null;
-            const pristine = this.formApi ? this.isPristine() : true;
-            const validatorData = this.formApi
-                ? this.getValidatorData()
-                : undefined;
-
-            return {
-                value,
-                pristine,
-                validatorData,
+        /**
+         * Retrieves the components derived state from the nearest form Ancestor. The
+         * output is cached in between calls as `this._state`. If the object is shallow
+         * equal to the previously calculated value, it will be returned instead.
+         */
+        _getState = (): BoundComponentDerivedState => {
+            const prevState = this._state || {};
+            const nextState = {
+                pristine: this._formApi ? this.isPristine() : true,
+                value: this._formApi ? this.getValue() : null,
+                validatorData: this._formApi
+                    ? this.getValidatorData()
+                    : undefined,
             };
+
+            // Cache next state if value has changed
+            if (
+                prevState.value !== nextState.value ||
+                prevState.pristine !== nextState.pristine ||
+                !shallowEqual(prevState.validatorData, nextState.validatorData)
+            ) {
+                this._state = nextState;
+            }
+
+            return this._state;
         };
         // tslint:enable:variable-name
         //#endregion

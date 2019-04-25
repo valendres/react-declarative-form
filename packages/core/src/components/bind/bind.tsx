@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { shallowEqual } from 'shallow-equal-object';
+import * as deepEqual from 'fast-deep-equal';
 
 import {
     ValidatorData,
@@ -157,10 +158,10 @@ export function bind<
             return this._formApi && this._formApi.onComponentUpdate(name);
         }
 
-        public shouldComponentUpdate() {
-            const prevState = this._state;
-            const nextState = this._getState();
-            return prevState !== nextState;
+        public shouldComponentUpdate(nextProps: WrappedComponentProps) {
+            const propsChanged = !deepEqual(this.props, nextProps);
+            const stateChanged = this._state !== this._getState();
+            return propsChanged || stateChanged;
         }
 
         public render() {

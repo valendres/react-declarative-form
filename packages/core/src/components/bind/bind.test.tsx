@@ -19,15 +19,36 @@ describe('module: bind', () => {
         }
     }
 
-    interface ComponentProps extends BoundComponentProps {}
+    interface ComponentProps extends BoundComponentProps {
+        readOnly?: boolean;
+    }
 
     class UnboundComponent extends React.Component<ComponentProps> {
         render() {
-            return <div />;
+            const { value, readOnly } = this.props;
+
+            return <input value={value} readOnly={readOnly} />;
         }
     }
 
     const Component = bind<ComponentProps>(UnboundComponent);
+
+    interface ComponentWithFormProps extends ComponentProps {
+        formApi: FormApi;
+    }
+
+    class ComponentWithForm extends React.Component<ComponentWithFormProps> {
+        render() {
+            const { formApi, ...restProps } = this.props;
+
+            console.log(restProps.value);
+            return (
+                <FakeForm api={formApi}>
+                    <Component {...restProps} />
+                </FakeForm>
+            );
+        }
+    }
 
     const mockProps = (
         props: Partial<BoundComponentProps> = {},
@@ -43,9 +64,9 @@ describe('module: bind', () => {
         reset: jest.fn().mockResolvedValue(undefined),
         validate: jest.fn().mockResolvedValue(undefined),
         isValid: jest.fn(),
-        isPristine: jest.fn(),
-        getValidatorData: jest.fn().mockResolvedValue(undefined),
-        getValue: jest.fn().mockResolvedValue(undefined),
+        isPristine: jest.fn().mockReturnValue(true),
+        getValidatorData: jest.fn().mockReturnValue({}),
+        getValue: jest.fn().mockReturnValue(undefined),
         setValidatorData: jest.fn().mockResolvedValue(undefined),
         setValue: jest.fn().mockResolvedValue(undefined),
         onComponentMount: jest.fn().mockResolvedValue(undefined),
@@ -416,6 +437,59 @@ describe('module: bind', () => {
             expect(UnboundClass.prototype.constructor.name).toBe(
                 'UnboundComponent',
             );
+        });
+
+        it('should update wrapped component if component props changes', () => {
+            const initialReadOnlyState = true;
+            const updatedReadOnlyState = false;
+            const wrapper = mount(
+                <ComponentWithForm
+                    {...mockProps()}
+                    formApi={mockFormApi()}
+                    readOnly={initialReadOnlyState}
+                />,
+            );
+
+            // Test initial readOnly prop
+            expect(wrapper.find('input').prop('readOnly')).toBe(
+                initialReadOnlyState,
+            );
+
+            // Update readOnly state
+            wrapper.setProps({
+                readOnly: updatedReadOnlyState,
+            });
+
+            // Test updated readOnly prop
+            expect(wrapper.find('input').prop('readOnly')).toBe(
+                updatedReadOnlyState,
+            );
+        });
+
+        it('should update wrapped component if component state changes', () => {
+            const initialValue = 'Initial value';
+            const updatedValue = 'Updated value';
+            const wrapper = mount(
+                <ComponentWithForm
+                    {...mockProps()}
+                    formApi={mockFormApi({
+                        getValue: jest.fn().mockReturnValue(initialValue),
+                    })}
+                />,
+            );
+
+            // Test initial value state
+            expect(wrapper.find('input').prop('value')).toBe(initialValue);
+
+            // Update value state
+            wrapper.setProps({
+                formApi: mockFormApi({
+                    getValue: jest.fn().mockReturnValue(updatedValue),
+                }),
+            });
+
+            // Test updated value state
+            expect(wrapper.find('input').prop('value')).toBe(updatedValue);
         });
     });
 });

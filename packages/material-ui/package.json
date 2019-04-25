@@ -17,10 +17,10 @@
         "clean": "rimraf dist",
         "lint": "tslint -c ./tslint.json ./src/**/*.ts --format stylish",
         "package": "cd ./dist && yarn pack",
-        "prebuild": "yarn run clean",
+        "prebuild": "yarn clean",
         "precommit": "lint-staged",
-        "prepackage": "yarn run build",
-        "prepublish": "yarn run build",
+        "prepackage": "yarn build",
+        "prepublish": "yarn build",
         "prettier": "prettier --write \"?(src|test)/**/*.ts?(x)\"",
         "transpile": "tsc --project ./tsconfig.json --noEmit"
     },

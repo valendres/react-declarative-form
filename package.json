@@ -28,8 +28,8 @@
     ],
     "husky": {
         "hooks": {
-            "pre-commit": "yarn run precommit",
-            "pre-push": "yarn run prepush"
+            "pre-commit": "yarn precommit",
+            "pre-push": "yarn prepush"
         }
     },
     "devDependencies": {

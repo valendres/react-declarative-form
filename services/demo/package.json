@@ -13,7 +13,7 @@
     "scripts": {
         "build": "webpack --config=webpack.config.js",
         "clean": "rimraf dist",
-        "prebuild": "yarn run clean",
+        "prebuild": "yarn clean",
         "precommit": "lint-staged",
         "prettier": "prettier --write \"src/**/*.ts?(x)\"",
         "lint": "tslint -c ./tslint.json ./src/**/*.ts --format stylish",

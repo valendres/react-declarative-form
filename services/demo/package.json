@@ -13,11 +13,12 @@
     "scripts": {
         "build": "webpack --config=webpack.config.js",
         "clean": "rimraf dist",
-        "prebuild": "yarn run clean",
+        "prebuild": "yarn clean",
         "precommit": "lint-staged",
         "prettier": "prettier --write \"src/**/*.ts?(x)\"",
         "lint": "tslint -c ./tslint.json ./src/**/*.ts --format stylish",
-        "start": "webpack-dev-server --hot"
+        "start": "webpack-dev-server --hot",
+        "transpile": "tsc --project ./tsconfig.json --noEmit"
     },
     "lint-staged": {
         "*.{ts,tsx,js,jsx}": [
@@ -43,7 +44,7 @@
     },
     "dependencies": {
         "@material-ui/core": "3.9.3",
-        "@react-declarative-form/core": "^1.0.0",
+        "@react-declarative-form/core": "^2.0.0",
         "@react-declarative-form/material-ui": "^1.0.0",
         "react": "16.8.6",
         "react-dom": "16.8.6",

@@ -18,12 +18,14 @@
         "gen:toc": "markdown-toc -i --maxdepth 5 README.md",
         "lint": "tslint -c ./tslint.json ./src/**/*.ts --format stylish",
         "package": "cd ./dist && yarn pack",
-        "prebuild": "yarn run clean",
-        "precommit": "yarn run test --coverage=0 && lint-staged",
-        "prepackage": "yarn run build",
-        "prepublish": "yarn run build",
+        "prebuild": "yarn clean",
+        "precommit": "yarn test --coverage=0 && lint-staged",
+        "prepackage": "yarn build",
+        "prepublish": "yarn build",
         "prettier": "prettier --write \"?(src|test)/**/*.ts?(x)\"",
-        "test": "jest --silent"
+        "test": "jest --silent",
+        "transpile": "tsc --project ./tsconfig.json --noEmit",
+        "verify": "yarn lint && yarn transpile && yarn test"
     },
     "lint-staged": {
         "*.{ts,tsx,js,jsx}": [

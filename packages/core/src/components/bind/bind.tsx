@@ -1,6 +1,8 @@
-import * as React from 'react';
+import React from 'react';
 import { shallowEqual } from 'shallow-equal-object';
-import * as deepEqual from 'fast-deep-equal';
+import deepEqual from 'fast-deep-equal';
+import omit from 'lodash.omit';
+import pick from 'lodash.pick';
 
 import {
     ValidatorData,
@@ -159,8 +161,27 @@ export function bind<
         }
 
         public shouldComponentUpdate(nextProps: WrappedComponentProps) {
-            const propsChanged = !deepEqual(this.props, nextProps);
-            const stateChanged = this._state !== this._getState();
+            const prevProps = this.props;
+            const prevState = this._state;
+            const nextState = this._getState();
+
+            const validatorObjectKeys: (keyof WrappedComponentProps)[] = [
+                'validatorData',
+                'validatorRules',
+                'validatorMessages',
+            ];
+
+            const propsChanged =
+                !shallowEqual(
+                    omit(prevProps, validatorObjectKeys),
+                    omit(nextProps, validatorObjectKeys),
+                ) ||
+                !deepEqual(
+                    pick(prevProps, validatorObjectKeys),
+                    pick(prevProps, validatorObjectKeys),
+                );
+
+            const stateChanged = prevState !== nextState;
             return propsChanged || stateChanged;
         }
 

@@ -18,7 +18,8 @@
         "noUnusedLocals": true,
         "sourceMap": true,
         "allowJs": false,
-        "declaration": true
+        "declaration": true,
+        "esModuleInterop": true
     },
     "exclude": [
         "node_modules"

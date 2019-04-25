@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { FormContext, FormApi } from '../Form';
 
 export interface MirrorInstance {
@@ -8,11 +8,7 @@ export interface MirrorInstance {
 
 export interface MirrorProps {
     name: string | string[];
-    children: (
-        values: {
-            [key: string]: any;
-        },
-    ) => any;
+    children: (values: { [key: string]: any }) => any;
 }
 
 export class Mirror extends React.Component<MirrorProps> {

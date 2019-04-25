@@ -21,7 +21,9 @@
         "precommit": "lint-staged",
         "prepackage": "yarn run build",
         "prepublish": "yarn run build",
-        "prettier": "prettier --write \"?(src|test)/**/*.ts?(x)\""
+        "prettier": "prettier --write \"?(src|test)/**/*.ts?(x)\"",
+        "transpile": "tsc --project ./tsconfig.json --noEmit",
+        "verify": "yarn lint && yarn transpile"
     },
     "lint-staged": {
         "*.{ts,tsx,js,jsx}": [
@@ -32,7 +34,7 @@
     },
     "dependencies": {
         "@material-ui/core": "3.9.3",
-        "@react-declarative-form/core": "^1.0.17"
+        "@react-declarative-form/core": "^2.0.0"
     },
     "peerDependencies": {
         "react": ">=0.16.3",

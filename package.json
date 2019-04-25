@@ -12,11 +12,15 @@
     "scripts": {
         "bootstrap": "lerna bootstrap",
         "build": "lerna run --concurrency=1 --stream build",
+        "lint": "lerna run --concurrency=1 --stream lint",
         "start": "lerna run --concurrency=1 --stream start",
         "test": "lerna run --concurrency=1 --stream test",
         "precommit": "lerna run --concurrency 1 --stream precommit",
         "prepush": "lerna run --concurrency 1 --stream prepush",
-        "preinstall": "npx use-yarn -m 'Please use yarn!'"
+        "preinstall": "npx use-yarn -m 'Please use yarn!'",
+        "postinstall": "lerna link",
+        "transpile": "lerna run --concurrency=1 --stream transpile",
+        "verify": "lerna run --concurrency=1 --stream verify"
     },
     "workspaces": [
         "packages/*",

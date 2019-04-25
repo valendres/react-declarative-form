@@ -23,7 +23,9 @@
         "prepackage": "yarn run build",
         "prepublish": "yarn run build",
         "prettier": "prettier --write \"?(src|test)/**/*.ts?(x)\"",
-        "test": "jest --silent"
+        "test": "jest --silent",
+        "transpile": "tsc --project ./tsconfig.json --noEmit",
+        "verify": "yarn lint && yarn transpile && yarn test"
     },
     "lint-staged": {
         "*.{ts,tsx,js,jsx}": [

@@ -18,8 +18,7 @@
         "prettier": "prettier --write \"src/**/*.ts?(x)\"",
         "lint": "tslint -c ./tslint.json ./src/**/*.ts --format stylish",
         "start": "webpack-dev-server --hot",
-        "transpile": "tsc --project ./tsconfig.json --noEmit",
-        "verify": "yarn lint && yarn transpile"
+        "transpile": "tsc --project ./tsconfig.json --noEmit"
     },
     "lint-staged": {
         "*.{ts,tsx,js,jsx}": [

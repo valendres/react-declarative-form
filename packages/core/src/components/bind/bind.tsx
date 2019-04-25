@@ -1,6 +1,6 @@
-import * as React from 'react';
+import React from 'react';
 import { shallowEqual } from 'shallow-equal-object';
-import * as deepEqual from 'fast-deep-equal';
+import deepEqual from 'fast-deep-equal';
 
 import {
     ValidatorData,

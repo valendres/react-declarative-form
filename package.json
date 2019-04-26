@@ -15,6 +15,7 @@
         "lint": "lerna run --concurrency=1 --stream lint",
         "start": "lerna run --concurrency=1 --stream start",
         "test": "lerna run --concurrency=1 --stream test",
+        "package": "lerna run --concurrency=1 --stream package",
         "precommit": "lerna run --concurrency 1 --stream precommit",
         "prepush": "lerna run --concurrency 1 --stream prepush",
         "preinstall": "npx use-yarn -m 'Please use yarn!'",

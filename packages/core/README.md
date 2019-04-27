@@ -1,4 +1,16 @@
-# @react-declarative-form/core
+
+<h1 align="center">@react-declarative-form/core</h1>
+
+<div align="center">
+<img src="https://www.peterweller.com.au:9000/api/project_badges/measure?project=react-declarative-form&metric=alert_status"/>
+
+<img src="https://www.peterweller.com.au:9000/api/project_badges/measure?project=react-declarative-form&metric=coverage"/>
+
+<img src="https://www.peterweller.com.au:9000/api/project_badges/measure?project=react-declarative-form&metric=vulnerabilities"/>
+
+<img src="https://www.peterweller.com.au:9000/api/project_badges/measure?project=react-declarative-form&metric=sqale_rating"/>
+</div>
+
 ## Overview
 **@react-declarative-form/core** is the core of a simple-to-use declarative valadation library. It is designed to make building forms easy; allowing consumers to specify validator requirements on individual form components, and let the library do the heavy lifting.
 
@@ -23,50 +35,49 @@ Each bound component registers itself with the closest `<Form />` ancestor which
 
 <!-- toc -->
 
-- [@react-declarative-form/core](#react-declarative-formcore)
-  - [Overview](#overview)
-    - [Requirements](#requirements)
-  - [Getting started](#getting-started)
-  - [How does it work?](#how-does-it-work)
-  - [Table of Contents](#table-of-contents)
-  - [Documentation](#documentation)
-    - [Form component](#form-component)
-      - [Form Props](#form-props)
-      - [Form API](#form-api)
-        - [Func: submit](#func-submit)
-        - [Func: clear](#func-clear)
-        - [Func: reset](#func-reset)
-        - [Func: validate](#func-validate)
-        - [Func: isValid](#func-isvalid)
-        - [Func: isPristine](#func-ispristine)
-        - [Func: getValidatorData](#func-getvalidatordata)
-        - [Func: getValue](#func-getvalue)
-        - [Func: getValues](#func-getvalues)
-        - [Func: setValidatorData](#func-setvalidatordata)
-        - [Func: setValue](#func-setvalue)
-        - [Func: setValues](#func-setvalues)
-    - [bind HOC](#bind-hoc)
-      - [Bound component props](#bound-component-props)
-      - [Higher order component props](#higher-order-component-props)
-      - [bind HOC API](#bind-hoc-api)
-        - [Func: clear](#func-clear-1)
-        - [Func: reset](#func-reset-1)
-        - [Func: validate](#func-validate-1)
-        - [Func: isValid](#func-isvalid-1)
-        - [Func: isPristine](#func-ispristine-1)
-        - [Func: getValidatorData](#func-getvalidatordata-1)
-        - [Func: getValue](#func-getvalue-1)
-        - [Func: setValidatorData](#func-setvalidatordata-1)
-        - [Func: setValue](#func-setvalue-1)
-    - [Validator rules](#validator-rules)
-      - [Built-in validator rules](#built-in-validator-rules)
-      - [Adding additional validator rules](#adding-additional-validator-rules)
-    - [Types](#types)
-    - [Examples](#examples)
-      - [Example: Adding validator rules](#example-adding-validator-rules)
-      - [Example: Form Binding HOC](#example-form-binding-hoc)
-      - [Example: Form Usage](#example-form-usage)
-  - [Authors](#authors)
+- [Overview](#overview)
+  - [Requirements](#requirements)
+- [Getting started](#getting-started)
+- [How does it work?](#how-does-it-work)
+- [Table of Contents](#table-of-contents)
+- [Documentation](#documentation)
+  - [Form component](#form-component)
+    - [Form Props](#form-props)
+    - [Form API](#form-api)
+      - [Func: submit](#func-submit)
+      - [Func: clear](#func-clear)
+      - [Func: reset](#func-reset)
+      - [Func: validate](#func-validate)
+      - [Func: isValid](#func-isvalid)
+      - [Func: isPristine](#func-ispristine)
+      - [Func: getValidatorData](#func-getvalidatordata)
+      - [Func: getValue](#func-getvalue)
+      - [Func: getValues](#func-getvalues)
+      - [Func: setValidatorData](#func-setvalidatordata)
+      - [Func: setValue](#func-setvalue)
+      - [Func: setValues](#func-setvalues)
+  - [bind HOC](#bind-hoc)
+    - [Bound component props](#bound-component-props)
+    - [Higher order component props](#higher-order-component-props)
+    - [bind HOC API](#bind-hoc-api)
+      - [Func: clear](#func-clear-1)
+      - [Func: reset](#func-reset-1)
+      - [Func: validate](#func-validate-1)
+      - [Func: isValid](#func-isvalid-1)
+      - [Func: isPristine](#func-ispristine-1)
+      - [Func: getValidatorData](#func-getvalidatordata-1)
+      - [Func: getValue](#func-getvalue-1)
+      - [Func: setValidatorData](#func-setvalidatordata-1)
+      - [Func: setValue](#func-setvalue-1)
+  - [Validator rules](#validator-rules)
+    - [Built-in validator rules](#built-in-validator-rules)
+    - [Adding additional validator rules](#adding-additional-validator-rules)
+  - [Types](#types)
+  - [Examples](#examples)
+    - [Example: Adding validator rules](#example-adding-validator-rules)
+    - [Example: Form Binding HOC](#example-form-binding-hoc)
+    - [Example: Form Usage](#example-form-usage)
+- [Authors](#authors)
 
 <!-- tocstop -->
 

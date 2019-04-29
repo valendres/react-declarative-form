@@ -9,6 +9,8 @@
 <img src="https://www.peterweller.com.au:9000/api/project_badges/measure?project=react-declarative-form&metric=vulnerabilities"/>
 
 <img src="https://www.peterweller.com.au:9000/api/project_badges/measure?project=react-declarative-form&metric=sqale_rating"/>
+
+<span>For more info, see <a href="https://www.peterweller.com.au:9000/dashboard?id=react-declarative-form">SonarQube project stats</a>.</span>
 </div>
 
 ## Installation

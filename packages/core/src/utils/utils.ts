@@ -1,4 +1,4 @@
-import { ValueMap, OptionalPromise } from '../types';
+import { ValueMap } from '../types';
 
 export const isDefined = (key: string, values: ValueMap) => {
     return (
@@ -8,11 +8,3 @@ export const isDefined = (key: string, values: ValueMap) => {
         values[key] !== ''
     );
 };
-
-export const isPromise = (possiblePromise?: OptionalPromise<any>): boolean =>
-    possiblePromise instanceof Promise;
-
-export const ensurePromise = <T extends any>(
-    optionalPromise?: OptionalPromise<T>,
-): Promise<T> =>
-    isPromise(optionalPromise) ? (optionalPromise as any) : Promise.resolve();

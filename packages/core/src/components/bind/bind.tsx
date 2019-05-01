@@ -366,23 +366,23 @@ export function bind<
 
         //#region Private functions
         // tslint:disable:variable-name
-        _handleBlur = async (event?: React.FocusEvent<any>) => {
+        _handleBlur = (event?: React.FocusEvent<any>) => {
             const { name } = this.props;
             if (!this._formApi) {
                 throw new OutsideFormError(`handle blur for "${name}"`);
             }
 
-            await this._formApi.onComponentBlur(name, event);
+            this._formApi.onComponentBlur(name, event);
             return this.props.onBlur(event);
         };
 
-        _handleFocus = async (event?: React.FocusEvent<any>) => {
+        _handleFocus = (event?: React.FocusEvent<any>) => {
             const { name } = this.props;
             if (!this._formApi) {
                 throw new OutsideFormError(`handle focus for "${name}"`);
             }
 
-            await this._formApi.onComponentFocus(name, event);
+            this._formApi.onComponentFocus(name, event);
             return this.props.onFocus(event);
         };
 

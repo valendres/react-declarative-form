@@ -1,16 +1,9 @@
 import React from 'react';
 import update from 'update-immutable';
 
-import {
-    ValidatorData,
-    ValueMap,
-    Omit,
-    OptionalPromise,
-    ValidatorContext,
-} from '../../types';
+import { ValidatorData, ValueMap, Omit, ValidatorContext } from '../../types';
 import { BoundComponent } from '../bind';
 import { MirrorInstance, Mirror } from '../Mirror';
-import { ensurePromise } from '../../utils';
 import { validate } from '../../validator';
 import { UnknownComponentError } from '../../errors';
 
@@ -56,7 +49,7 @@ export interface FormProps<FormFields extends ValueMap>
         componentName: keyof FormFields,
         value: any,
         event: React.FocusEvent<any>,
-    ) => OptionalPromise<void>;
+    ) => void;
 
     /**
      * Called when a bound form component has been focused.
@@ -67,7 +60,7 @@ export interface FormProps<FormFields extends ValueMap>
         componentName: keyof FormFields,
         value: any,
         event: React.FocusEvent<any>,
-    ) => OptionalPromise<void>;
+    ) => void;
 
     /**
      * 	Called when the form is programmatically submitted, or a button with type="submit" is clicked.
@@ -670,21 +663,21 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         this.reflectComponentMirrors(componentName);
     };
 
-    private handleComponentBlur = async (
+    private handleComponentBlur = (
         componentName: keyof FormComponents,
         event: React.FocusEvent<any>,
     ) => {
         const value = this.getValue(componentName);
-        await ensurePromise(this.props.onBlur(componentName, value, event));
+        this.props.onBlur(componentName, value, event);
         return event;
     };
 
-    private handleComponentFocus = async (
+    private handleComponentFocus = (
         componentName: keyof FormComponents,
         event: React.FocusEvent<any>,
     ) => {
         const value = this.getValue(componentName);
-        await ensurePromise(this.props.onFocus(componentName, value, event));
+        this.props.onFocus(componentName, value, event);
         return event;
     };
     //#endregion

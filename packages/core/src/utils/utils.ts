@@ -8,3 +8,7 @@ export const isDefined = (key: string, values: ValueMap) => {
         values[key] !== ''
     );
 };
+
+export const isCallable = (arg: unknown): boolean => {
+    return typeof arg === 'function';
+};

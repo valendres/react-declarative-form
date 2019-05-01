@@ -549,6 +549,22 @@ describe('component: Form', () => {
                     );
                 });
         });
+
+        it('should ignore initialValues if null', async () => {
+            const props = mockProps({
+                initialValues: null,
+            });
+            const wrapper = mount(
+                <Form {...props}>
+                    <TextField name="firstName" defaultValue={defaultValue} />
+                </Form>,
+            );
+
+            // Should be defaultValue because initialValues is null
+            expect(wrapper.find({ name: 'firstName' })).toHaveInputValue(
+                defaultValue,
+            );
+        });
     });
 
     describe('validation', () => {

@@ -12,6 +12,7 @@ import {
 } from '../../types';
 import { FormContext, FormApi } from '../Form';
 import { OutsideFormError } from '../../errors';
+import { isCallable } from '../../utils';
 const hoistNonReactStatics = require('hoist-non-react-statics');
 
 export interface BoundComponentCommonProps {
@@ -133,11 +134,6 @@ export function bind<
         _state?: BoundComponentDerivedState;
         // tslint:enable:variable-name
         //#endregion
-
-        static defaultProps: Partial<BoundComponentProps> = {
-            onBlur: () => {},
-            onFocus: () => {},
-        };
 
         public componentDidMount() {
             const { name } = this.props;
@@ -367,23 +363,29 @@ export function bind<
         //#region Private functions
         // tslint:disable:variable-name
         _handleBlur = (event?: React.FocusEvent<any>) => {
-            const { name } = this.props;
+            const { name, onBlur } = this.props;
             if (!this._formApi) {
                 throw new OutsideFormError(`handle blur for "${name}"`);
             }
 
             this._formApi.onComponentBlur(name, event);
-            return this.props.onBlur(event);
+
+            if (isCallable(onBlur)) {
+                onBlur(event);
+            }
         };
 
         _handleFocus = (event?: React.FocusEvent<any>) => {
-            const { name } = this.props;
+            const { name, onFocus } = this.props;
             if (!this._formApi) {
                 throw new OutsideFormError(`handle focus for "${name}"`);
             }
 
             this._formApi.onComponentFocus(name, event);
-            return this.props.onFocus(event);
+
+            if (isCallable(onFocus)) {
+                onFocus(event);
+            }
         };
 
         /**

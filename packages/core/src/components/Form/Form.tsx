@@ -6,6 +6,7 @@ import { BoundComponent } from '../bind';
 import { MirrorInstance, Mirror } from '../Mirror';
 import { validate } from '../../validator';
 import { UnknownComponentError } from '../../errors';
+import { isCallable } from '../../utils';
 
 export const FormContext = React.createContext(undefined as FormApi);
 
@@ -110,13 +111,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     FormProps<FormComponents>
 > {
     static defaultProps: FormProps<any> = {
-        onChange: () => {},
-        onBlur: () => {},
-        onFocus: () => {},
-        onSubmit: () => {},
-        onValidSubmit: () => {},
-        onInvalidSubmit: () => {},
-        initialValues: {},
         sticky: false,
     };
 
@@ -133,6 +127,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     private mirrors: {
         [ComponentName in keyof FormComponents]: MirrorInstance[]
     };
+
+    private formRef = React.createRef<HTMLFormElement>();
 
     constructor(props: FormProps<FormComponents>) {
         super(props as any);
@@ -180,7 +176,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
         return (
             <FormContext.Provider value={api}>
-                <form {...restProps as any} onSubmit={this.handleFormSubmit}>
+                <form
+                    {...restProps as any}
+                    onSubmit={this.handleFormSubmit}
+                    ref={this.formRef}
+                >
                     {children}
                     {withHiddenSubmit && (
                         <button type="submit" style={{ display: 'none' }} />
@@ -369,12 +369,16 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             componentName,
         ),
     ): any => {
-        const propValue = componentProps && componentProps.value;
-        const defaultValue = componentProps && componentProps.defaultValue;
-        const stateValue =
-            this.components[componentName] &&
-            this.components[componentName].value;
-        const initialValue = this.props.initialValues[componentName];
+        const propValue = componentProps ? componentProps.value : undefined;
+        const defaultValue = componentProps
+            ? componentProps.defaultValue
+            : undefined;
+        const stateValue = this.components[componentName]
+            ? this.components[componentName].value
+            : undefined;
+        const initialValue = this.props.initialValues
+            ? this.props.initialValues[componentName]
+            : undefined;
 
         const dynamicValue = [
             propValue,
@@ -598,7 +602,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         value: any,
     ) => {
-        return this.props.onChange(componentName, value);
+        const { onChange } = this.props;
+        if (isCallable(onChange)) {
+            onChange(componentName, value);
+        }
     };
 
     private handleFormSubmit = (event?: React.FormEvent<HTMLFormElement>) => {
@@ -615,7 +622,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             this.handleFormInvalidSubmit(values);
         }
 
-        this.props.onSubmit(values);
+        const { onSubmit } = this.props;
+        if (isCallable(onSubmit)) {
+            onSubmit(values);
+        }
 
         return {
             isValid,
@@ -624,12 +634,18 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     };
 
     private handleFormValidSubmit = (values: FormComponents) => {
-        this.props.onValidSubmit(values);
+        const { onValidSubmit } = this.props;
+        if (isCallable(onValidSubmit)) {
+            onValidSubmit(values);
+        }
     };
 
     private handleFormInvalidSubmit = (values: FormComponents) => {
+        const { onInvalidSubmit } = this.props;
         this.validate();
-        this.props.onInvalidSubmit(values);
+        if (isCallable(onInvalidSubmit)) {
+            onInvalidSubmit(values);
+        }
     };
 
     private handleComponentMount = async (
@@ -668,7 +684,12 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         event: React.FocusEvent<any>,
     ) => {
         const value = this.getValue(componentName);
-        this.props.onBlur(componentName, value, event);
+
+        const { onBlur } = this.props;
+        if (isCallable(onBlur)) {
+            onBlur(componentName, value, event);
+        }
+
         return event;
     };
 
@@ -677,7 +698,12 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         event: React.FocusEvent<any>,
     ) => {
         const value = this.getValue(componentName);
-        this.props.onFocus(componentName, value, event);
+
+        const { onFocus } = this.props;
+        if (isCallable(onFocus)) {
+            onFocus(componentName, value, event);
+        }
+
         return event;
     };
     //#endregion

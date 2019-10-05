@@ -66,7 +66,9 @@ export class Mirror extends React.Component<MirrorProps> {
         return new Promise(resolve => {
             // Document check is done to prevent a jest unit test error where
             // the document may be cleaned up before forceUpdate is called
-            document ? this.forceUpdate(resolve) : Promise.resolve();
+            typeof document !== 'undefined'
+                ? this.forceUpdate(resolve)
+                : Promise.resolve();
         });
     };
 

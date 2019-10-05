@@ -32,10 +32,10 @@ export interface BoundComponentCommonProps {
     value?: any;
 
     /** Should be called when component has been blurred */
-    onBlur?: React.EventHandler<any>;
+    onBlur?: (event: any) => void;
 
     /** Should be called when component has been focused */
-    onFocus?: React.EventHandler<any>;
+    onFocus?: (event: any) => void;
 }
 
 export interface BoundComponentInjectedProps {
@@ -362,7 +362,7 @@ export function bind<
 
         //#region Private functions
         // tslint:disable:variable-name
-        _handleBlur = (event?: React.FocusEvent<any>) => {
+        _handleBlur = (event?: any) => {
             const { name, onBlur } = this.props;
             if (!this._formApi) {
                 throw new OutsideFormError(`handle blur for "${name}"`);
@@ -375,7 +375,7 @@ export function bind<
             }
         };
 
-        _handleFocus = (event?: React.FocusEvent<any>) => {
+        _handleFocus = (event?: any) => {
             const { name, onFocus } = this.props;
             if (!this._formApi) {
                 throw new OutsideFormError(`handle focus for "${name}"`);

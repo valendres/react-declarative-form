@@ -1,12 +1,17 @@
 import React from 'react';
 import update from 'update-immutable';
 
-import { ValidatorData, ValueMap, Omit, ValidatorContext } from '../../types';
+import {
+    ValidatorData,
+    ValueMap,
+    ValidatorContext,
+    Environment,
+} from '../../types';
 import { BoundComponent } from '../bind';
 import { MirrorInstance, Mirror } from '../Mirror';
 import { validate } from '../../validator';
 import { UnknownComponentError } from '../../errors';
-import { isCallable } from '../../utils';
+import { isCallable, getEnvironment } from '../../utils';
 
 export const FormContext = React.createContext(undefined as FormApi);
 
@@ -29,11 +34,7 @@ export interface FormApi {
     unregisterMirror: Form<any>['unregisterMirror'];
 }
 
-export interface FormProps<FormFields extends ValueMap>
-    extends Omit<
-        React.FormHTMLAttributes<HTMLFormElement>,
-        'onChange' | 'onBlur' | 'onFocus' | 'onSubmit'
-    > {
+export interface FormProps<FormFields extends ValueMap> {
     /**
      * Called when the value of a bound form component has been changed.
      * @param {string} componentName name of the component
@@ -46,22 +47,14 @@ export interface FormProps<FormFields extends ValueMap>
      * @param {string} componentName name of the component
      * @param {object} value current value
      */
-    onBlur?: (
-        componentName: keyof FormFields,
-        value: any,
-        event: React.FocusEvent<any>,
-    ) => void;
+    onBlur?: (componentName: keyof FormFields, value: any, event: any) => void;
 
     /**
      * Called when a bound form component has been focused.
      * @param {string} componentName name of the component
      * @param {object} value current value
      */
-    onFocus?: (
-        componentName: keyof FormFields,
-        value: any,
-        event: React.FocusEvent<any>,
-    ) => void;
+    onFocus?: (componentName: keyof FormFields, value: any, event: any) => void;
 
     /**
      * 	Called when the form is programmatically submitted, or a button with type="submit" is clicked.
@@ -87,6 +80,7 @@ export interface FormProps<FormFields extends ValueMap>
      * However, if you a form which is being submitted programatically, or it doesn't
      * make sense to show a submit button, setting this to true will allow submit on enter
      * to work.
+     * @note this prop has no effect when using `react-native`.
      */
     withHiddenSubmit?: boolean;
 
@@ -127,8 +121,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     private mirrors: {
         [ComponentName in keyof FormComponents]: MirrorInstance[]
     };
-
-    private formRef = React.createRef<HTMLFormElement>();
 
     constructor(props: FormProps<FormComponents>) {
         super(props as any);
@@ -176,16 +168,20 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
         return (
             <FormContext.Provider value={api}>
-                <form
-                    {...restProps as any}
-                    onSubmit={this.handleFormSubmit}
-                    ref={this.formRef}
-                >
-                    {children}
-                    {withHiddenSubmit && (
-                        <button type="submit" style={{ display: 'none' }} />
-                    )}
-                </form>
+                {/* Skip rendering dom element in react-native environments */}
+                {getEnvironment() === Environment.ReactNative ? (
+                    children
+                ) : (
+                    <form
+                        {...restProps as any}
+                        onSubmit={this.handleFormSubmit}
+                    >
+                        {children}
+                        {withHiddenSubmit && (
+                            <button type="submit" style={{ display: 'none' }} />
+                        )}
+                    </form>
+                )}
             </FormContext.Provider>
         );
     }
@@ -608,7 +604,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         }
     };
 
-    private handleFormSubmit = (event?: React.FormEvent<HTMLFormElement>) => {
+    private handleFormSubmit = (event?: any) => {
         if (event) {
             event.preventDefault();
         }
@@ -681,7 +677,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
     private handleComponentBlur = (
         componentName: keyof FormComponents,
-        event: React.FocusEvent<any>,
+        event: any,
     ) => {
         const value = this.getValue(componentName);
 
@@ -695,7 +691,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
     private handleComponentFocus = (
         componentName: keyof FormComponents,
-        event: React.FocusEvent<any>,
+        event: any,
     ) => {
         const value = this.getValue(componentName);
 

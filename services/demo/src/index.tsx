@@ -7,14 +7,16 @@ import 'typeface-roboto';
 import {
     // LoginForm,
     // DefaultValuesForm,
-    StickyValuesForm,
+    // StickyValuesForm,
+    WithNestedForm,
 } from './forms';
 
 const App = () => (
     <React.Fragment>
         {/* <LoginForm /> */}
         {/* <DefaultValuesForm /> */}
-        <StickyValuesForm />
+        {/* <StickyValuesForm /> */}
+        <WithNestedForm />
     </React.Fragment>
 );
 

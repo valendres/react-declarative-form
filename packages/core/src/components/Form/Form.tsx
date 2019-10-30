@@ -12,6 +12,7 @@ import { MirrorInstance, Mirror } from '../Mirror';
 import { validate } from '../../validator';
 import { UnknownComponentError } from '../../errors';
 import { isCallable, getEnvironment } from '../../utils';
+import { NestedForm } from '../NestedForm';
 
 export const FormContext = React.createContext(undefined as FormApi);
 
@@ -23,8 +24,10 @@ export interface FormApi {
     isPristine: Form<any>['isPristine'];
     getValidatorData: Form<any>['getValidatorData'];
     getValue: Form<any>['getValue'];
+    getValues: Form<any>['getValues'];
     setValidatorData: Form<any>['setValidatorData'];
     setValue: Form<any>['setValue'];
+    setValues: Form<any>['setValues'];
     onComponentMount: Form<any>['handleComponentMount'];
     onComponentUnmount: Form<any>['handleComponentUnmount'];
     onComponentUpdate: Form<any>['handleComponentUpdate'];
@@ -163,7 +166,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             getValidatorData: this.getValidatorData,
             setValidatorData: this.setValidatorData,
             getValue: this.getValue,
+            getValues: this.getValues,
             setValue: this.setValue,
+            setValues: this.setValues,
             onComponentMount: this.handleComponentMount,
             onComponentUnmount: this.handleComponentUnmount,
             onComponentUpdate: this.handleComponentUpdate,
@@ -216,9 +221,13 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
         return Promise.all(
-            this.getComponentNames(componentName).map(componentName =>
-                this.setValue(componentName, null),
-            ),
+            this.getComponentNames(componentName).map(async componentName => {
+                if (this.isNestedForm(componentName)) {
+                    await this.getNestedForm(componentName).clear();
+                } else {
+                    await this.setValue(componentName, null);
+                }
+            }),
         );
     };
 
@@ -233,11 +242,14 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
         return Promise.all(
-            this.getComponentNames(componentName).map(componentName =>
-                this.updateComponent(componentName, {
+            this.getComponentNames(componentName).map(async componentName => {
+                await this.updateComponent(componentName, {
                     $unset: ['value', 'validatorData', 'pristine'],
-                }),
-            ),
+                });
+                if (this.isNestedForm(componentName)) {
+                    this.getNestedForm(componentName).reset();
+                }
+            }),
         );
     };
 
@@ -495,6 +507,21 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
                 this.setValue(componentName, values[componentName], pristine),
             ),
         );
+    };
+    //#endregion
+
+    //#region Private helpers
+    isNestedForm = (componentName: keyof FormComponents) => {
+        const instance = this.getComponentInstance(componentName);
+        return instance instanceof NestedForm;
+    };
+
+    getNestedForm = (componentName: keyof FormComponents): NestedForm => {
+        if (this.isNestedForm(componentName)) {
+            const instance = this.getComponentInstance(componentName);
+            return instance as NestedForm;
+        }
+        return undefined;
     };
     //#endregion
 
@@ -804,7 +831,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * @returns array of component names which are dependent on the specified
      * component names.
      */
-    getCompomentDependencyMap = (
+    getComponentDependencyMap = (
         componentNames: (keyof FormComponents)[],
         mappedNames: FormComponents = {} as any,
     ): (keyof FormComponents)[] => {
@@ -827,7 +854,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
                 if (namesToMap.length > 0) {
                     return {
                         ...dependencyMap,
-                        ...this.getCompomentDependencyMap(
+                        ...this.getComponentDependencyMap(
                             namesToMap,
                             mappedNames,
                         ),
@@ -852,7 +879,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         const component = this.components[componentName];
         if (component) {
             return Object.keys(
-                this.getCompomentDependencyMap(
+                this.getComponentDependencyMap(
                     this.getComponentValidatorTriggers(componentName),
                 ),
             ).filter(

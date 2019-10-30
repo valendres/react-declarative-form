@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as zxcvbn from 'zxcvbn';
+import zxcvbn from 'zxcvbn';
 import {
     Form,
     ValueMap,
@@ -87,9 +87,6 @@ export class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
                     onValidSubmit={this.handleFormValidSubmit}
                     onInvalidSubmit={this.handleFormInvalidSubmit}
                     onChange={this.handleFormChange}
-                    style={{
-                        maxWidth: '600px',
-                    }}
                 >
                     <Grid container spacing={16}>
                         <Grid item sm={4} xs={12}>

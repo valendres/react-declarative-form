@@ -85,6 +85,12 @@ export interface FormProps<FormFields extends ValueMap> {
     withHiddenSubmit?: boolean;
 
     /**
+     * If true, a the html form element will not be rendered.
+     * @note this prop has no effect when using `react-native`.
+     */
+    virtual?: boolean;
+
+    /**
      * Whether the form component values should be sticky and retain their value in
      * between component unmounts and mounts. By default, form component state is
      * lost when a component is unmounted.
@@ -132,6 +138,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         const {
             children,
             withHiddenSubmit,
+            virtual,
 
             // Omitted
             onChange,
@@ -169,7 +176,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         return (
             <FormContext.Provider value={api}>
                 {/* Skip rendering dom element in react-native environments */}
-                {getEnvironment() === Environment.ReactNative ? (
+                {virtual || getEnvironment() === Environment.ReactNative ? (
                     children
                 ) : (
                     <form

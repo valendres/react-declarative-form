@@ -10,7 +10,7 @@ import {
     ValidatorMessageGenerator,
     Omit,
 } from '../../types';
-import { FormContext, FormApi } from '../Form';
+import { FormContext, FormApi, FormComponentState } from '../Form';
 import { OutsideFormError } from '../../errors';
 import { isCallable } from '../../utils';
 const hoistNonReactStatics = require('hoist-non-react-statics');
@@ -76,7 +76,7 @@ export interface BoundComponentDerivedState {
 }
 
 export interface BoundComponent extends React.Component<BoundComponentProps> {
-    update: (value: any, pristine: any) => Promise<void>;
+    update: (state: FormComponentState) => Promise<void>;
     clear: () => Promise<void[]>;
     reset: () => Promise<void[]>;
     validate: () => Promise<void[]>;

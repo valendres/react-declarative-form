@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, FormContext, FormApi } from '../Form';
+import { Form, FormContext, FormApi, FormComponentState } from '../Form';
 import { BoundComponent } from '../bind';
 
 export interface NestedFormProps {
@@ -123,7 +123,7 @@ export class NestedForm extends React.Component<NestedFormProps>
     //     return super.forceUpdate();
     // }
 
-    update = async (value: any, pristine: boolean) => {
+    update = async ({ value, pristine }: FormComponentState) => {
         /**
          * If we're setting the value to undefined or null, we need to map
          * the new value to each nested form component. Otherwise, providing
@@ -144,6 +144,7 @@ export class NestedForm extends React.Component<NestedFormProps>
             pristine,
             true,
         );
+
         return Promise.resolve();
     };
 }

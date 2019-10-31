@@ -1,5 +1,5 @@
 import React from 'react';
-import update from 'update-immutable';
+import update, { UpdateTransform } from 'update-immutable';
 
 import {
     ValidatorData,
@@ -78,9 +78,9 @@ export interface FormProps<FormFields extends ValueMap> {
     onInvalidSubmit?: (values: FormFields) => void;
 
     /**
-     * Whether a hidden submit should be rendered within the form. The existance of a
+     * Whether a hidden submit should be rendered within the form. The existence of a
      * `<button type="submit"/>` allows forms to be submitted when the enter key is pressed.
-     * However, if you a form which is being submitted programatically, or it doesn't
+     * However, if you a form which is being submitted programmatically, or it doesn't
      * make sense to show a submit button, setting this to true will allow submit on enter
      * to work.
      * @note this prop has no effect when using `react-native`.
@@ -110,6 +110,14 @@ export interface FormProps<FormFields extends ValueMap> {
     initialValues?: FormFields;
 }
 
+export interface FormComponentState {
+    name: string;
+    pristine: boolean;
+    value?: any;
+    validatorData?: ValidatorData;
+    instance?: BoundComponent;
+}
+
 export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     FormProps<FormComponents>
 > {
@@ -118,13 +126,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     };
 
     private components: {
-        [ComponentName in keyof FormComponents]: {
-            name: string;
-            pristine: boolean;
-            value?: any;
-            validatorData?: ValidatorData;
-            instance?: BoundComponent;
-        }
+        [ComponentName in keyof FormComponents]: FormComponentState
     };
 
     private mirrors: {
@@ -200,7 +202,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
     //#region Public commands
     /**
-     * Programatically submit the form. If you don't want to manually call this, a button
+     * programmatically submit the form. If you don't want to manually call this, a button
      * with type submit should be provided to the form. This can be provided in your form
      * implementation, or automatically using the `withHiddenSubmit` prop on the Form.
      * @returns an object with 2 properties:
@@ -242,6 +244,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
                 await this.updateComponent(componentName, {
                     $unset: ['value', 'validatorData', 'pristine'],
                 });
+
+                // We need to explicitly call reset since the updateComponent $unset wont reset validatorData
+                if (this.isNestedForm(componentName)) {
+                    await this.getNestedForm(componentName).reset();
+                }
             }),
         );
     };
@@ -308,7 +315,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
     /**
      * Determines if all the specified component(s) are pristine - the component has not
-     * been modified by the user or by programatically calling setValue. If no component
+     * been modified by the user or by programmatically calling setValue. If no component
      * names are provided, all components within the form will checked.
      * @param {string|string[]} componentName component name(s) to be tested
      * @returns a boolean flag to indicate whether all the components are pristine
@@ -365,7 +372,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
     /**
      * Returns the value of the specified component. There are four
-     * ways a component value can be provied (in order of precedence):
+     * ways a component value can be provided (in order of precedence):
      *  1. *externally managed* value prop provided to the component
      *  2. *internally managed* state value when the user changes input
      *  3. *initialValues* provided to the form component
@@ -557,7 +564,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         componentRef: BoundComponent,
     ) => {
-        // Return early if a ref has already been refistered
+        // Return early if a ref has already been registered
         if (
             componentName in this.components &&
             !!this.components[componentName].instance
@@ -774,9 +781,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     /** Helper function for retrieving an array of component names. This is used by
      * functions which can iterate over a single, multiple or all components within
      * the form.
-     * * If a singilar component name is provided, it will be returned as an array.
+     * * If a singular component name is provided, it will be returned as an array.
      * * If multiple component names are provided, they will be returned unchanged.
-     * * If no component names are provided, all component names will be returend.
+     * * If no component names are provided, all component names will be returned.
      * @param {string|string[]} componentName component name(s)
      * @returns array of component names
      */
@@ -846,9 +853,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * Recursively builds a dependency map for components that are part of the
      * validator trigger tree.
      * @param {string[]} componentNames array of component names to check
-     * @param {object} mappedNames while recursing, a mappedNames object is kept
+     * @param {object} mappedNames while recurseing, a mappedNames object is kept
      * to ensure that a component is not included twice and to ensure that
-     * components cannot trigger eachother.
+     * components cannot trigger each other.
      * @returns array of component names which are dependent on the specified
      * component names.
      */
@@ -915,15 +922,16 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * the state has been updated, the react component will be updated to reflect
      * the change.
      * @param {string} componentName name of the component which should be updated
+     * @param {object} transform the `update-immutable` transform object
      * @returns a promise which is resolved once the react component has been re-rendered.
      */
     updateComponent = (
         componentName: keyof FormComponents,
-        componentTransform: any,
+        componentTransform: UpdateTransform,
     ): Promise<void> => {
         if (!(componentName in this.components)) {
             throw new UnknownComponentError(
-                `Unable to update "${componentName}" compoment`,
+                `Unable to update "${componentName}" component`,
             );
         }
 
@@ -933,10 +941,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
         const component = this.components[componentName];
         if (component && component.instance) {
-            return component.instance.update(
-                component.value,
-                component.pristine,
-            );
+            return component.instance.update(component);
         }
     };
 

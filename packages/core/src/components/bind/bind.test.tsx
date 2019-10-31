@@ -40,8 +40,6 @@ describe('module: bind', () => {
     class ComponentWithForm extends React.Component<ComponentWithFormProps> {
         render() {
             const { formApi, ...restProps } = this.props;
-
-            console.log(restProps.value);
             return (
                 <FakeForm api={formApi}>
                     <Component {...restProps} />

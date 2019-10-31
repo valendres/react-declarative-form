@@ -68,12 +68,10 @@ export class NestedForm extends React.Component<NestedFormProps>
     }
 
     clear: BoundComponent['clear'] = () => {
-        console.log('CLEAR');
         return this._wrappedFormRef.current.clear();
     };
 
     reset: BoundComponent['reset'] = () => {
-        console.log('RESET');
         return this._wrappedFormRef.current.reset();
     };
 

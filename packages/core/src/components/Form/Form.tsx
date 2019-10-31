@@ -264,11 +264,19 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
         return Promise.all(
-            this.getComponentNames(componentName).map(componentName => {
-                return this.setValidatorData(
-                    componentName,
-                    this.executeValidator(componentName),
-                );
+            this.getComponentNames(componentName).map(async componentName => {
+                /**
+                 * Nested forms don't have validation rules, therefore we rely on
+                 * recursively calling isValid on the form.
+                 */
+                if (this.isNestedForm(componentName)) {
+                    await this.getNestedForm(componentName).validate();
+                } else {
+                    await this.setValidatorData(
+                        componentName,
+                        this.executeValidator(componentName),
+                    );
+                }
             }),
         );
     };

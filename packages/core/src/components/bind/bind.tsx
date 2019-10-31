@@ -76,6 +76,7 @@ export interface BoundComponentDerivedState {
 }
 
 export interface BoundComponent extends React.Component<BoundComponentProps> {
+    update: (value: any, pristine: any) => Promise<void>;
     clear: () => Promise<void[]>;
     reset: () => Promise<void[]>;
     validate: () => Promise<void[]>;
@@ -416,6 +417,12 @@ export function bind<
         };
         // tslint:enable:variable-name
         //#endregion
+
+        update = (): Promise<void> => {
+            return new Promise(resolve => {
+                this.forceUpdate(resolve);
+            });
+        };
     }
 
     return hoistNonReactStatics(BoundComponent, WrappedComponent);

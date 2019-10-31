@@ -118,4 +118,32 @@ export class NestedForm extends React.Component<NestedFormProps>
     private handleComponentBlur = () => {};
 
     private handleComponentFocus = () => {};
+
+    // forceUpdate() {
+    //     return super.forceUpdate();
+    // }
+
+    update = async (value: any, pristine: boolean) => {
+        /**
+         * If we're setting the value to undefined or null, we need to map
+         * the new value to each nested form component. Otherwise, providing
+         * this value to setValues will have no impact.
+         */
+        const transformedValue =
+            value === undefined || value === null
+                ? this._wrappedFormRef.current
+                      .getComponentNames()
+                      .reduce(
+                          (values, key) => ({ ...values, [key]: value }),
+                          {},
+                      )
+                : value;
+
+        await this._wrappedFormRef.current.setValues(
+            transformedValue,
+            pristine,
+            true,
+        );
+        return Promise.resolve();
+    };
 }

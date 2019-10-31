@@ -4,7 +4,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { Form } from '../Form';
 
-describe.skip('Component: NestedForm', () => {
+describe('Component: NestedForm', () => {
     interface TextFieldProps extends BoundComponentProps {
         label?: string;
         type?: string;
@@ -41,15 +41,23 @@ describe.skip('Component: NestedForm', () => {
     const TextField = bind<TextFieldProps>(UnconnectedTextField);
 
     const findNestedForm = (wrapper: any, name: string): NestedForm => {
-        return wrapper.find(NestedForm).find({
-            name,
-        }) as any;
+        return wrapper
+            .find(NestedForm)
+            .find({
+                name,
+            })
+            .at(0)
+            .instance() as any;
     };
 
     const findTextField = (wrapper: any, name: string): BoundComponent => {
-        return wrapper.find(TextField).find({
-            name,
-        }) as any;
+        return wrapper
+            .find(TextField)
+            .find({
+                name,
+            })
+            .at(0)
+            .instance() as any;
     };
 
     it('should hide the components from the parent form', () => {
@@ -69,7 +77,7 @@ describe.skip('Component: NestedForm', () => {
         const outerFormInstance = wrapper.instance();
         const values = outerFormInstance.getValues();
 
-        expect(values.keys()).toEqual(['currency']);
+        expect(Object.keys(values)).toEqual(['username', 'currency']);
         expect(values).toEqual({
             username,
             currency: {
@@ -134,19 +142,13 @@ describe.skip('Component: NestedForm', () => {
         const amountTextField = findTextField(wrapper, 'amount');
         const codeTextField = findTextField(wrapper, 'code');
 
-        jest.spyOn(innerFormInstance, 'clear');
-        jest.spyOn(usernameTextField, 'clear');
-        jest.spyOn(amountTextField, 'clear');
-        jest.spyOn(codeTextField, 'clear');
-
+        // Clear the form
         outerFormInstance.clear();
 
-        expect(innerFormInstance.clear).toHaveBeenCalled();
-        expect(usernameTextField.clear).toHaveBeenCalled();
-        expect(amountTextField.clear).toHaveBeenCalled();
-        expect(codeTextField.clear).toHaveBeenCalled();
-
-        expect(innerFormInstance.getValue()).toEqual(null);
+        expect(innerFormInstance.getValue()).toEqual({
+            amount: null,
+            code: null,
+        });
         expect(usernameTextField.getValue()).toEqual(null);
         expect(amountTextField.getValue()).toEqual(null);
         expect(codeTextField.getValue()).toEqual(null);
@@ -188,33 +190,25 @@ describe.skip('Component: NestedForm', () => {
 
         // Ensure values have been changed from defaults
         expect(usernameTextField.getValue()).toEqual(updatedValues.username);
+        expect(innerFormInstance.getValue()).toEqual(updatedValues.currency);
         expect(amountTextField.getValue()).toEqual(
             updatedValues.currency.amount,
         );
         expect(codeTextField.getValue()).toEqual(updatedValues.currency.code);
 
-        jest.spyOn(innerFormInstance, 'reset');
-        jest.spyOn(usernameTextField, 'reset');
-        jest.spyOn(amountTextField, 'reset');
-        jest.spyOn(codeTextField, 'reset');
-
+        // Reset the form
         outerFormInstance.reset();
 
-        expect(innerFormInstance.reset).toHaveBeenCalled();
-        expect(usernameTextField.reset).toHaveBeenCalled();
-        expect(amountTextField.reset).toHaveBeenCalled();
-        expect(codeTextField.reset).toHaveBeenCalled();
-
         // Ensure values are returned back to their initial state
-        expect(innerFormInstance.getValue()).toEqual(initialValues);
         expect(usernameTextField.getValue()).toEqual(initialValues.username);
+        expect(innerFormInstance.getValue()).toEqual(initialValues.currency);
         expect(amountTextField.getValue()).toEqual(
             initialValues.currency.amount,
         );
         expect(codeTextField.getValue()).toEqual(initialValues.currency.code);
     });
 
-    it('should reset nested form components when reset is called on the parent form', async () => {
+    it('should correctly update a single nested form value', async () => {
         const initialValues = {
             username: 'James',
             currency: {
@@ -256,12 +250,12 @@ describe.skip('Component: NestedForm', () => {
             username: initialValues.username,
             currency: {
                 amount: updatedValues.currency.amount,
-                code: initialValues.currency.amount,
+                code: initialValues.currency.code,
             },
         });
         expect(innerFormInstance.getValue()).toEqual({
             amount: updatedValues.currency.amount,
-            code: initialValues.currency.amount,
+            code: initialValues.currency.code,
         });
         expect(usernameTextField.getValue()).toEqual(initialValues.username);
         expect(amountTextField.getValue()).toEqual(

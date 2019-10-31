@@ -222,11 +222,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     ): Promise<void[]> => {
         return Promise.all(
             this.getComponentNames(componentName).map(async componentName => {
-                if (this.isNestedForm(componentName)) {
-                    await this.getNestedForm(componentName).clear();
-                } else {
-                    await this.setValue(componentName, null);
-                }
+                await this.setValue(componentName, null);
             }),
         );
     };
@@ -246,9 +242,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
                 await this.updateComponent(componentName, {
                     $unset: ['value', 'validatorData', 'pristine'],
                 });
-                if (this.isNestedForm(componentName)) {
-                    this.getNestedForm(componentName).reset();
-                }
             }),
         );
     };
@@ -384,6 +377,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             componentName,
         ),
     ): any => {
+        if (this.isNestedForm(componentName)) {
+            return this.getNestedForm(componentName).getValue();
+        }
+
         const propValue = componentProps ? componentProps.value : undefined;
         const defaultValue = componentProps
             ? componentProps.defaultValue
@@ -462,12 +459,14 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * @param {string} componentName name of the component to set value for
      * @param {any} value the new value to be stored in Form state
      * @param {boolean} pristine the new pristine state when setting this value (default: false).
+     * @param {boolean} internal if true, the handle form change will not be executed
      * @returns a promise which is resolved once the react component has been re-rendered.
      */
     public setValue = async (
         componentName: keyof FormComponents,
         value: any,
         pristine: boolean = false,
+        internal: boolean = false,
     ): Promise<void> => {
         // Don't set value if component is unknown
         if (!(componentName in this.components)) {
@@ -488,7 +487,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             },
         });
 
-        return this.handleFormChange(componentName, value);
+        if (!internal) {
+            await this.handleFormChange(componentName, value);
+        }
+
+        return Promise.resolve();
     };
 
     /**
@@ -501,10 +504,16 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     public setValues = (
         values: { [ComponentName in keyof FormComponents]: any },
         pristine?: boolean,
+        internal?: boolean,
     ): Promise<void[]> => {
         return Promise.all(
             Object.keys(values).map((componentName: string) =>
-                this.setValue(componentName, values[componentName], pristine),
+                this.setValue(
+                    componentName,
+                    values[componentName],
+                    pristine,
+                    internal,
+                ),
             ),
         );
     };
@@ -513,13 +522,13 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     //#region Private helpers
     isNestedForm = (componentName: keyof FormComponents) => {
         const instance = this.getComponentInstance(componentName);
-        return instance instanceof NestedForm;
+        return instance && instance.constructor.name === 'NestedForm';
     };
 
     getNestedForm = (componentName: keyof FormComponents): NestedForm => {
         if (this.isNestedForm(componentName)) {
             const instance = this.getComponentInstance(componentName);
-            return instance as NestedForm;
+            return instance && (instance as NestedForm);
         }
         return undefined;
     };
@@ -912,9 +921,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
         const component = this.components[componentName];
         if (component && component.instance) {
-            return new Promise(resolve => {
-                return component.instance.forceUpdate(resolve);
-            });
+            return component.instance.update(
+                component.value,
+                component.pristine,
+            );
         }
     };
 

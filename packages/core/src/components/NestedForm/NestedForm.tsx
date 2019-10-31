@@ -106,11 +106,14 @@ export class NestedForm extends React.Component<NestedFormProps>
         return undefined;
     };
 
-    private handleFormChange = (componentName: string, value: any) => {
-        this._parentFormApi.setValue(this.props.name, {
+    private handleFormChange = async (componentName: string, value: any) => {
+        const { name } = this.props;
+
+        await this._parentFormApi.setValue(name, {
             ...this._wrappedFormRef.current.getValues(),
             [componentName]: value,
         });
+        await this._parentFormApi.onComponentUpdate(name);
     };
 
     private handleComponentBlur = () => {};

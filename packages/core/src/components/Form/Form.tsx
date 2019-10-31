@@ -285,6 +285,14 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     ): boolean => {
         const results = this.getComponentNames(componentName).map(
             componentName => {
+                /**
+                 * Nested forms don't have validation rules, therefore we rely on
+                 * recursively calling isValid on the form.
+                 */
+                if (this.isNestedForm(componentName)) {
+                    return this.getNestedForm(componentName).isValid();
+                }
+
                 const componentProps = this.getComponentProps(componentName);
 
                 // Use managed validatorData (if exists), otherwise execute validator
@@ -377,6 +385,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             componentName,
         ),
     ): any => {
+        /**
+         * Nested form values can't be derived from props, therefore we rely on
+         * recursively calling getValue on the form.
+         */
         if (this.isNestedForm(componentName)) {
             return this.getNestedForm(componentName).getValue();
         }

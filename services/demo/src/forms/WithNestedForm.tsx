@@ -64,10 +64,10 @@ export class WithNestedForm extends React.Component<
                     onChange={this.handleFormChange}
                     initialValues={{
                         username: 'ABC',
-                        // currency: {
-                        //     amount: 500,
-                        //     code: 'AUD',
-                        // },
+                        currency: {
+                            amount: 500,
+                            code: 'AUD',
+                        },
                     }}
                     sticky
                 >

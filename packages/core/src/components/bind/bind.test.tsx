@@ -58,6 +58,7 @@ describe('module: bind', () => {
     });
 
     const mockFormApi = (api: Partial<FormApi> = {}): FormApi => ({
+        initialValues: {},
         clear: jest.fn().mockResolvedValue(undefined),
         reset: jest.fn().mockResolvedValue(undefined),
         validate: jest.fn().mockResolvedValue(undefined),

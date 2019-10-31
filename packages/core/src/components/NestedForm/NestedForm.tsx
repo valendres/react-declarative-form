@@ -47,9 +47,7 @@ export class NestedForm extends React.Component<NestedFormProps>
             <FormContext.Consumer>
                 {(api: FormApi) => {
                     this._parentFormApi = api;
-                    const initialValues = api.getValue(name, {
-                        name,
-                    });
+                    const initialValues = api.initialValues[name];
                     return (
                         <Form
                             ref={this._wrappedFormRef}

@@ -17,6 +17,7 @@ import { NestedForm } from '../NestedForm';
 export const FormContext = React.createContext(undefined as FormApi);
 
 export interface FormApi {
+    initialValues: any;
     clear: Form<any>['clear'];
     reset: Form<any>['reset'];
     validate: Form<any>['validate'];
@@ -123,6 +124,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 > {
     static defaultProps: FormProps<any> = {
         sticky: false,
+        initialValues: {},
     };
 
     private components: {
@@ -160,6 +162,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         } = this.props;
 
         const api: FormApi = {
+            initialValues,
             clear: this.clear,
             reset: this.reset,
             validate: this.validate,
@@ -179,6 +182,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             registerMirror: this.registerMirror,
             unregisterMirror: this.unregisterMirror,
         };
+
+        console.debug('Form initialValues', initialValues);
 
         return (
             <FormContext.Provider value={api}>

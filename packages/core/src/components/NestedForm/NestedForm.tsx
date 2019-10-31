@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Form, FormContext, FormApi, FormComponentState } from '../Form';
 import { BoundComponent } from '../bind';
 

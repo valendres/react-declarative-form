@@ -1,8 +1,7 @@
-import React from 'react';
+import * as React from 'react';
 import { shallowEqual } from 'shallow-equal-object';
-import deepEqual from 'fast-deep-equal';
-import omit from 'lodash.omit';
-import pick from 'lodash.pick';
+import * as deepEqual from 'fast-deep-equal';
+import { omit, pick } from 'lodash';
 
 import {
     ValidatorData,

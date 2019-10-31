@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { FormContext, FormApi } from '../Form';
 
 export interface MirrorInstance {

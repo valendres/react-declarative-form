@@ -1,5 +1,5 @@
 import * as React from 'react';
-import zxcvbn from 'zxcvbn';
+import * as zxcvbn from 'zxcvbn';
 import {
     Form,
     ValueMap,

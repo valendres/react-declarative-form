@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { bind, BoundComponentProps } from '../bind';
 import { Form } from '../Form';
 import { mount } from 'enzyme';

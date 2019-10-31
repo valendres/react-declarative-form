@@ -4,22 +4,22 @@
         "moduleResolution": "node",
         "target": "es5",
         "lib": [
+            "es2017",
+            "es6",
             "dom",
-            "dom.iterable",
-            "es5",
-            "es2015",
-            "es2016"
+            "esnext"
         ],
         "jsx": "react",
+        "allowJs": false,
+        "allowSyntheticDefaultImports": true,
         "noImplicitReturns": false,
         "noImplicitThis": true,
         "noImplicitAny": true,
+        "skipLibCheck": true,
         "strictNullChecks": false,
         "noUnusedLocals": true,
         "sourceMap": true,
-        "allowJs": false,
-        "declaration": true,
-        "esModuleInterop": true
+        "declaration": true
     },
     "exclude": [
         "node_modules"

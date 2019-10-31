@@ -1,6 +1,6 @@
 import { NestedForm } from './NestedForm';
 import { BoundComponentProps, bind, BoundComponent } from '../bind';
-import React from 'react';
+import * as React from 'react';
 import { mount } from 'enzyme';
 import { Form } from '../Form';
 

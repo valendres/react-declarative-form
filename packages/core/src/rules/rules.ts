@@ -1,15 +1,15 @@
-import isCreditCard from 'validator/lib/isCreditCard';
-import isDecimal from 'validator/lib/isDecimal';
-import isDivisibleBy from 'validator/lib/isDivisibleBy';
-import isEmail from 'validator/lib/isEmail';
-import isHexColor from 'validator/lib/isHexColor';
-import isInteger from 'validator/lib/isInt';
-import isIP from 'validator/lib/isIP';
-import isLowercase from 'validator/lib/isLowercase';
-import isNumeric from 'validator/lib/isNumeric';
-import isPort from 'validator/lib/isPort';
-import isUppercase from 'validator/lib/isUppercase';
-import isUrl from 'validator/lib/isURL';
+import * as isCreditCard from 'validator/lib/isCreditCard';
+import * as isDecimal from 'validator/lib/isDecimal';
+import * as isDivisibleBy from 'validator/lib/isDivisibleBy';
+import * as isEmail from 'validator/lib/isEmail';
+import * as isHexColor from 'validator/lib/isHexColor';
+import * as isInteger from 'validator/lib/isInt';
+import * as isIP from 'validator/lib/isIP';
+import * as isLowercase from 'validator/lib/isLowercase';
+import * as isNumeric from 'validator/lib/isNumeric';
+import * as isPort from 'validator/lib/isPort';
+import * as isUppercase from 'validator/lib/isUppercase';
+import * as isUrl from 'validator/lib/isURL';
 
 import { ValidatorContext, ValidatorRuleMap, ValueMap } from '../types';
 import { isDefined } from '../utils';

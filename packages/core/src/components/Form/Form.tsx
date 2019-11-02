@@ -61,6 +61,12 @@ export interface FormProps<FormFields extends ValueMap> {
     onFocus?: (componentName: keyof FormFields, value: any, event: any) => void;
 
     /**
+     * Called when a component updates
+     * @param {string} componentName name of the component
+     */
+    onUpdate?: (componentName: keyof FormFields) => void;
+
+    /**
      * 	Called when the form is programmatically submitted, or a button with type="submit" is clicked.
      * @param {object} values name/value pairs for all bound form components.
      */
@@ -753,6 +759,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
         // Reflect all mirrors
         this.reflectComponentMirrors(componentName);
+
+        const { onUpdate } = this.props;
+        if (isCallable(onUpdate)) {
+            onUpdate(componentName);
+        }
     };
 
     private handleComponentBlur = (

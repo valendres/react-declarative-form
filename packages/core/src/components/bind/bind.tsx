@@ -75,9 +75,9 @@ export interface BoundComponentDerivedState {
 }
 
 export interface BoundComponent extends React.Component<BoundComponentProps> {
-    clear: () => Promise<void[]>;
-    reset: () => Promise<void[]>;
-    validate: () => Promise<void[]>;
+    clear: () => Promise<void>;
+    reset: () => Promise<void>;
+    validate: () => Promise<void>;
     isValid: () => boolean;
     isPristine: () => boolean;
     getValidatorData: () => ValidatorData;
@@ -143,7 +143,7 @@ export function bind<
                 );
                 return;
             }
-            this._formApi.onComponentMount(name, this);
+            this._formApi.onComponentMount(name, this as any);
         }
 
         public componentWillUnmount() {

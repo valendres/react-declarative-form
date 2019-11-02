@@ -56,6 +56,7 @@ export class NestedForm extends React.Component<NestedFormProps>
                             onChange={this._handleChange}
                             onBlur={this._handleBlur}
                             onFocus={this._handleFocus}
+                            onUpdate={this._handleUpdate}
                             initialValues={initialValues}
                             virtual
                         >
@@ -67,16 +68,30 @@ export class NestedForm extends React.Component<NestedFormProps>
         );
     }
 
-    clear: BoundComponent['clear'] = () => {
-        return this._wrappedFormRef.current.clear();
+    clear: BoundComponent['clear'] = async () => {
+        const { name } = this.props;
+
+        if (!this._parentFormApi) {
+            throw new OutsideFormError(`handle clear for "${name}"`);
+        }
+
+        await this._wrappedFormRef.current.clear();
+        await this._parentFormApi.onComponentUpdate(name);
     };
 
-    reset: BoundComponent['reset'] = () => {
-        return this._wrappedFormRef.current.reset();
+    reset: BoundComponent['reset'] = async () => {
+        const { name } = this.props;
+
+        if (!this._parentFormApi) {
+            throw new OutsideFormError(`handle reset for "${name}"`);
+        }
+
+        await this._wrappedFormRef.current.reset();
+        await this._parentFormApi.onComponentUpdate(name);
     };
 
-    validate: BoundComponent['validate'] = () => {
-        return this._wrappedFormRef.current.validate();
+    validate: BoundComponent['validate'] = async () => {
+        await this._wrappedFormRef.current.validate();
     };
 
     isValid: BoundComponent['isValid'] = () => {
@@ -138,6 +153,18 @@ export class NestedForm extends React.Component<NestedFormProps>
         }
 
         return this._parentFormApi.onComponentFocus(name, event);
+    };
+
+    _handleUpdate = (componentName: string) => {
+        const { name } = this.props;
+
+        if (!this._parentFormApi) {
+            throw new OutsideFormError(
+                `handle update for "${name}:${componentName}"`,
+            );
+        }
+
+        return this._parentFormApi.onComponentUpdate(name);
     };
 
     _update = async ({ value, pristine }: FormComponentState) => {

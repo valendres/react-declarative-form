@@ -116,7 +116,7 @@ export interface FormComponentState {
     pristine: boolean;
     value?: any;
     validatorData?: ValidatorData;
-    instance?: BoundComponent;
+    instance?: BoundComponent | NestedForm;
 }
 
 export class Form<FormComponents extends ValueMap = {}> extends React.Component<
@@ -182,8 +182,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             registerMirror: this.registerMirror,
             unregisterMirror: this.unregisterMirror,
         };
-
-        console.debug('Form initialValues', initialValues);
 
         return (
             <FormContext.Provider value={api}>
@@ -567,7 +565,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     ): NestedForm => {
         if (this.isNestedForm(componentName)) {
             const instance = this.getComponentInstance(componentName);
-            return instance && (instance as NestedForm);
+            return instance && (instance as any);
         }
         return undefined;
     };
@@ -582,7 +580,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      */
     private registerComponent = (
         componentName: keyof FormComponents,
-        componentRef: BoundComponent,
+        componentRef: BoundComponent | NestedForm,
     ) => {
         // Return early if a ref has already been registered
         if (
@@ -728,7 +726,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
     private handleComponentMount = async (
         componentName: keyof FormComponents,
-        componentRef: BoundComponent,
+        componentRef: BoundComponent | NestedForm,
     ) => {
         this.registerComponent(componentName, componentRef);
         this.reflectComponentMirrors(componentName);
@@ -839,7 +837,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
     ): BoundComponent => {
         return componentName in this.components
-            ? this.components[componentName].instance
+            ? (this.components[componentName].instance as any)
             : undefined;
     };
 

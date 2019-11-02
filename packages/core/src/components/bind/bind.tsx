@@ -75,7 +75,6 @@ export interface BoundComponentDerivedState {
 }
 
 export interface BoundComponent extends React.Component<BoundComponentProps> {
-    update: (state: FormComponentState) => Promise<void>;
     clear: () => Promise<void[]>;
     reset: () => Promise<void[]>;
     validate: () => Promise<void[]>;
@@ -85,6 +84,7 @@ export interface BoundComponent extends React.Component<BoundComponentProps> {
     getValue: () => any;
     setValidatorData: (data: ValidatorData) => Promise<void>;
     setValue: (value: any) => Promise<void>;
+    _update: (state: FormComponentState) => Promise<void>;
 }
 
 export function bind<
@@ -414,14 +414,14 @@ export function bind<
 
             return this._state;
         };
-        // tslint:enable:variable-name
-        //#endregion
 
-        update = (): Promise<void> => {
+        _update = (state: BoundComponentDerivedState): Promise<void> => {
             return new Promise(resolve => {
                 this.forceUpdate(resolve);
             });
         };
+        // tslint:enable:variable-name
+        //#endregion
     }
 
     return hoistNonReactStatics(BoundComponent, WrappedComponent);

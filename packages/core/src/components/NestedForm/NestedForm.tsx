@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Form, FormContext, FormApi, FormComponentState } from '../Form';
 import { BoundComponent } from '../bind';
+import { OutsideFormError } from '../../errors';
 
 export interface NestedFormProps {
     name: string;
@@ -47,13 +48,13 @@ export class NestedForm extends React.Component<NestedFormProps>
             <FormContext.Consumer>
                 {(api: FormApi) => {
                     this._parentFormApi = api;
-                    const initialValues = api.initialValues[name];
+                    const initialValues = api && api.initialValues[name];
                     return (
                         <Form
                             ref={this._wrappedFormRef}
-                            onChange={this.handleFormChange}
-                            onBlur={this.handleComponentBlur}
-                            onFocus={this.handleComponentFocus}
+                            onChange={this._handleChange}
+                            onBlur={this._handleBlur}
+                            onFocus={this._handleFocus}
                             initialValues={initialValues}
                             virtual
                         >
@@ -99,13 +100,23 @@ export class NestedForm extends React.Component<NestedFormProps>
         return undefined;
     };
 
-    setValue: BoundComponent['setValue'] = async values => {
-        await this._wrappedFormRef.current.setValues(values);
+    setValue: BoundComponent['setValue'] = async value => {
+        await this._wrappedFormRef.current.setValues(
+            this._transformValue(value),
+        );
         return undefined;
     };
 
-    private handleFormChange = async (componentName: string, value: any) => {
+    //#region Private functions
+    // tslint:disable:variable-name
+    _handleChange = async (componentName: string, value: any) => {
         const { name } = this.props;
+
+        if (!this._parentFormApi) {
+            throw new OutsideFormError(
+                `handle change for "${name}:${componentName}"`,
+            );
+        }
 
         await this._parentFormApi.setValue(name, {
             ...this._wrappedFormRef.current.getValues(),
@@ -114,36 +125,62 @@ export class NestedForm extends React.Component<NestedFormProps>
         await this._parentFormApi.onComponentUpdate(name);
     };
 
-    private handleComponentBlur = () => {};
+    _handleBlur = (componentName: string, event: any) => {
+        const { name } = this.props;
 
-    private handleComponentFocus = () => {};
+        if (!this._parentFormApi) {
+            throw new OutsideFormError(
+                `handle blur for "${name}:${componentName}"`,
+            );
+        }
 
-    // forceUpdate() {
-    //     return super.forceUpdate();
-    // }
+        return this._parentFormApi.onComponentBlur(name, event);
+    };
 
-    update = async ({ value, pristine }: FormComponentState) => {
-        /**
-         * If we're setting the value to undefined or null, we need to map
-         * the new value to each nested form component. Otherwise, providing
-         * this value to setValues will have no impact.
-         */
-        const transformedValue =
-            value === undefined || value === null
-                ? this._wrappedFormRef.current
-                      .getComponentNames()
-                      .reduce(
-                          (values, key) => ({ ...values, [key]: value }),
-                          {},
-                      )
-                : value;
+    _handleFocus = (componentName: string, event: any) => {
+        const { name } = this.props;
+
+        if (!this._parentFormApi) {
+            throw new OutsideFormError(
+                `handle focus for "${name}:${componentName}"`,
+            );
+        }
+
+        return this._parentFormApi.onComponentFocus(name, event);
+    };
+
+    _update = async ({ value, pristine }: FormComponentState) => {
+        const { name } = this.props;
+
+        if (!this._parentFormApi) {
+            throw new OutsideFormError(`get validator data for "${name}"`);
+        }
 
         await this._wrappedFormRef.current.setValues(
-            transformedValue,
+            this._transformValue(value),
             pristine,
             true,
         );
 
         return Promise.resolve();
     };
+
+    /**
+     * If we're setting the value to undefined or null, we need to map
+     * the new value to each nested form component. Otherwise, providing
+     * this value to setValues will have no impact.
+     */
+    _transformValue = (value: any) => {
+        return value === null || value === undefined
+            ? (this._wrappedFormRef.current as any).getComponentNames().reduce(
+                  (values: any, key: string) => ({
+                      ...values,
+                      [key]: value,
+                  }),
+                  {},
+              )
+            : value;
+    };
+    // tslint:enable:variable-name
+    //#endregion
 }

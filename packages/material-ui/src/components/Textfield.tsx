@@ -17,7 +17,7 @@ export interface TextFieldProps
     label?: string;
 }
 
-export class UnboundTextField extends React.Component<TextFieldProps> {
+export class UnboundTextField extends React.PureComponent<TextFieldProps> {
     render() {
         const {
             name,

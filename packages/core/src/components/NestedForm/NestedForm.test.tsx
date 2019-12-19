@@ -756,7 +756,7 @@ describe('Component: NestedForm', () => {
             });
         });
 
-        describe('func: isNestedForm', () => {
+        describe('func: isRecursiveComponent', () => {
             it("should return true for components that are NestedForm's", () => {
                 const wrapper = mount<Form<any>>(
                     <Form>
@@ -770,12 +770,16 @@ describe('Component: NestedForm', () => {
 
                 const outerFormInstance: any = wrapper.instance();
 
-                expect(outerFormInstance.isNestedForm('username')).toBe(false);
-                expect(outerFormInstance.isNestedForm('currency')).toBe(true);
+                expect(outerFormInstance.isRecursiveComponent('username')).toBe(
+                    false,
+                );
+                expect(outerFormInstance.isRecursiveComponent('currency')).toBe(
+                    true,
+                );
             });
         });
 
-        describe('func: getNestedForm', () => {
+        describe('func: getComponentInstance', () => {
             it("should return true for components that are NestedForm's", () => {
                 const wrapper = mount<Form<any>>(
                     <Form>
@@ -791,13 +795,15 @@ describe('Component: NestedForm', () => {
 
                 // Should be undefined because username is not a nested field
                 expect(
-                    outerFormInstance.getNestedForm('username'),
-                ).toBeUndefined();
+                    outerFormInstance.getComponentInstance('username')
+                        .constructor.name,
+                ).toBe('BoundComponent');
 
                 // Should return an instance of NestedForm
                 expect(
-                    outerFormInstance.getNestedForm('currency'),
-                ).toBeInstanceOf(NestedForm);
+                    outerFormInstance.getComponentInstance('currency')
+                        .constructor.name,
+                ).toBe('NestedForm');
             });
         });
     });

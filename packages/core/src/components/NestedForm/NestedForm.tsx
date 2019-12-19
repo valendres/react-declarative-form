@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Form, FormContext, FormApi, FormComponentState } from '../Form';
 import { BoundComponent } from '../bind';
 import { OutsideFormError } from '../../errors';
-import { Omit } from '../../types';
 
 export interface NestedFormProps {
     name: string;
@@ -10,7 +9,7 @@ export interface NestedFormProps {
 }
 
 export class NestedForm extends React.Component<NestedFormProps>
-    implements Omit<BoundComponent, 'getValidatorData' | 'setValidatorData'> {
+    implements BoundComponent {
     //#region Private variables
     // tslint:disable:variable-name
     /**
@@ -102,8 +101,16 @@ export class NestedForm extends React.Component<NestedFormProps>
         return this._wrappedFormRef.current.isPristine();
     };
 
+    getValidatorData: BoundComponent['getValidatorData'] = () => {
+        return undefined;
+    };
+
     getValue: BoundComponent['getValue'] = () => {
         return this._wrappedFormRef.current.getValues();
+    };
+
+    setValidatorData: BoundComponent['setValidatorData'] = () => {
+        return Promise.resolve();
     };
 
     setValue: BoundComponent['setValue'] = async value => {
@@ -181,6 +188,10 @@ export class NestedForm extends React.Component<NestedFormProps>
         );
 
         return Promise.resolve();
+    };
+
+    _isRecursive = () => {
+        return true;
     };
 
     /**

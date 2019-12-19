@@ -85,6 +85,7 @@ export interface BoundComponent extends React.Component<BoundComponentProps> {
     setValidatorData: (data: ValidatorData) => Promise<void>;
     setValue: (value: any) => Promise<void>;
     _update: (state: FormComponentState) => Promise<void>;
+    _isRecursive: () => boolean;
 }
 
 export function bind<
@@ -419,6 +420,10 @@ export function bind<
             return new Promise(resolve => {
                 this.forceUpdate(resolve);
             });
+        };
+
+        _isRecursive = () => {
+            return false;
         };
         // tslint:enable:variable-name
         //#endregion

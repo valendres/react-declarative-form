@@ -12,7 +12,6 @@ import { MirrorInstance, Mirror } from '../Mirror';
 import { validate } from '../../validator';
 import { UnknownComponentError } from '../../errors';
 import { isCallable, getEnvironment } from '../../utils';
-import { NestedForm } from '../NestedForm';
 
 export const FormContext = React.createContext(undefined as FormApi);
 
@@ -122,7 +121,7 @@ export interface FormComponentState {
     pristine: boolean;
     value?: any;
     validatorData?: ValidatorData;
-    instance?: BoundComponent | NestedForm;
+    instance?: BoundComponent;
 }
 
 export class Form<FormComponents extends ValueMap = {}> extends React.Component<
@@ -255,8 +254,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
                 });
 
                 // We need to explicitly call reset since the updateComponent $unset wont reset validatorData
-                if (this.isNestedForm(componentName)) {
-                    await this.getNestedForm(componentName).reset();
+                if (this.isRecursiveComponent(componentName)) {
+                    await this.getComponentInstance(componentName).reset();
                 }
             }),
         );
@@ -275,11 +274,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         return Promise.all(
             this.getComponentNames(componentName).map(async componentName => {
                 /**
-                 * Nested forms don't have validation rules, therefore we rely on
+                 * Recursive components don't have validation rules, therefore we rely on
                  * recursively calling isValid on the form.
                  */
-                if (this.isNestedForm(componentName)) {
-                    await this.getNestedForm(componentName).validate();
+                if (this.isRecursiveComponent(componentName)) {
+                    await this.getComponentInstance(componentName).validate();
                 } else {
                     await this.setValidatorData(
                         componentName,
@@ -310,11 +309,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         const results = this.getComponentNames(componentName).map(
             componentName => {
                 /**
-                 * Nested forms don't have validation rules, therefore we rely on
-                 * recursively calling isValid on the form.
+                 * Recursive components don't have validation rules, therefore we rely on
+                 * recursively calling isValid.
                  */
-                if (this.isNestedForm(componentName)) {
-                    return this.getNestedForm(componentName).isValid();
+                if (this.isRecursiveComponent(componentName)) {
+                    return this.getComponentInstance(componentName).isValid();
                 }
 
                 const componentProps = this.getComponentProps(componentName);
@@ -342,8 +341,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     ): boolean => {
         const results = this.getComponentNames(componentName).map(
             componentName => {
-                if (this.isNestedForm(componentName)) {
-                    return this.getNestedForm(componentName).isPristine();
+                if (this.isRecursiveComponent(componentName)) {
+                    return this.getComponentInstance(
+                        componentName,
+                    ).isPristine();
                 }
 
                 return componentName in this.components
@@ -415,11 +416,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         ),
     ): any => {
         /**
-         * Nested form values can't be derived from props, therefore we rely on
-         * recursively calling getValue on the form.
+         * Recursive component values can't be derived from props, therefore we rely on
+         * recursively calling getValue.
          */
-        if (this.isNestedForm(componentName)) {
-            return this.getNestedForm(componentName).getValue();
+        if (this.isRecursiveComponent(componentName)) {
+            return this.getComponentInstance(componentName).getValue();
         }
 
         const propValue = componentProps ? componentProps.value : undefined;
@@ -561,19 +562,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     //#endregion
 
     //#region Private helpers
-    private isNestedForm = (componentName: keyof FormComponents) => {
+    private isRecursiveComponent = (componentName: keyof FormComponents) => {
         const instance = this.getComponentInstance(componentName);
-        return instance && instance.constructor.name === 'NestedForm';
-    };
-
-    private getNestedForm = (
-        componentName: keyof FormComponents,
-    ): NestedForm => {
-        if (this.isNestedForm(componentName)) {
-            const instance = this.getComponentInstance(componentName);
-            return instance && (instance as any);
-        }
-        return undefined;
+        return instance && instance._isRecursive();
     };
     //#endregion
 
@@ -586,7 +577,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      */
     private registerComponent = (
         componentName: keyof FormComponents,
-        componentRef: BoundComponent | NestedForm,
+        componentRef: BoundComponent,
     ) => {
         // Return early if a ref has already been registered
         if (
@@ -732,7 +723,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
     private handleComponentMount = async (
         componentName: keyof FormComponents,
-        componentRef: BoundComponent | NestedForm,
+        componentRef: BoundComponent,
     ) => {
         this.registerComponent(componentName, componentRef);
         this.reflectComponentMirrors(componentName);

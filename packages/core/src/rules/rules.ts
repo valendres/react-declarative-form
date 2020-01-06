@@ -41,7 +41,7 @@ const numericValidatorRules: ValidatorRuleMap = {
             return {
                 name: 'minValue',
                 context: ValidatorContext.Danger,
-                message: `Value must be >= ${minValue}`,
+                message: `Minimum value of ${minValue}`,
             };
         }
     },
@@ -53,7 +53,7 @@ const numericValidatorRules: ValidatorRuleMap = {
             return {
                 name: 'maxValue',
                 context: ValidatorContext.Danger,
-                message: `Value must be <= ${maxValue}`,
+                message: `Maximum value of ${maxValue}`,
             };
         }
     },
@@ -116,7 +116,7 @@ const stringValidatorRules: ValidatorRuleMap = {
             return {
                 name: 'minLength',
                 context: ValidatorContext.Danger,
-                message: `Length must be >= ${minLength}`,
+                message: `Minimum ${minLength} characters`,
             };
         }
     },
@@ -128,7 +128,7 @@ const stringValidatorRules: ValidatorRuleMap = {
             return {
                 name: 'maxLength',
                 context: ValidatorContext.Danger,
-                message: `Length must be <= ${maxLength}`,
+                message: `Maximum ${maxLength} characters`,
             };
         }
     },
@@ -302,7 +302,9 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
             return {
                 name: 'gtTarget',
                 context: ValidatorContext.Danger,
-                message: `Value must be > ${values[targetcomponentName]}`,
+                message: `Value must be greater than ${
+                    values[targetcomponentName]
+                }`,
             };
         }
     },
@@ -319,7 +321,7 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
             return {
                 name: 'gteTarget',
                 context: ValidatorContext.Danger,
-                message: `Value must be >= ${values[targetcomponentName]}`,
+                message: `Minimum value of ${values[targetcomponentName]}`,
             };
         }
     },
@@ -336,7 +338,9 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
             return {
                 name: 'ltTarget',
                 context: ValidatorContext.Danger,
-                message: `Value must be < ${values[targetcomponentName]}`,
+                message: `Value must be less than ${
+                    values[targetcomponentName]
+                }`,
             };
         }
     },
@@ -353,7 +357,7 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
             return {
                 name: 'lteTarget',
                 context: ValidatorContext.Danger,
-                message: `Value must be <= ${values[targetcomponentName]}`,
+                message: `Maximum value of ${values[targetcomponentName]}`,
             };
         }
     },

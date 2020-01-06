@@ -49,7 +49,7 @@ describe('Numeric validator rules', () => {
             expect(minValue('age', { age: 16 }, 18)).toEqual({
                 name: 'minValue',
                 context: ValidatorContext.Danger,
-                message: 'Value must be >= 18',
+                message: 'Minimum value of 18',
             });
         });
 
@@ -65,7 +65,7 @@ describe('Numeric validator rules', () => {
             expect(maxValue('age', { age: 21 }, 18)).toEqual({
                 name: 'maxValue',
                 context: ValidatorContext.Danger,
-                message: 'Value must be <= 18',
+                message: 'Maximum value of 18',
             });
         });
 
@@ -150,7 +150,7 @@ describe('String validator rules', () => {
                     context,
                     value: 'toolong',
                     criteria: 8,
-                    message: 'Length must be >= 8',
+                    message: 'Minimum 8 characters',
                 },
             ]);
         });
@@ -185,7 +185,7 @@ describe('String validator rules', () => {
                     context,
                     value: 'toolong',
                     criteria: 3,
-                    message: 'Length must be <= 3',
+                    message: 'Maximum 3 characters',
                 },
             ]);
         });

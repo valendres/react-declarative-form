@@ -55,7 +55,20 @@ export const validate = (
     // Execute required rule first (if it exists)
     if (required) {
         const response = validatorRules.required(valueKey, values);
-        if (response) return response;
+        if (response) {
+            return {
+                ...response,
+                ...('required' in customMessages
+                    ? {
+                          message: formatCustomMessage(
+                              customMessages['required'],
+                              valueKey,
+                              values,
+                          ),
+                      }
+                    : {}),
+            };
+        }
     }
 
     // Execute custom validator rule second (if it exists)
@@ -99,18 +112,14 @@ export const validate = (
         // Use custom error message if available
         const ruleKey = cachedValidatorData.name;
         if (ruleKey in customMessages) {
-            const customMessage =
-                customMessages[ruleKey] instanceof Function
-                    ? ((customMessages[ruleKey] as ValidatorMessageGenerator)(
-                          valueKey,
-                          values,
-                          targetRules[ruleKey],
-                      ) as string)
-                    : (customMessages[ruleKey] as string);
-
             return {
                 ...cachedValidatorData,
-                message: customMessage,
+                message: formatCustomMessage(
+                    customMessages[ruleKey],
+                    valueKey,
+                    values,
+                    targetRules[ruleKey],
+                ),
             };
         }
 
@@ -122,4 +131,19 @@ export const validate = (
         context: ValidatorContext.Success,
         message: undefined,
     };
+};
+
+const formatCustomMessage = (
+    customMessage: ValidatorMessageGenerator | string,
+    valueKey: string,
+    values: ValueMap = {},
+    criteria?: any,
+) => {
+    return customMessage instanceof Function
+        ? ((customMessage as ValidatorMessageGenerator)(
+              valueKey,
+              values,
+              criteria,
+          ) as string)
+        : (customMessage as string);
 };

@@ -136,4 +136,17 @@ describe('func: validate', () => {
             `Gen: ${inputValue} is less than ${minValue}...`,
         );
     });
+
+    it('should return custom error message for required if provided', () => {
+        const customRequiredMessage = 'A first name is required';
+        const response = validate(
+            'firstName',
+            { firstName: undefined },
+            { required: true },
+            {
+                required: customRequiredMessage,
+            },
+        );
+        expect(response.message).toEqual(customRequiredMessage);
+    });
 });

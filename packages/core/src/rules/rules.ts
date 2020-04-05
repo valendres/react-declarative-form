@@ -275,12 +275,12 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
     eqTarget: (
         componentName: string,
         values: ValueMap,
-        targetcomponentName: string,
+        targetComponentName: string,
     ) => {
         if (
             isDefined(componentName, values) &&
-            isDefined(targetcomponentName, values) &&
-            values[componentName] !== values[targetcomponentName]
+            isDefined(targetComponentName, values) &&
+            values[componentName] !== values[targetComponentName]
         ) {
             return {
                 name: 'eqTarget',
@@ -292,18 +292,18 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
     gtTarget: (
         componentName: string,
         values: ValueMap,
-        targetcomponentName: string,
+        targetComponentName: string,
     ) => {
         if (
             isDefined(componentName, values) &&
-            isDefined(targetcomponentName, values) &&
-            Number(values[targetcomponentName]) > Number(values[componentName])
+            isDefined(targetComponentName, values) &&
+            Number(values[targetComponentName]) > Number(values[componentName])
         ) {
             return {
                 name: 'gtTarget',
                 context: ValidatorContext.Danger,
                 message: `Value must be greater than ${
-                    values[targetcomponentName]
+                    values[targetComponentName]
                 }`,
             };
         }
@@ -311,35 +311,35 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
     gteTarget: (
         componentName: string,
         values: ValueMap,
-        targetcomponentName: string,
+        targetComponentName: string,
     ) => {
         if (
             isDefined(componentName, values) &&
-            isDefined(targetcomponentName, values) &&
-            Number(values[targetcomponentName]) >= Number(values[componentName])
+            isDefined(targetComponentName, values) &&
+            Number(values[targetComponentName]) >= Number(values[componentName])
         ) {
             return {
                 name: 'gteTarget',
                 context: ValidatorContext.Danger,
-                message: `Minimum value of ${values[targetcomponentName]}`,
+                message: `Minimum value of ${values[targetComponentName]}`,
             };
         }
     },
     ltTarget: (
         componentName: string,
         values: ValueMap,
-        targetcomponentName: string,
+        targetComponentName: string,
     ) => {
         if (
             isDefined(componentName, values) &&
-            isDefined(targetcomponentName, values) &&
-            Number(values[targetcomponentName]) < Number(values[componentName])
+            isDefined(targetComponentName, values) &&
+            Number(values[targetComponentName]) < Number(values[componentName])
         ) {
             return {
                 name: 'ltTarget',
                 context: ValidatorContext.Danger,
                 message: `Value must be less than ${
-                    values[targetcomponentName]
+                    values[targetComponentName]
                 }`,
             };
         }
@@ -347,17 +347,17 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
     lteTarget: (
         componentName: string,
         values: ValueMap,
-        targetcomponentName: string,
+        targetComponentName: string,
     ) => {
         if (
             isDefined(componentName, values) &&
-            isDefined(targetcomponentName, values) &&
-            Number(values[targetcomponentName]) <= Number(values[componentName])
+            isDefined(targetComponentName, values) &&
+            Number(values[targetComponentName]) <= Number(values[componentName])
         ) {
             return {
                 name: 'lteTarget',
                 context: ValidatorContext.Danger,
-                message: `Maximum value of ${values[targetcomponentName]}`,
+                message: `Maximum value of ${values[targetComponentName]}`,
             };
         }
     },

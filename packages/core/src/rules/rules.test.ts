@@ -255,14 +255,26 @@ describe('Misc. validator rules', () => {
     describe('rule: minLength', () => {
         const { minLength } = validatorRules;
 
-        it('should return danger context if value length is < minLength', () => {
+        it('should return danger context if string value length is < minLength', () => {
             const context = ValidatorContext.Danger;
             testRule(minLength, [
                 {
                     context,
-                    value: 'toolong',
+                    value: 'short',
                     criteria: 8,
                     message: 'Minimum 8 characters',
+                },
+            ]);
+        });
+
+        it('should return danger context if array value length is < minLength', () => {
+            const context = ValidatorContext.Danger;
+            testRule(minLength, [
+                {
+                    context,
+                    value: [1, 2, 3, 4, 5],
+                    criteria: 10,
+                    message: 'Minimum 10 items',
                 },
             ]);
         });
@@ -290,7 +302,7 @@ describe('Misc. validator rules', () => {
     describe('rule: maxLength', () => {
         const { maxLength } = validatorRules;
 
-        it('should return danger context if value length is > maxLength', () => {
+        it('should return danger context if string value length is > maxLength', () => {
             const context = ValidatorContext.Danger;
             testRule(maxLength, [
                 {
@@ -298,6 +310,18 @@ describe('Misc. validator rules', () => {
                     value: 'toolong',
                     criteria: 3,
                     message: 'Maximum 3 characters',
+                },
+            ]);
+        });
+
+        it('should return danger context if array value length is > maxLength', () => {
+            const context = ValidatorContext.Danger;
+            testRule(maxLength, [
+                {
+                    context,
+                    value: [1, 2, 3, 4, 5],
+                    criteria: 3,
+                    message: 'Maximum 3 items',
                 },
             ]);
         });

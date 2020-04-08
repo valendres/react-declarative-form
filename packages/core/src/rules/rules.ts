@@ -166,26 +166,26 @@ export const validatorRules: {
         }
     },
     minLength: (componentName: string, values: ValueMap, minLength: number) => {
-        if (
-            isDefined(componentName, values) &&
-            String(values[componentName]).length < minLength
-        ) {
+        const value = values[componentName];
+        if (isDefined(componentName, values) && value.length < minLength) {
             return {
                 name: 'minLength',
                 context: ValidatorContext.Danger,
-                message: `Minimum ${minLength} characters`,
+                message: Array.isArray(value)
+                    ? `Minimum ${minLength} items`
+                    : `Minimum ${minLength} characters`,
             };
         }
     },
     maxLength: (componentName: string, values: ValueMap, maxLength: number) => {
-        if (
-            isDefined(componentName, values) &&
-            String(values[componentName]).length > maxLength
-        ) {
+        const value = values[componentName];
+        if (isDefined(componentName, values) && value.length > maxLength) {
             return {
                 name: 'maxLength',
                 context: ValidatorContext.Danger,
-                message: `Maximum ${maxLength} characters`,
+                message: Array.isArray(value)
+                    ? `Maximum ${maxLength} items`
+                    : `Maximum ${maxLength} characters`,
             };
         }
     },

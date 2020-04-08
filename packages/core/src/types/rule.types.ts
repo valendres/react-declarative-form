@@ -11,6 +11,8 @@ export interface ValidatorRuleMap {
 }
 
 export interface ValidatorRules {
+    required?: boolean;
+
     /** Input is >= to the specified minimum value */
     minValue?: number;
 
@@ -60,12 +62,12 @@ export interface ValidatorRules {
     isHexColor?: boolean;
 
     /** Input is a valid IPv4 or IPv6 address */
-    isIP?: boolean;
+    isIp?: boolean;
 
     /** Input is a valid port number */
     isPort?: boolean;
 
-    /** Input value is == to target input value */
+    /** Input value is === to target input value */
     eqTarget?: string;
 
     /** Input value is > to target input value */
@@ -82,6 +84,4 @@ export interface ValidatorRules {
 
     /** Custom validator rule. It is executed before other rules */
     custom?: ValidatorRule;
-
-    [name: string]: any;
 }

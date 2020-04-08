@@ -11,16 +11,17 @@ import isPort from 'validator/lib/isPort';
 import isUppercase from 'validator/lib/isUppercase';
 import isUrl from 'validator/lib/isURL';
 
-import { ValidatorContext, ValidatorRuleMap, ValueMap } from '../types';
+import {
+    ValidatorContext,
+    ValueMap,
+    ValidatorRules,
+    ValidatorRule,
+} from '../types';
 import { isDefined } from '../utils';
 
-const patterns: {
-    [componentName: string]: RegExp;
+export const validatorRules: {
+    [rule in keyof Required<Omit<ValidatorRules, 'custom'>>]: ValidatorRule;
 } = {
-    isDate: /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{4})$/,
-};
-
-const miscValidatorRules: ValidatorRuleMap = {
     required: (componentName: string, values: ValueMap) => {
         if (!isDefined(componentName, values)) {
             return {
@@ -30,9 +31,6 @@ const miscValidatorRules: ValidatorRuleMap = {
             };
         }
     },
-};
-
-const numericValidatorRules: ValidatorRuleMap = {
     minValue: (componentName: string, values: ValueMap, minValue: number) => {
         if (
             isDefined(componentName, values) &&
@@ -105,9 +103,6 @@ const numericValidatorRules: ValidatorRuleMap = {
             };
         }
     },
-};
-
-const stringValidatorRules: ValidatorRuleMap = {
     minLength: (componentName: string, values: ValueMap, minLength: number) => {
         if (
             isDefined(componentName, values) &&
@@ -168,9 +163,6 @@ const stringValidatorRules: ValidatorRuleMap = {
             };
         }
     },
-};
-
-const regexValidatorRules: ValidatorRuleMap = {
     matches: (componentName: string, values: ValueMap, pattern: RegExp) => {
         if (
             isDefined(componentName, values) &&
@@ -256,22 +248,6 @@ const regexValidatorRules: ValidatorRuleMap = {
             };
         }
     },
-    isDate: (componentName: string, values: ValueMap) => {
-        // TODO: refactor this so date format is configurable
-        if (
-            isDefined(componentName, values) &&
-            !patterns.isDate.test(values[componentName])
-        ) {
-            return {
-                name: componentName,
-                context: ValidatorContext.Danger,
-                message: 'Invalid date format, expected: dd/mm/yyyy',
-            };
-        }
-    },
-};
-
-const crossFieldValidatorRules: ValidatorRuleMap = {
     eqTarget: (
         componentName: string,
         values: ValueMap,
@@ -302,9 +278,7 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
             return {
                 name: 'gtTarget',
                 context: ValidatorContext.Danger,
-                message: `Value must be greater than ${
-                    values[targetComponentName]
-                }`,
+                message: `Value must be greater than ${values[targetComponentName]}`,
             };
         }
     },
@@ -338,9 +312,7 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
             return {
                 name: 'ltTarget',
                 context: ValidatorContext.Danger,
-                message: `Value must be less than ${
-                    values[targetComponentName]
-                }`,
+                message: `Value must be less than ${values[targetComponentName]}`,
             };
         }
     },
@@ -361,12 +333,4 @@ const crossFieldValidatorRules: ValidatorRuleMap = {
             };
         }
     },
-};
-
-export const baseValidatorRules: ValidatorRuleMap = {
-    ...miscValidatorRules,
-    ...numericValidatorRules,
-    ...stringValidatorRules,
-    ...regexValidatorRules,
-    ...crossFieldValidatorRules,
 };

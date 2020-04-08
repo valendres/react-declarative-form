@@ -1,5 +1,5 @@
 import { ValidatorContext, ValidatorRule, ValidatorTest } from '../types';
-import { baseValidatorRules } from './rules';
+import { validatorRules } from './rules';
 
 const testRule = (rule: ValidatorRule, tests: ValidatorTest[]) => {
     const name = 'TEST';
@@ -20,7 +20,7 @@ const testRule = (rule: ValidatorRule, tests: ValidatorTest[]) => {
 
 describe('Misc. validator rules', () => {
     describe('rule: required', () => {
-        const { required } = baseValidatorRules;
+        const { required } = validatorRules;
 
         it('should return danger context if value is undefined or empty string', () => {
             expect(required('name', {})).toEqual({
@@ -43,7 +43,7 @@ describe('Misc. validator rules', () => {
 
 describe('Numeric validator rules', () => {
     describe('rule: minValue', () => {
-        const { minValue } = baseValidatorRules;
+        const { minValue } = validatorRules;
 
         it('should return danger context if value is less than minValue', () => {
             expect(minValue('age', { age: 16 }, 18)).toEqual({
@@ -59,7 +59,7 @@ describe('Numeric validator rules', () => {
     });
 
     describe('rule: maxValue', () => {
-        const { maxValue } = baseValidatorRules;
+        const { maxValue } = validatorRules;
 
         it('should return danger context if value is greater than maxValue', () => {
             expect(maxValue('age', { age: 21 }, 18)).toEqual({
@@ -75,7 +75,7 @@ describe('Numeric validator rules', () => {
     });
 
     describe('rule: isDivisibleBy', () => {
-        const { isDivisibleBy } = baseValidatorRules;
+        const { isDivisibleBy } = validatorRules;
 
         it('should return danger context if value is not divisible by criteria', () => {
             expect(isDivisibleBy('age', { age: '10' }, 3)).toEqual({
@@ -91,7 +91,7 @@ describe('Numeric validator rules', () => {
     });
 
     describe('rule: isInteger', () => {
-        const { isInteger } = baseValidatorRules;
+        const { isInteger } = validatorRules;
 
         it('should return danger context if value is not an integer', () => {
             expect(isInteger('age', { age: 'test' })).toEqual({
@@ -107,7 +107,7 @@ describe('Numeric validator rules', () => {
     });
 
     describe('rule: isDecimal', () => {
-        const { isDecimal } = baseValidatorRules;
+        const { isDecimal } = validatorRules;
 
         it('should return danger context if value is not a decimal', () => {
             expect(isDecimal('age', { age: 'test' })).toEqual({
@@ -123,7 +123,7 @@ describe('Numeric validator rules', () => {
     });
 
     describe('rule: isNumeric', () => {
-        const { isNumeric } = baseValidatorRules;
+        const { isNumeric } = validatorRules;
 
         it('should return danger context if value is not a number', () => {
             expect(isNumeric('age', { age: '$10.52' })).toEqual({
@@ -141,7 +141,7 @@ describe('Numeric validator rules', () => {
 
 describe('String validator rules', () => {
     describe('rule: minLength', () => {
-        const { minLength } = baseValidatorRules;
+        const { minLength } = validatorRules;
 
         it('should return danger context if value length is < minLength', () => {
             const context = ValidatorContext.Danger;
@@ -176,7 +176,7 @@ describe('String validator rules', () => {
     });
 
     describe('rule: maxLength', () => {
-        const { maxLength } = baseValidatorRules;
+        const { maxLength } = validatorRules;
 
         it('should return danger context if value length is > maxLength', () => {
             const context = ValidatorContext.Danger;
@@ -211,7 +211,7 @@ describe('String validator rules', () => {
     });
 
     describe('rule: isLength', () => {
-        const { isLength } = baseValidatorRules;
+        const { isLength } = validatorRules;
 
         it('should return danger context if value length is equal to length', () => {
             const context = ValidatorContext.Danger;
@@ -246,7 +246,7 @@ describe('String validator rules', () => {
     });
 
     describe('rule: isLowercase', () => {
-        const { isLowercase } = baseValidatorRules;
+        const { isLowercase } = validatorRules;
 
         it('should return danger context if value is not all lowercase', () => {
             const response: ValidatorTest = {
@@ -276,7 +276,7 @@ describe('String validator rules', () => {
     });
 
     describe('rule: isUppercase', () => {
-        const { isUppercase } = baseValidatorRules;
+        const { isUppercase } = validatorRules;
 
         it('should return danger context if value is not all uppercase', () => {
             const response: ValidatorTest = {
@@ -308,7 +308,7 @@ describe('String validator rules', () => {
 
 describe('Regex validator rules', () => {
     describe('rule: matches', () => {
-        const { matches } = baseValidatorRules;
+        const { matches } = validatorRules;
 
         it('should return danger context if value does not match pattern', () => {
             expect(matches('greeting', { greeting: 'hi' }, /hell.*/i)).toEqual({
@@ -326,7 +326,7 @@ describe('Regex validator rules', () => {
     });
 
     describe('rule: isEmail', () => {
-        const { isEmail } = baseValidatorRules;
+        const { isEmail } = validatorRules;
 
         it('should return danger context if value is not an email', () => {
             const response: ValidatorTest = {
@@ -359,7 +359,7 @@ describe('Regex validator rules', () => {
     });
 
     describe('rule: isUrl', () => {
-        const { isUrl } = baseValidatorRules;
+        const { isUrl } = validatorRules;
 
         it('should return danger context if value is not a url', () => {
             const response: ValidatorTest = {
@@ -394,7 +394,7 @@ describe('Regex validator rules', () => {
     });
 
     describe('rule: isCreditCard', () => {
-        const { isCreditCard } = baseValidatorRules;
+        const { isCreditCard } = validatorRules;
 
         it('should return danger context if value is not a credit card number', () => {
             const response: ValidatorTest = {
@@ -442,7 +442,7 @@ describe('Regex validator rules', () => {
     });
 
     describe('rule: isHexColor', () => {
-        const { isHexColor } = baseValidatorRules;
+        const { isHexColor } = validatorRules;
 
         it('should return danger context if value is not a hex color', () => {
             const response: ValidatorTest = {
@@ -477,7 +477,7 @@ describe('Regex validator rules', () => {
     });
 
     describe('rule: isIp', () => {
-        const { isIp } = baseValidatorRules;
+        const { isIp } = validatorRules;
 
         it('should return danger context if value is not an IP address', () => {
             const response: ValidatorTest = {
@@ -524,7 +524,7 @@ describe('Regex validator rules', () => {
     });
 
     describe('rule: isPort', () => {
-        const { isPort } = baseValidatorRules;
+        const { isPort } = validatorRules;
 
         it('should return danger context if value is not a port', () => {
             const response: ValidatorTest = {
@@ -556,46 +556,11 @@ describe('Regex validator rules', () => {
             ]);
         });
     });
-
-    describe('rule: isDate', () => {
-        const { isDate } = baseValidatorRules;
-
-        it('should return danger context if value is not a date (dd/mm/yyyy)', () => {
-            const response: ValidatorTest = {
-                context: ValidatorContext.Danger,
-                message: 'Invalid date format, expected: dd/mm/yyyy',
-            };
-            testRule(isDate, [
-                { value: '1994', ...response },
-                { value: '35/05/1994', ...response },
-                { value: '01/13/1994', ...response },
-            ]);
-        });
-
-        it('should return undefined if value is a port', () => {
-            const response: ValidatorTest = {
-                context: undefined,
-                message: undefined,
-            };
-            testRule(isDate, [
-                // Shouldn't validate empty string
-                { value: undefined, ...response },
-                { value: '', ...response },
-
-                // Valid date
-                { value: '15/01/2001', ...response },
-                { value: '15/1/2001', ...response },
-                { value: '1/1/2001', ...response },
-                { value: '01/01/2001', ...response },
-                { value: '12/12/2001', ...response },
-            ]);
-        });
-    });
 });
 
 describe('Cross field validator rules', () => {
     describe('rule: eqTarget', () => {
-        const { eqTarget } = baseValidatorRules;
+        const { eqTarget } = validatorRules;
 
         it('should return danger context if value does not match other field value', () => {
             expect(

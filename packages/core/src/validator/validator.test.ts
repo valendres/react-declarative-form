@@ -1,11 +1,11 @@
-import { baseValidatorRules } from '../rules';
+import { validatorRules } from '../rules';
 import { ValidatorContext, ValueMap } from '../types';
 import { addValidatorRule, getValidatorRules, validate } from './validator';
 
 describe('validator rules', () => {
     it('should use default validator rules', () => {
         // Should use default validator rules by default
-        expect(getValidatorRules()).toEqual(baseValidatorRules);
+        expect(getValidatorRules()).toEqual(validatorRules);
     });
 
     it('should should allow additional validator rules to be defined', () => {
@@ -25,7 +25,7 @@ describe('validator rules', () => {
         addValidatorRule(customRuleKey, customRule);
         expect(getValidatorRules()[customRuleKey]).toEqual(customRule);
         expect(Object.keys(getValidatorRules()).length).toEqual(
-            Object.keys(baseValidatorRules).length + 1,
+            Object.keys(validatorRules).length + 1,
         );
     });
 });

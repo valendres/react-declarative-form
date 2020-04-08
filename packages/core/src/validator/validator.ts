@@ -6,13 +6,14 @@ import {
     ValidatorRuleMap,
     ValidatorMessageGenerator,
     ValueMap,
+    ValidatorRules,
 } from '../types';
-import { baseValidatorRules } from '../rules';
+import { validatorRules as importedValidatorRules } from '../rules';
 
 /**
  * Validator rules to be used by validator
  */
-let validatorRules = baseValidatorRules;
+let validatorRules = importedValidatorRules;
 
 /**
  * Returns current validator rules in use
@@ -80,32 +81,38 @@ export const validate = (
 
     // Excute rest rules
     let cachedValidatorData: ValidatorData;
-    Object.keys(restRules).some((ruleKey: string) => {
-        const criteria = targetRules[ruleKey];
-        if (ruleKey in validatorRules) {
-            const data = validatorRules[ruleKey](valueKey, values, criteria);
+    Object.keys(restRules).some(
+        (ruleKey: keyof Omit<ValidatorRules, 'custom'>) => {
+            const criteria = targetRules[ruleKey];
+            if (ruleKey in validatorRules) {
+                const data = validatorRules[ruleKey](
+                    valueKey,
+                    values,
+                    criteria,
+                );
 
-            // Break early if danger context is encountered
-            if (data && data.context === ValidatorContext.Danger) {
-                cachedValidatorData = data;
-                return true;
+                // Break early if danger context is encountered
+                if (data && data.context === ValidatorContext.Danger) {
+                    cachedValidatorData = data;
+                    return true;
+                }
+
+                // Cache first warning context, don't break because there might be an error later on
+                if (
+                    data &&
+                    data.context === ValidatorContext.Warning &&
+                    !cachedValidatorData
+                ) {
+                    cachedValidatorData = data;
+                }
+            } else {
+                console.warn(`Rule "${ruleKey}" does not exist.`);
             }
 
-            // Cache first warning context, don't break because there might be an error later on
-            if (
-                data &&
-                data.context === ValidatorContext.Warning &&
-                !cachedValidatorData
-            ) {
-                cachedValidatorData = data;
-            }
-        } else {
-            console.warn(`Rule "${ruleKey}" does not exist.`);
-        }
-
-        // Keep iterating
-        return false;
-    });
+            // Keep iterating
+            return false;
+        },
+    );
 
     // If we have a cached validatorData, return it
     if (cachedValidatorData) {

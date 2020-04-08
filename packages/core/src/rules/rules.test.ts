@@ -39,9 +39,65 @@ describe('Misc. validator rules', () => {
             expect(required('name', { name: 'Peter' })).toBeUndefined();
         });
     });
-});
 
-describe('Numeric validator rules', () => {
+    describe('rule: equals', () => {
+        const { equals } = validatorRules;
+
+        it('should return danger context if value is not equal to specified string value', () => {
+            expect(equals('name', { name: 'John' }, 'Peter')).toEqual({
+                name: 'equals',
+                context: ValidatorContext.Danger,
+                message: 'Value must be equal to "Peter"',
+            });
+        });
+
+        it('should return danger context if value is not equal to specified numeric value', () => {
+            expect(equals('age', { age: 20 }, 18)).toEqual({
+                name: 'equals',
+                context: ValidatorContext.Danger,
+                message: 'Value must be equal to 18',
+            });
+        });
+
+        it('should return undefined if value is equal to specified string value', () => {
+            expect(equals('name', { name: 'Peter' }, 'Peter')).toBeUndefined();
+        });
+
+        it('should return undefined if value is equal to specified numeric value', () => {
+            expect(equals('age', { age: 18 }, 18)).toBeUndefined();
+        });
+    });
+
+    describe('rule: notEquals', () => {
+        const { notEquals } = validatorRules;
+
+        it('should return danger context if value is equal to specified string value', () => {
+            expect(notEquals('name', { name: 'Peter' }, 'Peter')).toEqual({
+                name: 'notEquals',
+                context: ValidatorContext.Danger,
+                message: 'Value must not be equal to "Peter"',
+            });
+        });
+
+        it('should return danger context if value is equal to specified numeric value', () => {
+            expect(notEquals('age', { age: 18 }, 18)).toEqual({
+                name: 'notEquals',
+                context: ValidatorContext.Danger,
+                message: 'Value must not be equal to 18',
+            });
+        });
+
+        it('should return undefined if value is equal to specified string value', () => {
+            expect(
+                notEquals('name', { name: 'John' }, 'Peter'),
+            ).toBeUndefined();
+        });
+
+        it('should return undefined if value is equal to specified numeric value', () => {
+            expect(notEquals('age', { age: 20 }, 18)).toBeUndefined();
+        });
+    });
+
     describe('rule: minValue', () => {
         const { minValue } = validatorRules;
 
@@ -51,6 +107,10 @@ describe('Numeric validator rules', () => {
                 context: ValidatorContext.Danger,
                 message: 'Minimum value of 18',
             });
+        });
+
+        it('should return undefined if value is equal to minValue', () => {
+            expect(minValue('age', { age: 18 }, 18)).toBeUndefined();
         });
 
         it('should return undefined if value is greater than minValue', () => {
@@ -69,8 +129,62 @@ describe('Numeric validator rules', () => {
             });
         });
 
+        it('should return undefined if value is equal to the maxValue', () => {
+            expect(maxValue('age', { age: 18 }, 18)).toBeUndefined();
+        });
+
         it('should return undefined if value is greater than maxValue', () => {
             expect(maxValue('age', { age: 15 }, 18)).toBeUndefined();
+        });
+    });
+
+    describe('rule: greaterThan', () => {
+        const { greaterThan } = validatorRules;
+
+        it('should return danger context if value is less than the specified value', () => {
+            expect(greaterThan('amount', { amount: 9.999 }, 10)).toEqual({
+                name: 'greaterThan',
+                context: ValidatorContext.Danger,
+                message: 'Value must be greater than 10',
+            });
+        });
+
+        it('should return danger context if value is equal to the specified value', () => {
+            expect(greaterThan('amount', { amount: 10 }, 10)).toEqual({
+                name: 'greaterThan',
+                context: ValidatorContext.Danger,
+                message: 'Value must be greater than 10',
+            });
+        });
+
+        it('should return undefined if value is greater than specified value', () => {
+            expect(
+                greaterThan('amount', { amount: 10.001 }, 10),
+            ).toBeUndefined();
+        });
+    });
+
+    describe('rule: lessThan', () => {
+        const { lessThan } = validatorRules;
+
+        it('should return danger context if value is greater than the specified value', () => {
+            expect(lessThan('amount', { amount: 10.001 }, 10)).toEqual({
+                name: 'lessThan',
+                context: ValidatorContext.Danger,
+                message: 'Value must be less than 10',
+            });
+        });
+
+        it('should return danger context if value is equal to the specified value', () => {
+            expect(lessThan('amount', { amount: 10 }, 10)).toEqual({
+                name: 'lessThan',
+                context: ValidatorContext.Danger,
+                message: 'Value must be less than 10',
+            });
+        });
+
+        it('should return undefined if value is less than specified value', () => {
+            expect(lessThan('amount', { amount: 9.999 }, 10)).toBeUndefined();
         });
     });
 
@@ -137,9 +251,7 @@ describe('Numeric validator rules', () => {
             expect(isNumeric('age', { age: '0' })).toBeUndefined();
         });
     });
-});
 
-describe('String validator rules', () => {
     describe('rule: minLength', () => {
         const { minLength } = validatorRules;
 
@@ -304,9 +416,7 @@ describe('String validator rules', () => {
             ]);
         });
     });
-});
 
-describe('Regex validator rules', () => {
     describe('rule: matches', () => {
         const { matches } = validatorRules;
 
@@ -556,9 +666,7 @@ describe('Regex validator rules', () => {
             ]);
         });
     });
-});
 
-describe('Cross field validator rules', () => {
     describe('rule: eqTarget', () => {
         const { eqTarget } = validatorRules;
 
@@ -589,4 +697,16 @@ describe('Cross field validator rules', () => {
             ).toBeUndefined();
         });
     });
+
+    // TODO
+    describe('rule: gtTarget', () => {});
+
+    // TODO
+    describe('rule: gteTarget', () => {});
+
+    // TODO
+    describe('rule: ltTarget', () => {});
+
+    // TODO
+    describe('rule: lteTarget', () => {});
 });

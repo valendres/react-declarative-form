@@ -354,32 +354,37 @@ Validator rules are executed sequentially (in the order in which they are define
 #### Built-in validator rules
 The following validator rules are built-in. By default, they will only return ValidatorContext.Danger if the a value is defined and it fails to pass the test. However, this behaviour can be customized by overriding built-in rules. See the [Adding additional validator rules](#adding-additional-validator-rules) section for more information. Additional built-in validator rules will be added in the future.
 
-| Name            | Criteria      | Description                                              |
-| --------------- | ------------- | -------------------------------------------------------- |
-| `minValue`      | number        | Input is >= to the specified minimum value               |
-| `maxValue`      | number        | Input is <= to the specified maximum value               |
-| `isDivisibleBy` | number        | Input is divisible by the specified number               |
-| `isInteger`     | boolean       | Input is an integer                                      |
-| `isDecimal`     | boolean       | Input is a decimal number                                |
-| `isNumeric`     | boolean       | Input is numeric characters only [0-9]+                  |
-| `minLength`     | number        | Input length is at least the specified length            |
-| `maxLength`     | number        | Input length is at most the specified length             |
-| `isLength`      | number        | Input length equals the specified length                 |
-| `isLowercase`   | boolean       | Input is all lowercase characters                        |
-| `isUppercase`   | boolean       | Input is all uppercase characters                        |
-| `matches`       | RegExp        | Input matches the specified regex pattern                |
-| `isEmail`       | boolean       | Input is a valid email address                           |
-| `isUrl`         | boolean       | Input is a valid url                                     |
-| `isCreditCard`  | boolean       | Input is a valid credit card number                      |
-| `isHexColor`    | boolean       | Input is a valid hexadecimal color                       |
-| `isIP`          | boolean       | Input is a valid IPv4 or IPv6 address                    |
-| `isPort`        | boolean       | Input is a valid port number                             |
-| `eqTarget`      | string        | Input value is == to target input value                  |
-| `gtTarget`      | string        | Input value is > to target input value                   |
-| `gteTarget`     | string        | Input value is >= to target input value                  |
-| `ltTarget`      | string        | Input value is < to target input value                   |
-| `lteTarget`     | string        | Input value is <= to target input value                  |
-| `custom`        | ValidatorRule | Custom validator rule. It is executed before other rules |
+| Name            | Criteria         | Description                                              |
+| --------------- | ---------------- | -------------------------------------------------------- |
+| `required`      | boolean          | Whether the input is required                            |
+| `equals`        | number \| string | Input is === to the specified value                      |
+| `notEquals`     | number \| string | Input is !== to the specified value                      |
+| `greaterThan`   | number           | Input is > than the specified value                      |
+| `lessThan`      | number           | Input is < than the specified value                      |
+| `minValue`      | number           | Input is >= to the specified value                       |
+| `maxValue`      | number           | Input is <= to the specified value                       |
+| `isDivisibleBy` | number           | Input is divisible by the specified number               |
+| `isInteger`     | boolean          | Input is an integer                                      |
+| `isDecimal`     | boolean          | Input is a decimal number                                |
+| `isNumeric`     | boolean          | Input is numeric characters only [0-9]+                  |
+| `minLength`     | number           | Input length is at least the specified length            |
+| `maxLength`     | number           | Input length is at most the specified length             |
+| `isLength`      | number           | Input length equals the specified length                 |
+| `isLowercase`   | boolean          | Input is all lowercase characters                        |
+| `isUppercase`   | boolean          | Input is all uppercase characters                        |
+| `matches`       | RegExp           | Input matches the specified regex pattern                |
+| `isEmail`       | boolean          | Input is a valid email address                           |
+| `isUrl`         | boolean          | Input is a valid url                                     |
+| `isCreditCard`  | boolean          | Input is a valid credit card number                      |
+| `isHexColor`    | boolean          | Input is a valid hexadecimal color                       |
+| `isIp`          | boolean          | Input is a valid IPv4 or IPv6 address                    |
+| `isPort`        | boolean          | Input is a valid port number                             |
+| `eqTarget`      | string           | Input value is == to target input value                  |
+| `gtTarget`      | string           | Input value is > to target input value                   |
+| `gteTarget`     | string           | Input value is >= to target input value                  |
+| `ltTarget`      | string           | Input value is < to target input value                   |
+| `lteTarget`     | string           | Input value is <= to target input value                  |
+| `custom`        | ValidatorRule    | Custom validator rule. It is executed before other rules |
 
 ***Note:** using the custom key allows consumers to define a custom validator rule. This is useful when one-off custom validator logic is required. Ideally, validator rules should be designed for reusability.*
 

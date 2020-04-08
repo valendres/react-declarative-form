@@ -19,6 +19,12 @@ import {
 } from '../types';
 import { isDefined } from '../utils';
 
+/*
+ * Use `ValidatorRules` interface to ensure that there is is a corresponding rule
+ * implementation for every rule specified in the interface.
+ *
+ * Note: `custom` is omitted because it is expected that consumers implement it.
+ */
 export const validatorRules: {
     [rule in keyof Required<Omit<ValidatorRules, 'custom'>>]: ValidatorRule;
 } = {
@@ -28,6 +34,62 @@ export const validatorRules: {
                 name: 'required',
                 context: ValidatorContext.Danger,
                 message: 'This field is required',
+            };
+        }
+    },
+    equals: (
+        componentName: string,
+        values: ValueMap,
+        target: number | string,
+    ) => {
+        if (
+            isDefined(componentName, values) &&
+            values[componentName] !== target
+        ) {
+            return {
+                name: 'equals',
+                context: ValidatorContext.Danger,
+                message:
+                    typeof target === 'string'
+                        ? `Value must be equal to "${target}"`
+                        : `Value must be equal to ${target}`,
+            };
+        }
+    },
+    notEquals: (
+        componentName: string,
+        values: ValueMap,
+        target: number | string,
+    ) => {
+        if (
+            isDefined(componentName, values) &&
+            values[componentName] === target
+        ) {
+            return {
+                name: 'notEquals',
+                context: ValidatorContext.Danger,
+                message:
+                    typeof target === 'string'
+                        ? `Value must not be equal to "${target}"`
+                        : `Value must not be equal to ${target}`,
+            };
+        }
+    },
+    greaterThan: (componentName: string, values: ValueMap, num: number) => {
+        if (isDefined(componentName, values) && values[componentName] <= num) {
+            return {
+                name: 'greaterThan',
+                context: ValidatorContext.Danger,
+                message: `Value must be greater than ${num}`,
+            };
+        }
+    },
+    lessThan: (componentName: string, values: ValueMap, num: number) => {
+        if (isDefined(componentName, values) && values[componentName] >= num) {
+            return {
+                name: 'lessThan',
+                context: ValidatorContext.Danger,
+                message: `Value must be less than ${num}`,
             };
         }
     },

@@ -11,15 +11,33 @@ export interface ValidatorRuleMap {
 }
 
 export interface ValidatorRules {
+    /**
+     * Whether the input is required. If true, the value must not be:
+     * - undefined
+     * - null
+     * - empty string
+     */
     required?: boolean;
 
-    /** Input is >= to the specified minimum value */
+    /** Input is === to the specified value */
+    equals?: any;
+
+    /** Input is !== to the specified value */
+    notEquals?: any;
+
+    /** Input is > than the specified value */
+    greaterThan?: number;
+
+    /** Input is < than the specified value */
+    lessThan?: number;
+
+    /** Input is >= to the specified value */
     minValue?: number;
 
-    /** Input is <= to the specified maximum value */
+    /** Input is <= to the specified value */
     maxValue?: number;
 
-    /** Input is divisible by the specified number */
+    /** Input is divisible by the specified value */
     isDivisibleBy?: number;
 
     /** Input is an integer */

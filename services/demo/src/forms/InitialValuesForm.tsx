@@ -130,7 +130,6 @@ export class InitialValuesForm extends React.Component<
             {
                 initialValues: {
                     ...this.state.initialValues,
-                    firstName: 'TEST!!!',
                 },
             },
             this.formRef.current.reset,

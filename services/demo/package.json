@@ -27,31 +27,31 @@
             "git add"
         ]
     },
-    "devDependencies": {
-        "@types/zxcvbn": "4.4.0",
-        "autoprefixer": "9.5.1",
-        "awesome-typescript-loader": "5.2.1",
-        "css-loader": "2.1.1",
-        "file-loader": "3.0.1",
-        "html-webpack-plugin": "3.2.0",
-        "open-browser-webpack-plugin": "0.0.5",
-        "postcss-loader": "^3.0.0",
-        "source-map-loader": "0.2.4",
-        "webpack": "4.30.0",
-        "webpack-cli": "3.3.0",
-        "webpack-dev-server": "3.3.1",
-        "webpack-hot-middleware": "2.24.3"
-    },
     "dependencies": {
         "@material-ui/core": "3.9.3",
         "@react-declarative-form/core": "^2.0.0",
         "@react-declarative-form/material-ui": "^1.0.0",
-        "react": "16.8.6",
-        "react-dom": "16.8.6",
-        "react-hot-loader": "4.8.4",
+        "react": "16.13.1",
+        "react-dom": "16.13.1",
+        "react-hot-loader": "4.12.20",
         "shallow-equal-object": "1.1.1",
-        "typeface-roboto": "0.0.54",
-        "validator": "10.11.0",
+        "typeface-roboto": "0.0.75",
+        "validator": "13.0.0",
         "zxcvbn": "4.4.2"
+    },
+    "devDependencies": {
+        "@types/zxcvbn": "4.4.0",
+        "autoprefixer": "9.7.6",
+        "awesome-typescript-loader": "5.2.1",
+        "css-loader": "3.5.1",
+        "file-loader": "6.0.0",
+        "html-webpack-plugin": "4.0.4",
+        "open-browser-webpack-plugin": "0.0.5",
+        "postcss-loader": "3.0.0",
+        "source-map-loader": "0.2.4",
+        "webpack": "4.42.1",
+        "webpack-cli": "3.3.11",
+        "webpack-dev-server": "3.10.3",
+        "webpack-hot-middleware": "2.25.0"
     }
 }

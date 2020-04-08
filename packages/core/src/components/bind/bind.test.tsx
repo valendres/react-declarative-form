@@ -423,7 +423,7 @@ describe('module: bind', () => {
             mount(<Component name="test" ref={boundComponentRef} />);
 
             const BoundClass = (boundComponentRef as any).current
-                ._reactInternalFiber.child.type;
+                ._reactInternalFiber.type;
             expect(BoundClass.prototype.constructor.name).toBe(
                 'BoundComponent',
             );

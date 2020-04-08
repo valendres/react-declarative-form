@@ -1,4 +1,4 @@
-module.exports = function(wallaby) {
+module.exports = function (wallaby) {
     const path = require('path');
     process.env.NODE_PATH +=
         path.delimiter +
@@ -32,13 +32,6 @@ module.exports = function(wallaby) {
 
         tests: ['src/**/*test.ts*'],
 
-        compilers: {
-            '**/*.ts?(x)': wallaby.compilers.typeScript({
-                module: 'commonjs',
-                jsx: 'React',
-            }),
-        },
-
         testFramework: 'jest',
 
         env: {
@@ -46,8 +39,13 @@ module.exports = function(wallaby) {
             runner: 'node',
         },
 
-        hints: {
-            ignoreCoverage: /istanbul ignore next/,
+        compilers: {
+            '**/*.ts?(x)': wallaby.compilers.typeScript({
+                module: 'CommonJS',
+                jsx: 'React',
+                target: 'es5',
+            }),
+            '**/*.js': wallaby.compilers.babel(),
         },
 
         debug: true,

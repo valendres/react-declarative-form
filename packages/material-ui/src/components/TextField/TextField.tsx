@@ -12,7 +12,7 @@ import MaterialTextField, {
 
 export interface TextFieldProps
     extends Omit<MaterialTextFieldProps, 'value' | 'defaultValue'>,
-        BoundComponentProps {
+        Omit<BoundComponentProps, 'onBlur' | 'onFocus'> {
     name: string;
     label?: string;
 }

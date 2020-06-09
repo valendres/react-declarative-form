@@ -4,13 +4,13 @@ const autoprefixer = require('autoprefixer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OpenBrowserWebpackPlugin = require('open-browser-webpack-plugin');
 
-const packagePath = relPath => path.resolve(__dirname, relPath);
-const rootPath = relPath => path.resolve(__dirname, '../..', relPath);
+const packagePath = (relPath) => path.resolve(__dirname, relPath);
+const rootPath = (relPath) => path.resolve(__dirname, '../..', relPath);
 
 module.exports = {
     devtool: 'inline-source-map',
     devServer: {
-        port: '8080',
+        port: '9000',
         hot: true,
         stats: 'errors-only',
     },
@@ -32,7 +32,9 @@ module.exports = {
         },
     },
     plugins: [
-        new OpenBrowserWebpackPlugin(),
+        new OpenBrowserWebpackPlugin({
+            url: 'http://localhost:9000',
+        }),
         new webpack.NamedModulesPlugin(),
         new HtmlWebpackPlugin({
             title: 'React Declarative Form - Demo',

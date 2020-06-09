@@ -81,7 +81,7 @@ describe('component: Form', () => {
             // should not have been called yet
             expect(props.onSubmit).not.toHaveBeenCalled();
 
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
                 form.addEventListener('submit', resolve);
                 form.querySelector('button').click();
             }).then(() => {
@@ -142,10 +142,7 @@ describe('component: Form', () => {
             );
 
             const form = wrapper.instance() as any;
-            const componentInstance = wrapper
-                .find(TextField)
-                .at(0)
-                .instance();
+            const componentInstance = wrapper.find(TextField).at(0).instance();
 
             // Should store a reference to the first firstName component
             expect(form.components[componentName].instance).toEqual(
@@ -183,14 +180,8 @@ describe('component: Form', () => {
             );
 
             const form = wrapper.instance() as any;
-            const mirror1 = wrapper
-                .find(Mirror)
-                .at(0)
-                .instance();
-            const mirror2 = wrapper
-                .find(Mirror)
-                .at(1)
-                .instance();
+            const mirror1 = wrapper.find(Mirror).at(0).instance();
+            const mirror2 = wrapper.find(Mirror).at(1).instance();
 
             // Should store a reference for both mirrors
             expect(form.mirrors[componentName]).toEqual([mirror1, mirror2]);
@@ -239,10 +230,7 @@ describe('component: Form', () => {
             );
 
             // Simulate a change event
-            wrapper
-                .find({ name: 'firstName' })
-                .find('input')
-                .simulate('blur');
+            wrapper.find({ name: 'firstName' }).find('input').simulate('blur');
 
             // Ensure handler has been called with current value
             const [
@@ -269,10 +257,7 @@ describe('component: Form', () => {
             );
 
             // Simulate a change event
-            wrapper
-                .find({ name: 'firstName' })
-                .find('input')
-                .simulate('focus');
+            wrapper.find({ name: 'firstName' }).find('input').simulate('focus');
 
             // Ensure handler has been called with current value
             const [
@@ -543,7 +528,7 @@ describe('component: Form', () => {
             expect.assertions(1);
             return (wrapper.instance() as Form<any>)
                 .setValue('lastName', 'abc')
-                .catch(error => {
+                .catch((error) => {
                     expect(error).toMatchInlineSnapshot(
                         `[UnknownComponentError: Failed to set value for "lastName" component. Not a descendant of this <Form/> component.]`,
                     );
@@ -563,6 +548,187 @@ describe('component: Form', () => {
             // Should be defaultValue because initialValues is null
             expect(wrapper.find({ name: 'firstName' })).toHaveInputValue(
                 defaultValue,
+            );
+        });
+    });
+
+    describe('value transformation', () => {
+        it('should provide the transformed value from valueTransformer to the form component', () => {
+            const props = mockProps({
+                initialValues: {
+                    fruit: 'grape',
+                },
+                valueTransformer: (componentName, value) =>
+                    componentName === 'fruit' ? `transformed-${value}` : value,
+            });
+            const wrapper = mount(
+                <Form {...props}>
+                    <TextField name="fruit" />
+                </Form>,
+            );
+
+            // Should be the transformed initial value
+            expect(wrapper.find({ name: 'fruit' })).toHaveInputValue(
+                'transformed-grape',
+            );
+        });
+
+        it('should provide the new transformed value from the value transformer to the form component if setValue is called', () => {
+            const props = mockProps({
+                initialValues: {
+                    fruit: 'lemon',
+                },
+                valueTransformer: (componentName, value) =>
+                    componentName === 'fruit' ? `transformed-${value}` : value,
+            });
+            const wrapper = mount<
+                Form<{
+                    fruit: string;
+                }>
+            >(
+                <Form {...props}>
+                    <TextField name="fruit" />
+                </Form>,
+            );
+
+            wrapper.instance().setValue('fruit', 'lime');
+
+            // Should be the transformed updated value
+            expect(wrapper.find({ name: 'fruit' })).toHaveInputValue(
+                'transformed-lime',
+            );
+        });
+
+        it('should provide the new transformed value from the value transformer to the form component if setValue is called', () => {
+            const props = mockProps({
+                initialValues: {
+                    fruit: 'lemon',
+                },
+                valueTransformer: (componentName, value) =>
+                    componentName === 'fruit' ? `transformed-${value}` : value,
+            });
+            const wrapper = mount<
+                Form<{
+                    fruit: string;
+                }>
+            >(
+                <Form {...props}>
+                    <TextField name="fruit" />
+                </Form>,
+            );
+
+            wrapper.instance().setValue('fruit', 'lime');
+
+            // Should be the transformed updated value
+            expect(wrapper.find({ name: 'fruit' })).toHaveInputValue(
+                'transformed-lime',
+            );
+        });
+
+        it('should used the transformed value for component validation', () => {
+            const customValidator = jest.fn().mockReturnValue(undefined);
+            const props = mockProps({
+                valueTransformer: (componentName, value) =>
+                    componentName === 'fruit' ? `ripe-${value}` : value,
+            });
+            const wrapper = mount<
+                Form<{
+                    fruit: string;
+                }>
+            >(
+                <Form {...props}>
+                    <TextField
+                        name="fruit"
+                        defaultValue="banana"
+                        validatorRules={{
+                            matches: /^ripe-/,
+                            custom: customValidator,
+                        }}
+                    />
+                </Form>,
+            );
+
+            // Should be true because the transformed default value should match the expected value
+            expect(wrapper.instance().isValid('fruit')).toBe(true);
+
+            // Ensure that the transformed value was passed to the validator
+            expect(customValidator.mock.calls[0][1]).toMatchObject({
+                fruit: 'ripe-banana',
+            });
+        });
+
+        it('should use the valueTransformer when calling getValue', () => {
+            const initialFruitValue = 'eggplant';
+            const initialVegetableValue = 'pumpkin';
+
+            const props = mockProps({
+                initialValues: {
+                    fruit: initialFruitValue,
+                    vegetable: initialVegetableValue,
+                },
+                valueTransformer: jest
+                    .fn()
+                    .mockImplementation((componentName, value) =>
+                        componentName === 'fruit'
+                            ? `transformed-${value}`
+                            : value,
+                    ),
+            });
+            const wrapper = mount<
+                Form<{
+                    fruit: string;
+                    vegetable: string;
+                }>
+            >(
+                <Form {...props}>
+                    <TextField name="fruit" />
+                    <TextField name="vegetable" />
+                </Form>,
+            );
+
+            // The value should be the transformed fruit value
+            expect(wrapper.instance().getValue('fruit')).toEqual(
+                'transformed-eggplant',
+            );
+
+            // The last name should have not changed because our transformer did not modify it
+            expect(wrapper.instance().getValue('vegetable')).toEqual('pumpkin');
+        });
+
+        it('should use the valuesTransformer when calling getValues', () => {
+            const initialFruitValue = 'apple';
+            const initialVegetableValue = 'potato';
+
+            const props = mockProps({
+                initialValues: {
+                    fruit: initialFruitValue,
+                    vegetable: initialVegetableValue,
+                },
+                valuesTransformer: jest.fn().mockImplementation((values) => ({
+                    ...values,
+                    fruit: `transformed-${values.fruit}`,
+                })),
+            });
+            const wrapper = mount<Form>(
+                <Form {...props}>
+                    <TextField name="fruit" />
+                    <TextField name="vegetable" />
+                </Form>,
+            );
+
+            // Values transformer should not have been called because we haven't called getValues yet
+            expect(props.valuesTransformer).not.toHaveBeenCalled();
+
+            expect(wrapper.instance().getValues()).toEqual({
+                // The value should be the transformed fruit value
+                fruit: 'transformed-apple',
+                // The last name should have not changed because our transformer did not modify it
+                vegetable: 'potato',
+            });
+
+            // Values transformer should have now been called
+            expect(props.valuesTransformer).toHaveBeenCalledWith(
+                props.initialValues,
             );
         });
     });
@@ -632,7 +798,7 @@ describe('component: Form', () => {
             ['passwordConfirm'],
         ])(
             'should trigger validation on related components if there are no circular dependencies',
-            validatorTrigger => {
+            (validatorTrigger) => {
                 const password = 'abc';
                 const props = mockProps({
                     initialValues: {
@@ -795,7 +961,7 @@ describe('component: Form', () => {
                     context: ValidatorContext.Danger,
                     message: 'Something went wrong :(',
                 })
-                .catch(error => {
+                .catch((error) => {
                     expect(error).toMatchInlineSnapshot(
                         `[UnknownComponentError: Failed to set validatorData for "lastName" component. Not a descendant of this <Form/> component.]`,
                     );

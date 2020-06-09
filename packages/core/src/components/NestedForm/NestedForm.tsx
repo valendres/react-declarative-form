@@ -1,11 +1,18 @@
 import * as React from 'react';
-import { Form, FormContext, FormApi, FormComponentState } from '../Form';
+import {
+    Form,
+    FormContext,
+    FormApi,
+    FormComponentState,
+    FormProps,
+} from '../Form';
 import { BoundComponent } from '../bind';
 import { OutsideFormError } from '../../errors';
 
 export interface NestedFormProps {
     name: string;
     children: React.ReactNode;
+    valueTransformer?: FormProps<any>['valuesTransformer'];
 }
 
 export class NestedForm extends React.Component<NestedFormProps>
@@ -43,7 +50,7 @@ export class NestedForm extends React.Component<NestedFormProps>
     }
 
     render() {
-        const { name, children } = this.props;
+        const { name, children, valueTransformer } = this.props;
         return (
             <FormContext.Consumer>
                 {(api: FormApi) => {
@@ -57,6 +64,7 @@ export class NestedForm extends React.Component<NestedFormProps>
                             onFocus={this._handleFocus}
                             onUpdate={this._handleUpdate}
                             initialValues={initialValues}
+                            valuesTransformer={valueTransformer}
                             virtual
                         >
                             {children}
@@ -113,7 +121,7 @@ export class NestedForm extends React.Component<NestedFormProps>
         return Promise.resolve();
     };
 
-    setValue: BoundComponent['setValue'] = async value => {
+    setValue: BoundComponent['setValue'] = async (value) => {
         await this._wrappedFormRef.current.setValues(
             this._transformValue(value),
         );

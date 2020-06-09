@@ -84,6 +84,32 @@ export interface FormProps<FormFields extends ValueMap> {
     onInvalidSubmit?: (values: FormFields) => void;
 
     /**
+     * A transformer func which allows the final form value to be manipulated.
+     * The calculated value that `getValue` would normally return is provided
+     * as an argument to this transformer.
+     *
+     * The returned value will take precedence over the value normally returned
+     * by `getValue`. It will also be use for form validation and provided to
+     * bound components.  If it is not necessary to modify the value, simply
+     * return the provided value and `getValue` will behave as normal.
+     */
+    valueTransformer?: (componentName: keyof FormFields, value: any) => any;
+
+    /**
+     * If you don't want to modify the values, simply return the provided values.
+     *
+     * A transformer func which is used to manipulate the entire form values to
+     * be manipulated. It is calculated after any individual `valueTransformer`'s
+     * have been applied.
+     *
+     * The returned value will take precedence over the value normally returned by
+     * `getValues`. If it is not necessary to modify the value, simply return the
+     * provided value and `getValue` will behave as normal
+     *
+     */
+    valuesTransformer?: (values: FormFields) => FormFields;
+
+    /**
      * Whether a hidden submit should be rendered within the form. The existence of a
      * `<button type="submit"/>` allows forms to be submitted when the enter key is pressed.
      * However, if you a form which is being submitted programmatically, or it doesn't
@@ -133,11 +159,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     };
 
     private components: {
-        [ComponentName in keyof FormComponents]: FormComponentState
+        [ComponentName in keyof FormComponents]: FormComponentState;
     };
 
     private mirrors: {
-        [ComponentName in keyof FormComponents]: MirrorInstance[]
+        [ComponentName in keyof FormComponents]: MirrorInstance[];
     };
 
     constructor(props: FormProps<FormComponents>) {
@@ -195,7 +221,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
                     children
                 ) : (
                     <form
-                        {...restProps as any}
+                        {...(restProps as any)}
                         onSubmit={this.handleFormSubmit}
                     >
                         {children}
@@ -231,7 +257,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
         return Promise.all(
-            this.getComponentNames(componentName).map(async componentName => {
+            this.getComponentNames(componentName).map(async (componentName) => {
                 await this.setValue(componentName, null);
             }),
         );
@@ -248,7 +274,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
         return Promise.all(
-            this.getComponentNames(componentName).map(async componentName => {
+            this.getComponentNames(componentName).map(async (componentName) => {
                 await this.updateComponent(componentName, {
                     $unset: ['value', 'validatorData', 'pristine'],
                 });
@@ -272,7 +298,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
         return Promise.all(
-            this.getComponentNames(componentName).map(async componentName => {
+            this.getComponentNames(componentName).map(async (componentName) => {
                 /**
                  * Recursive components don't have validation rules, therefore we rely on
                  * recursively calling isValid on the form.
@@ -307,7 +333,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): boolean => {
         const results = this.getComponentNames(componentName).map(
-            componentName => {
+            (componentName) => {
                 /**
                  * Recursive components don't have validation rules, therefore we rely on
                  * recursively calling isValid.
@@ -340,7 +366,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): boolean => {
         const results = this.getComponentNames(componentName).map(
-            componentName => {
+            (componentName) => {
                 if (this.isRecursiveComponent(componentName)) {
                     return this.getComponentInstance(
                         componentName,
@@ -415,35 +441,43 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             componentName,
         ),
     ): any => {
+        const { valueTransformer } = this.props;
+
         /**
          * Recursive component values can't be derived from props, therefore we rely on
          * recursively calling getValue.
          */
-        if (this.isRecursiveComponent(componentName)) {
-            return this.getComponentInstance(componentName).getValue();
-        }
+        const value = this.isRecursiveComponent(componentName)
+            ? this.getComponentInstance(componentName).getValue()
+            : (() => {
+                  const propValue = componentProps
+                      ? componentProps.value
+                      : undefined;
+                  const defaultValue = componentProps
+                      ? componentProps.defaultValue
+                      : undefined;
+                  const stateValue = this.components[componentName]
+                      ? this.components[componentName].value
+                      : undefined;
+                  const initialValue = this.props.initialValues
+                      ? this.props.initialValues[componentName]
+                      : undefined;
 
-        const propValue = componentProps ? componentProps.value : undefined;
-        const defaultValue = componentProps
-            ? componentProps.defaultValue
-            : undefined;
-        const stateValue = this.components[componentName]
-            ? this.components[componentName].value
-            : undefined;
-        const initialValue = this.props.initialValues
-            ? this.props.initialValues[componentName]
-            : undefined;
+                  return [
+                      propValue,
+                      stateValue,
+                      initialValue,
+                      defaultValue,
+                  ].find((v) => v !== undefined);
+              })();
 
-        const dynamicValue = [
-            propValue,
-            stateValue,
-            initialValue,
-            defaultValue,
-        ].find(v => v !== undefined);
+        const transformedValue = valueTransformer
+            ? valueTransformer(componentName, value)
+            : value;
 
-        return dynamicValue instanceof Object
-            ? Object.freeze(dynamicValue)
-            : dynamicValue;
+        return transformedValue instanceof Object
+            ? Object.freeze(transformedValue)
+            : transformedValue;
     };
 
     /**
@@ -455,13 +489,16 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     public getValues = (
         componentNames?: (keyof FormComponents)[],
     ): FormComponents => {
-        return this.getComponentNames(componentNames).reduce(
+        const values = this.getComponentNames(componentNames).reduce(
             (values: FormComponents, componentName: keyof FormComponents) => ({
                 ...values,
                 [componentName]: this.getValue(componentName),
             }),
             {} as FormComponents,
         );
+
+        const { valuesTransformer } = this.props;
+        return valuesTransformer ? valuesTransformer(values) : values;
     };
     //#endregion
 
@@ -975,9 +1012,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
     ): Promise<void[]> => {
         return Promise.all(
-            this.getComponentMirrors(componentName).map(
-                (mirror: MirrorInstance) => mirror.reflect(),
-            ),
+            this.getComponentMirrors(
+                componentName,
+            ).map((mirror: MirrorInstance) => mirror.reflect()),
         );
     };
 

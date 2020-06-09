@@ -1035,8 +1035,6 @@ describe('Component: NestedForm', () => {
             });
         });
 
-        describe.skip('func: getValidatorData', () => {});
-
         describe('func: getValue', () => {
             it('should return value according to initialValues', () => {
                 const currencyNestedFormRef = React.createRef<NestedForm>();

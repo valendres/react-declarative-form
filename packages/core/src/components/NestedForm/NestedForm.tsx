@@ -121,9 +121,10 @@ export class NestedForm extends React.Component<NestedFormProps>
         return Promise.resolve();
     };
 
-    setValue: BoundComponent['setValue'] = async (value) => {
+    setValue: BoundComponent['setValue'] = async (value, pristine) => {
         await this._wrappedFormRef.current.setValues(
             this._transformValue(value),
+            pristine,
         );
         return undefined;
     };

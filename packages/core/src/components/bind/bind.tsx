@@ -39,7 +39,7 @@ export interface BoundComponentCommonProps {
 
 export interface BoundComponentInjectedProps {
     /** Should be called when component value has changed */
-    setValue?: (value: any) => Promise<void>;
+    setValue?: BoundComponent['setValue'];
 }
 
 /** Props used by the HOC only. They are not passed to the wrapped component. */
@@ -83,7 +83,7 @@ export interface BoundComponent extends React.Component<BoundComponentProps> {
     getValidatorData: () => ValidatorData;
     getValue: () => any;
     setValidatorData: (data: ValidatorData) => Promise<void>;
-    setValue: (value: any) => Promise<void>;
+    setValue: (value: any, pristine?: boolean) => Promise<void>;
     _update: (state: FormComponentState) => Promise<void>;
     _isRecursive: () => boolean;
 }
@@ -417,7 +417,7 @@ export function bind<
         };
 
         _update = (state: BoundComponentDerivedState): Promise<void> => {
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
                 this.forceUpdate(resolve);
             });
         };

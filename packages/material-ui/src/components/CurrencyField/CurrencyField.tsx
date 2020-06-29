@@ -1,54 +1,56 @@
 import * as React from 'react';
-import {
-    bind,
-    BoundComponentProps,
-    // ValidatorContext,
-    Omit,
-    NestedForm,
-} from '@react-declarative-form/core';
+import { NestedForm } from '@react-declarative-form/core';
 
 import { TextField } from '../TextField';
 import { Select } from '../Select';
 import { CURRENCY_CODE_OPTIONS } from './CurrencyField.options';
-import { Grid, makeStyles, Theme, createStyles } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
 
 export interface CurrencyFieldValues {
-    amount: string | number;
+    value: string | number;
     code: string;
 }
 
-export interface CurrencyFieldProps
-    extends Omit<BoundComponentProps, 'onBlur' | 'onFocus'> {
+export interface CurrencyFieldProps {
     name: string;
     label: string;
+    fixedCurrencyCode?: string;
+    disabled?: boolean;
     onChange?: () => void;
 }
 
-export class UnboundCurrencyField extends React.Component<CurrencyFieldProps> {
+export class CurrencyField extends React.Component<CurrencyFieldProps> {
     render() {
-        const { name, label } = this.props;
+        const { name, label, fixedCurrencyCode, disabled } = this.props;
 
         return (
             <NestedForm
                 name={name}
                 // tslint:disable-next-line: jsx-no-lambda
-                valueTransformer={({ amount, code }: CurrencyFieldValues) =>
-                    amount === undefined || amount === null || amount === ''
+                valueTransformer={({ value, code }: CurrencyFieldValues) =>
+                    value === undefined || value === null || value === ''
                         ? undefined
                         : {
-                              amount,
+                              value,
                               code,
                           }
                 }
             >
                 <Grid container spacing={2} alignItems="flex-end">
                     <Grid item xs={9}>
-                        <TextField name="amount" type="number" label={label} />
+                        <TextField
+                            name="value"
+                            type="number"
+                            label={label}
+                            disabled={disabled}
+                        />
                     </Grid>
                     <Grid item xs={3}>
                         <Select
                             name="code"
                             label="Currency"
+                            disabled={disabled || !!fixedCurrencyCode}
+                            value={fixedCurrencyCode ?? undefined}
                             options={CURRENCY_CODE_OPTIONS}
                             // tslint:disable-next-line: jsx-no-lambda
                             renderValue={(value) => value}
@@ -61,5 +63,3 @@ export class UnboundCurrencyField extends React.Component<CurrencyFieldProps> {
         );
     }
 }
-
-export const CurrencyField = bind<CurrencyFieldProps>(UnboundCurrencyField);

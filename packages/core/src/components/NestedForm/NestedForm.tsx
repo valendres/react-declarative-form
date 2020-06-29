@@ -66,6 +66,7 @@ export class NestedForm extends React.Component<NestedFormProps>
                             initialValues={initialValues}
                             valuesTransformer={valueTransformer}
                             virtual
+                            debug={api?.debug}
                         >
                             {children}
                         </Form>

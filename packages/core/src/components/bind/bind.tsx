@@ -144,16 +144,32 @@ export function bind<
                 );
                 return;
             }
+
+            if (this._formApi?.debug) {
+                console.log('🟦 componentDidMount', name);
+            }
+
             this._formApi.onComponentMount(name, this as any);
         }
 
         public componentWillUnmount() {
             const { name } = this.props;
+
+            console.log(this._formApi);
+            if (this._formApi?.debug) {
+                console.log('🟩 componentWillUnmount', name);
+            }
+
             return this._formApi && this._formApi.onComponentUnmount(name);
         }
 
         public componentDidUpdate() {
             const { name } = this.props;
+
+            if (this._formApi?.debug) {
+                console.log('🟧 componentDidUpdate', name);
+            }
+
             return this._formApi && this._formApi.onComponentUpdate(name);
         }
 
@@ -175,10 +191,17 @@ export function bind<
                 ) ||
                 !deepEqual(
                     pick(prevProps, validatorObjectKeys),
-                    pick(prevProps, validatorObjectKeys),
+                    pick(nextProps, validatorObjectKeys),
                 );
 
             const stateChanged = prevState !== nextState;
+
+            if (this._formApi?.debug) {
+                console.log('🟨 shouldComponentUpdate', this.props.name, {
+                    propsChanged,
+                    stateChanged,
+                });
+            }
             return propsChanged || stateChanged;
         }
 
@@ -201,6 +224,10 @@ export function bind<
                             pristine,
                             validatorData,
                         } = this._getState();
+
+                        if (this._formApi?.debug) {
+                            console.log('🟫 render', this.props.name);
+                        }
 
                         return (
                             <WrappedComponent

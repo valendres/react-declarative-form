@@ -153,7 +153,11 @@ export const App = () => {
                         padding: 10,
                     }}
                 >
-                    <Form formRef={formRef} onChange={updateMirroredFormData} />
+                    <Form
+                        formRef={formRef}
+                        onChange={updateMirroredFormData}
+                        debug
+                    />
                 </Paper>
             </Grid>
             <Grid item xs={4}>

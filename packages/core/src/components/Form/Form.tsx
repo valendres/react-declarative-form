@@ -16,6 +16,7 @@ import { isCallable, getEnvironment } from '../../utils';
 export const FormContext = React.createContext(undefined as FormApi);
 
 export interface FormApi {
+    debug: boolean;
     initialValues: any;
     clear: Form<any>['clear'];
     reset: Form<any>['reset'];
@@ -140,6 +141,11 @@ export interface FormProps<FormFields extends ValueMap> {
      * updating the initialValues.
      */
     initialValues?: FormFields;
+
+    /**
+     * When debug is enabled, detailed logging will be output to the console
+     */
+    debug?: boolean;
 }
 
 export interface FormComponentState {
@@ -177,6 +183,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             children,
             withHiddenSubmit,
             virtual,
+            debug,
 
             // Omitted
             onChange,
@@ -193,6 +200,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         } = this.props;
 
         const api: FormApi = {
+            debug,
             initialValues,
             clear: this.clear,
             reset: this.reset,
@@ -297,6 +305,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     public validate = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
+        if (this.props?.debug) {
+            console.log('🟪 validate', componentName);
+        }
         return Promise.all(
             this.getComponentNames(componentName).map(async (componentName) => {
                 /**
@@ -616,6 +627,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         componentRef: BoundComponent,
     ) => {
+        if (this.props?.debug) {
+            console.log('🟥 registerComponent', componentName);
+        }
+
         // Return early if a ref has already been registered
         if (
             componentName in this.components &&

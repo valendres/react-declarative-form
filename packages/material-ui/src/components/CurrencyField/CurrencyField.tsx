@@ -6,6 +6,15 @@ import { Select } from '../Select';
 import { CURRENCY_CODE_OPTIONS } from './CurrencyField.options';
 import { Grid } from '@material-ui/core';
 
+const valueTransformer = ({ value, code }: CurrencyFieldValues) =>
+    value === undefined || value === null || value === ''
+        ? undefined
+        : {
+              value,
+              code,
+          };
+const renderValue = (value: string) => value;
+
 export interface CurrencyFieldValues {
     value: string | number;
     code: string;
@@ -24,18 +33,7 @@ export class CurrencyField extends React.Component<CurrencyFieldProps> {
         const { name, label, fixedCurrencyCode, disabled } = this.props;
 
         return (
-            <NestedForm
-                name={name}
-                // tslint:disable-next-line: jsx-no-lambda
-                valueTransformer={({ value, code }: CurrencyFieldValues) =>
-                    value === undefined || value === null || value === ''
-                        ? undefined
-                        : {
-                              value,
-                              code,
-                          }
-                }
-            >
+            <NestedForm name={name} valueTransformer={valueTransformer}>
                 <Grid container spacing={2} alignItems="flex-end">
                     <Grid item xs={9}>
                         <TextField
@@ -52,8 +50,7 @@ export class CurrencyField extends React.Component<CurrencyFieldProps> {
                             disabled={disabled || !!fixedCurrencyCode}
                             value={fixedCurrencyCode ?? undefined}
                             options={CURRENCY_CODE_OPTIONS}
-                            // tslint:disable-next-line: jsx-no-lambda
-                            renderValue={(value) => value}
+                            renderValue={renderValue}
                             native={false}
                             fullWidth
                         />

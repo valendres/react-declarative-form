@@ -7,6 +7,11 @@ import {
 } from '@react-declarative-form/material-ui';
 import { Typography, Grid } from '@material-ui/core';
 
+const transformerFormValueTransformer = (
+    componentName: keyof TransformerFormFields,
+    value: any,
+) => (componentName === 'firstName' && value === 'apple' ? 'pineapple' : value);
+
 export interface TransformerFormFields {
     firstName: string;
     favFruit: string;
@@ -23,12 +28,7 @@ export const TransformerForm: React.FC<TransformerFormProps> = ({
     <Form<TransformerFormFields>
         ref={formRef}
         {...props}
-        // tslint:disable-next-line: jsx-no-lambda
-        valueTransformer={(componentName, value) =>
-            componentName === 'firstName' && value === 'apple'
-                ? 'pineapple'
-                : value
-        }
+        valueTransformer={transformerFormValueTransformer}
     >
         <Grid container>
             <Grid item xs={12}>

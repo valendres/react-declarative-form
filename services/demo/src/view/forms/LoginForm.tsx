@@ -82,6 +82,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ formRef, ...props }) => {
         ? passwordStrength.message
         : 'Enter a password to determine strength';
 
+    const handlePasswordChange = React.useCallback<
+        React.ChangeEventHandler<HTMLInputElement>
+    >((event) => {
+        setPassword(event.currentTarget.value);
+    }, []);
+
     return (
         <Form<LoginFormFields> ref={formRef} {...props}>
             <Grid container spacing={2}>
@@ -136,12 +142,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ formRef, ...props }) => {
                         name="password"
                         label="Password"
                         value={password}
-                        // tslint:disable-next-line: jsx-no-lambda
-                        onChange={(
-                            event: React.ChangeEvent<HTMLInputElement>,
-                        ) => {
-                            setPassword(event.currentTarget.value);
-                        }}
+                        onChange={handlePasswordChange}
                         validatorTrigger={['passwordConfirm']}
                         validatorRules={{
                             minLength: 8,

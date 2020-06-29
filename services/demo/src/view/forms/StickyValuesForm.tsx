@@ -18,6 +18,11 @@ export const StickyValuesForm: React.FC<StickyValuesFormProps> = ({
     ...props
 }) => {
     const [showInputs, setShowInputs] = React.useState(true);
+    const handleShowInputsCheckboxChange = React.useCallback<
+        React.ChangeEventHandler<HTMLInputElement>
+    >((event) => {
+        setShowInputs(event.target.checked);
+    }, []);
 
     return (
         <Form<StickyValuesFormFields> ref={formRef} {...props} sticky>
@@ -30,10 +35,7 @@ export const StickyValuesForm: React.FC<StickyValuesFormProps> = ({
                         control={
                             <Switch
                                 checked={showInputs}
-                                // tslint:disable-next-line: jsx-no-lambda
-                                onChange={(event) =>
-                                    setShowInputs(event.target.checked)
-                                }
+                                onChange={handleShowInputsCheckboxChange}
                             />
                         }
                         label="Toggle field visibility"

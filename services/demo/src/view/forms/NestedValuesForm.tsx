@@ -23,6 +23,11 @@ export const NestedValuesForm: React.FC<NestedValuesFormProps> = ({
     ...props
 }) => {
     const [showInputs, setShowInputs] = React.useState(true);
+    const handleShowInputsCheckboxChange = React.useCallback<
+        React.ChangeEventHandler<HTMLInputElement>
+    >((event) => {
+        setShowInputs(event.target.checked);
+    }, []);
 
     return (
         <Form<NestedValuesFormFields> ref={formRef} {...props}>
@@ -35,10 +40,7 @@ export const NestedValuesForm: React.FC<NestedValuesFormProps> = ({
                         control={
                             <Switch
                                 checked={showInputs}
-                                // tslint:disable-next-line: jsx-no-lambda
-                                onChange={(event) =>
-                                    setShowInputs(event.target.checked)
-                                }
+                                onChange={handleShowInputsCheckboxChange}
                             />
                         }
                         label="Toggle field visibility"

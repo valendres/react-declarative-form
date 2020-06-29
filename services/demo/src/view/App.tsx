@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Form, FormProps } from '@react-declarative-form/core';
+import { SelectOption } from '@react-declarative-form/material-ui';
 
 import { useQueryParams, StringParam, withDefault } from 'use-query-params';
 
@@ -63,9 +64,9 @@ const forms: {
 ];
 
 export const App = () => {
-    const formRef = React.createRef<Form<any>>();
+    const formRef = React.useRef<Form<any>>();
 
-    // Active form
+    // Active form query params
     const [queryParams, setQueryParams] = useQueryParams({
         form: withDefault(StringParam, forms[0].value),
     });
@@ -73,9 +74,42 @@ export const App = () => {
 
     // Form data mirror
     const [mirroredFormData, setMirroredFormData] = React.useState({});
-    const updateMirroredFormData = () =>
-        setMirroredFormData(formRef.current?.getValues() ?? {});
+    const updateMirroredFormData = React.useCallback(
+        () => setMirroredFormData(formRef.current?.getValues() ?? {}),
+        [formRef.current],
+    );
     React.useEffect(updateMirroredFormData, [queryParams.form]);
+
+    // Event handlers
+    const handleSubmitClick = React.useCallback<React.MouseEventHandler>(() => {
+        formRef.current.submit();
+        updateMirroredFormData();
+    }, [formRef.current]);
+
+    const handleClearClick = React.useCallback<React.MouseEventHandler>(() => {
+        formRef.current.clear();
+        updateMirroredFormData();
+    }, [formRef.current]);
+    const handleResetClick = React.useCallback<React.MouseEventHandler>(() => {
+        formRef.current.reset();
+        updateMirroredFormData();
+    }, [formRef.current]);
+    const handleValidateClick = React.useCallback<
+        React.MouseEventHandler
+    >(() => {
+        formRef.current.validate();
+        updateMirroredFormData();
+    }, [formRef.current]);
+    const handleActiveFormChange = React.useCallback<
+        React.ChangeEventHandler<SelectOption>
+    >(
+        (event) => {
+            setQueryParams({
+                form: event.target.value as string,
+            });
+        },
+        [formRef.current],
+    );
 
     return (
         <Grid container spacing={2}>
@@ -83,30 +117,18 @@ export const App = () => {
                 <Paper>
                     <Grid container justify="space-between">
                         <Grid item>
-                            <Button
-                                onClick={() => formRef.current.submit()}
-                                type="submit"
-                            >
+                            <Button onClick={handleSubmitClick} type="submit">
                                 Submit
                             </Button>
-                            <Button onClick={() => formRef.current.clear()}>
-                                Clear
-                            </Button>
-                            <Button onClick={() => formRef.current.reset()}>
-                                Reset
-                            </Button>
-                            <Button onClick={() => formRef.current.validate()}>
+                            <Button onClick={handleClearClick}>Clear</Button>
+                            <Button onClick={handleResetClick}>Reset</Button>
+                            <Button onClick={handleValidateClick}>
                                 Validate
                             </Button>
                         </Grid>
                         <Grid item>
                             <Select
-                                // tslint:disable-next-line: jsx-no-lambda
-                                onChange={(event) =>
-                                    setQueryParams({
-                                        form: event.target.value as string,
-                                    })
-                                }
+                                onChange={handleActiveFormChange}
                                 value={queryParams.form}
                             >
                                 {forms.map(({ value, label }) => (

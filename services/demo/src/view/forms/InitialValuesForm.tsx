@@ -22,6 +22,12 @@ export const InitialValuesForm: React.FC<InitialValuesFormProps> = ({
     const [controlledValue, setControlledValue] = React.useState('Level 1');
     const defaultValue = 'Default...';
 
+    const handleControlledValueChange = React.useCallback<
+        React.ChangeEventHandler<HTMLInputElement>
+    >((event) => {
+        setControlledValue(event.currentTarget.value);
+    }, []);
+
     return (
         <Form<InitialValuesFormFields>
             ref={formRef}
@@ -38,10 +44,7 @@ export const InitialValuesForm: React.FC<InitialValuesFormProps> = ({
                             name="controlled"
                             label="Controlled (level 1)"
                             value={controlledValue}
-                            // tslint:disable-next-line: jsx-no-lambda
-                            onChange={(
-                                event: React.ChangeEvent<HTMLInputElement>,
-                            ) => setControlledValue(event.currentTarget.value)}
+                            onChange={handleControlledValueChange}
                             defaultValue={defaultValue}
                             required
                         />

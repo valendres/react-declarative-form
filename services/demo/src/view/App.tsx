@@ -20,6 +20,7 @@ import {
     StickyValuesForm,
     TransformerForm,
     LoginForm,
+    ComplexForm,
 } from './forms';
 
 const forms: {
@@ -31,6 +32,11 @@ const forms: {
         }
     >;
 }[] = [
+    {
+        value: 'complex-form',
+        label: 'Complex form',
+        Form: ComplexForm,
+    },
     {
         value: 'default-values-form',
         label: 'Default values form',

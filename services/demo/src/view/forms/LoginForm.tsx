@@ -137,7 +137,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ formRef, ...props }) => {
                         label="Password"
                         value={password}
                         // tslint:disable-next-line: jsx-no-lambda
-                        onChange={(event) => {
+                        onChange={(
+                            event: React.ChangeEvent<HTMLInputElement>,
+                        ) => {
                             setPassword(event.currentTarget.value);
                         }}
                         validatorTrigger={['passwordConfirm']}

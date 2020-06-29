@@ -39,9 +39,9 @@ export const InitialValuesForm: React.FC<InitialValuesFormProps> = ({
                             label="Controlled (level 1)"
                             value={controlledValue}
                             // tslint:disable-next-line: jsx-no-lambda
-                            onChange={(event) =>
-                                setControlledValue(event.currentTarget.value)
-                            }
+                            onChange={(
+                                event: React.ChangeEvent<HTMLInputElement>,
+                            ) => setControlledValue(event.currentTarget.value)}
                             defaultValue={defaultValue}
                             required
                         />

@@ -18,10 +18,15 @@ import {
 
 const getPasswordStrength = (password: string) => {
     if (!password) {
-        return;
+        return {
+            score: -1,
+            percent: 0,
+            message: '',
+        };
     }
 
     const score = zxcvbn(password).score;
+    const percent = score ? (score + 1) * 20 : 0;
     const message = (() => {
         switch (score) {
             case 0:
@@ -39,6 +44,7 @@ const getPasswordStrength = (password: string) => {
 
     return {
         score,
+        percent,
         message,
     };
 };
@@ -74,13 +80,9 @@ export interface LoginFormProps extends FormProps<LoginFormFields> {
 
 export const LoginForm: React.FC<LoginFormProps> = ({ formRef, ...props }) => {
     const [password, setPassword] = React.useState(undefined);
-    const passwordStrength = getPasswordStrength(password);
-    const passwordStrengthPercent = passwordStrength
-        ? (passwordStrength.score + 1) * 20
-        : 0;
-    const passwordStrengthTooltip = passwordStrength
-        ? passwordStrength.message
-        : 'Enter a password to determine strength';
+    const passwordStrength = React.useMemo(() => {
+        return getPasswordStrength(password);
+    }, [password]);
 
     return (
         <Form<LoginFormFields> ref={formRef} {...props}>
@@ -162,7 +164,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ formRef, ...props }) => {
                     />
                 </Grid>
                 <Grid item xs={12}>
-                    <Tooltip title={passwordStrengthTooltip} placement="right">
+                    <Tooltip
+                        title={
+                            passwordStrength?.message ??
+                            'Enter a password to determine strength'
+                        }
+                        placement="right"
+                    >
                         <div
                             style={{
                                 width: '150px',
@@ -173,7 +181,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ formRef, ...props }) => {
                             <Typography>Password strength</Typography>
                             <LinearProgress
                                 variant="determinate"
-                                value={passwordStrengthPercent}
+                                value={passwordStrength.percent}
                             />
                         </div>
                     </Tooltip>

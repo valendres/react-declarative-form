@@ -10,7 +10,7 @@ import {
 import { TextField } from '../TextField';
 import { Select } from '../Select';
 import { CURRENCY_CODE_OPTIONS } from './CurrencyField.options';
-import { Grid, makeStyles, Theme, createStyles } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
 
 export interface CurrencyFieldValues {
     amount: string | number;

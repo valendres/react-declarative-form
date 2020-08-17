@@ -18,7 +18,7 @@ import {
     InitialValuesForm,
     StickyValuesForm,
     TransformerForm,
-    LoginForm,
+    RegistrationForm,
 } from './forms';
 
 const forms: {
@@ -41,9 +41,9 @@ const forms: {
         Form: InitialValuesForm,
     },
     {
-        value: 'login-form',
-        label: 'Login form',
-        Form: LoginForm,
+        value: 'registration-form',
+        label: 'Registration form',
+        Form: RegistrationForm,
     },
     {
         value: 'nested-values-form',

@@ -66,7 +66,7 @@ const validateDob = (name: string, values: ValueMap): ValidatorData => {
     // If we return a success response here, no other validator rules will be run.
 };
 
-export interface LoginFormFields {
+export interface RegistrationFormFields {
     username: string;
     email: string;
     dob: Date;
@@ -74,21 +74,25 @@ export interface LoginFormFields {
     passwordConfirm: string;
 }
 
-export interface LoginFormProps extends FormProps<LoginFormFields> {
-    formRef: React.RefObject<Form<LoginFormFields>>;
+export interface RegistrationFormProps
+    extends FormProps<RegistrationFormFields> {
+    formRef: React.RefObject<Form<RegistrationFormFields>>;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ formRef, ...props }) => {
+export const RegistrationForm: React.FC<RegistrationFormProps> = ({
+    formRef,
+    ...props
+}) => {
     const [password, setPassword] = React.useState(undefined);
     const passwordStrength = React.useMemo(() => {
         return getPasswordStrength(password);
     }, [password]);
 
     return (
-        <Form<LoginFormFields> ref={formRef} {...props}>
+        <Form<RegistrationFormFields> ref={formRef} {...props}>
             <Grid container spacing={2}>
                 <Grid item xs={12}>
-                    <Typography variant="h5">Login form</Typography>
+                    <Typography variant="h5">Registration form</Typography>
                 </Grid>
                 <Grid item sm={4} xs={12}>
                     {/* External validator example */}

@@ -41,10 +41,11 @@ export class UnboundTextField extends React.PureComponent<TextFieldProps> {
                 value={value || ''}
                 onChange={this.handleChange}
                 error={
+                    !pristine &&
                     validatorData &&
                     validatorData.context === ValidatorContext.Danger
                 }
-                helperText={validatorData && validatorData.message}
+                helperText={!pristine && validatorData && validatorData.message}
             />
         );
     }

@@ -373,6 +373,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
                     ).isPristine();
                 }
 
+                const props = this.getComponentProps(componentName);
+                if (props?.pristine !== undefined) {
+                    return props.pristine;
+                }
+
                 return componentName in this.components
                     ? this.components[componentName].pristine
                     : true;

@@ -968,4 +968,61 @@ describe('component: Form', () => {
                 });
         });
     });
+
+    describe('func: isPristine', () => {
+        it.each([
+            [
+                'should default to pristine if pristine prop is not provided',
+                {
+                    pristine: undefined,
+                    expectedResult: true,
+                },
+            ],
+            [
+                'should return pristine prop if provided (true)',
+                {
+                    pristine: true,
+                    expectedResult: true,
+                },
+            ],
+            [
+                'should return pristine prop if provided (false)',
+                {
+                    pristine: false,
+                    expectedResult: false,
+                },
+            ],
+        ])('%s', (_, { pristine, expectedResult }) => {
+            const wrapper = mount(
+                <Form>
+                    <TextField name="firstName" pristine={pristine} />
+                </Form>,
+            );
+
+            // Check pristine of TextField
+            const instance = wrapper.find(TextField).instance() as any;
+            expect(instance.isPristine()).toBe(expectedResult);
+        });
+
+        it('should no longer be pristine after validation is triggered', () => {
+            const wrapper = mount(
+                <Form>
+                    <TextField name="firstName" />
+                </Form>,
+            );
+
+            // Initially form should be pristine
+            expect(
+                (wrapper.find(TextField).instance() as any).isPristine(),
+            ).toBe(true);
+
+            // Trigger validation on the form
+            (wrapper.instance() as Form<any>).validate();
+
+            // After validation is triggered form is no longer pristine
+            expect(
+                (wrapper.find(TextField).instance() as any).isPristine(),
+            ).toBe(false);
+        });
+    });
 });

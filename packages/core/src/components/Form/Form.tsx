@@ -643,6 +643,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
                 },
             },
         });
+
+        // Force validation if component is not initially pristine to populate validationData
+        if (!componentRef.isPristine()) {
+            this.validate(componentName);
+        }
     };
 
     /**

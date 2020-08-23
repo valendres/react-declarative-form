@@ -163,6 +163,66 @@ describe('component: Form', () => {
             // Cleanup
             (console.error as any).mockRestore();
         });
+
+        it.only.each([
+            [
+                'should validate component on registration if it is not initially pristine',
+                {
+                    pristine: false,
+                    expectedValidatorData: {
+                        context: ValidatorContext.Warning,
+                        message: 'Custom warning message',
+                    },
+                },
+            ],
+            [
+                'should not validate component on registration if component is pristine',
+                {
+                    pristine: true,
+                    expectedValidatorData: undefined,
+                },
+            ],
+            [
+                'should not validate component on registration if no pristine prop provided (undefined)',
+                {
+                    pristine: undefined,
+                    expectedValidatorData: undefined,
+                },
+            ],
+        ])('%s', (_, { pristine, expectedValidatorData }) => {
+            const componentName = 'firstName';
+            const wrapper = mount(
+                <Form>
+                    <TextField
+                        name={componentName}
+                        validatorRules={{
+                            custom: () => {
+                                return {
+                                    context: ValidatorContext.Warning,
+                                    message: 'Custom warning message',
+                                };
+                            },
+                        }}
+                        pristine={pristine}
+                        value="Tai"
+                    />
+                </Form>,
+            );
+
+            const form = wrapper.instance() as any;
+
+            // Pristine prop should determine whether it should be validated on initial load/registration
+            // We check component validatorData and instance._state as they should both contain validator data
+            expect(form.components[componentName].validatorData).toStrictEqual(
+                expectedValidatorData,
+            );
+            expect(
+                form.components[componentName].instance._state.validatorData,
+            ).toStrictEqual({
+                context: expectedValidatorData?.context,
+                message: expectedValidatorData?.message,
+            });
+        });
     });
 
     describe('form mirror registration/unregistration', () => {

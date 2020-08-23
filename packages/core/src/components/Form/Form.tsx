@@ -1005,7 +1005,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         this.components = update(this.components, {
             [componentName]: componentTransform,
         });
-        // console.log(this.components.amount.pristine);
 
         const component = this.components[componentName];
         if (component && component.instance) {

@@ -164,7 +164,7 @@ describe('component: Form', () => {
             (console.error as any).mockRestore();
         });
 
-        it.only.each([
+        it.each([
             [
                 'should validate component on registration if it is not initially pristine',
                 {

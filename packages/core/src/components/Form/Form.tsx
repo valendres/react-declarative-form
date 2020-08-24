@@ -643,6 +643,11 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
                 },
             },
         });
+
+        // Force validation if component is not initially pristine to populate validationData
+        if (!componentRef.isPristine()) {
+            this.validate(componentName);
+        }
     };
 
     /**
@@ -1000,7 +1005,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         this.components = update(this.components, {
             [componentName]: componentTransform,
         });
-        // console.log(this.components.amount.pristine);
 
         const component = this.components[componentName];
         if (component && component.instance) {

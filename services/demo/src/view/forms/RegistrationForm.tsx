@@ -94,7 +94,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 <Grid item xs={12}>
                     <Typography variant="h5">Registration form</Typography>
                 </Grid>
-                <Grid item sm={4} xs={12}>
+                <Grid item sm={6} xs={12}>
                     {/* External validator example */}
                     <TextField
                         name="username"
@@ -108,7 +108,18 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                         required
                     />
                 </Grid>
-                <Grid item sm={4} xs={12}>
+                <Grid item sm={6} xs={12}>
+                    {/* Custom validator rule example */}
+                    <TextField
+                        name="dob"
+                        label="Date of birth"
+                        validatorRules={{
+                            custom: validateDob,
+                        }}
+                        required
+                    />
+                </Grid>
+                <Grid item sm={6} xs={12}>
                     {/* Multi-rule and custom validator message example */}
                     <TextField
                         name="email"
@@ -125,14 +136,17 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
                         required
                     />
                 </Grid>
-                <Grid item sm={4} xs={12}>
-                    {/* Custom validator rule example */}
+                <Grid item sm={6} xs={12}>
+                    {/* Validator rules triggered on default value with non pristine form example */}
                     <TextField
-                        name="dob"
-                        label="Date of birth"
+                        name="mobile"
+                        label="Mobile"
+                        defaultValue="04123456789"
                         validatorRules={{
-                            custom: validateDob,
+                            // Invalid mobile number if > 10 digits
+                            maxLength: 10,
                         }}
+                        pristine={false}
                         required
                     />
                 </Grid>

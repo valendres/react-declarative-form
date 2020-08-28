@@ -20,7 +20,6 @@ const lessThanCurrencyField = (
     currentFieldName: keyof ComplexFormFields,
     values: ComplexFormFields,
 ): ValidatorData => {
-    debugger;
     const rules =
         Number(values[currentFieldName]) > Number(value)
             ? {

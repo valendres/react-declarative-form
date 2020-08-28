@@ -10,6 +10,7 @@ import { BoundComponent } from '../bind';
 import { OutsideFormError } from '../../errors';
 
 export interface NestedFormProps {
+    validatorTrigger?: string;
     name: string;
     children: React.ReactNode;
     valueTransformer?: FormProps<any>['valuesTransformer'];

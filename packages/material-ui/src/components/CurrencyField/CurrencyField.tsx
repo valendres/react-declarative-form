@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { NestedForm } from '@react-declarative-form/core';
+import { NestedForm, ValidatorRules } from '@react-declarative-form/core';
 
 import { TextField } from '../TextField';
 import { Select } from '../Select';
@@ -26,14 +26,28 @@ export interface CurrencyFieldProps {
     fixedCurrencyCode?: string;
     disabled?: boolean;
     onChange?: () => void;
+    validatorRules?: ValidatorRules;
+    validatorTrigger?: string;
+    required?: boolean;
 }
 
 export class CurrencyField extends React.Component<CurrencyFieldProps> {
     render() {
-        const { name, label, fixedCurrencyCode, disabled } = this.props;
+        const {
+            name,
+            label,
+            fixedCurrencyCode,
+            disabled,
+            validatorTrigger,
+            ...restProps
+        } = this.props;
 
         return (
-            <NestedForm name={name} valueTransformer={valueTransformer}>
+            <NestedForm
+                name={name}
+                valueTransformer={valueTransformer}
+                validatorTrigger={validatorTrigger}
+            >
                 <Grid container spacing={2} alignItems="flex-end">
                     <Grid item xs={9}>
                         <TextField
@@ -41,6 +55,7 @@ export class CurrencyField extends React.Component<CurrencyFieldProps> {
                             type="number"
                             label={label}
                             disabled={disabled}
+                            {...restProps}
                         />
                     </Grid>
                     <Grid item xs={3}>

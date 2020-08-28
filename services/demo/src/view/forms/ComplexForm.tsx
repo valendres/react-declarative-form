@@ -13,17 +13,24 @@ import {
 } from '@react-declarative-form/material-ui';
 import { Grid, FormControlLabel, Switch } from '@material-ui/core';
 
-const lessThanCurrencyField = (targetFieldName: keyof ComplexFormFields) => (
+const lessThanCurrencyField = (
+    targetFieldName: keyof ComplexFormFields,
+    value: string,
+) => (
     currentFieldName: keyof ComplexFormFields,
     values: ComplexFormFields,
-): ValidatorData =>
-    Number((values[currentFieldName] as CurrencyFieldValues)?.value) >
-    Number((values[targetFieldName] as CurrencyFieldValues)?.value)
-        ? {
-              context: ValidatorContext.Danger,
-              message: `"${currentFieldName}" must be less than "${targetFieldName}"`,
-          }
-        : undefined;
+): ValidatorData => {
+    debugger;
+    const rules =
+        Number(values[currentFieldName]) > Number(value)
+            ? {
+                  context: ValidatorContext.Danger,
+                  message: `"${currentFieldName}" must be less than "${targetFieldName}"`,
+              }
+            : undefined;
+
+    return rules;
+};
 
 const initialValues: ComplexFormFields = {
     firstAmount: undefined,
@@ -79,7 +86,11 @@ export const ComplexForm: React.FC<ComplexFormProps> = ({
                                     minValue: 0,
                                 }}
                                 disabled={(assets || []).length > 5}
-                                validatorTrigger="secondAmount"
+                                validatorTrigger={
+                                    showConditionalField
+                                        ? 'secondAmount'
+                                        : undefined
+                                }
                                 required
                             />
                             <div>Assets</div>
@@ -117,6 +128,7 @@ export const ComplexForm: React.FC<ComplexFormProps> = ({
                                     minValue: 0,
                                     custom: lessThanCurrencyField(
                                         'firstAmount',
+                                        firstAmount?.value as string,
                                     ),
                                 }}
                             />

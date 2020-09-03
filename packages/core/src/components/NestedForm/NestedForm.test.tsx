@@ -3,7 +3,9 @@ import { BoundComponentProps, bind, BoundComponent } from '../bind';
 import * as React from 'react';
 import { mount } from 'enzyme';
 import { Form } from '../Form';
-import { ValidatorContext } from '@types';
+import { ValidatorContext, ValidatorData, ValueMap } from '@types';
+import { Mirror } from '../Mirror';
+const delay = require('delay');
 
 describe('Component: NestedForm', () => {
     interface TextFieldProps extends BoundComponentProps {
@@ -1293,6 +1295,100 @@ describe('Component: NestedForm', () => {
                         'Failed to handle focus for "currency:amount". Must be descendant of a <Form/> descendant.',
                     );
                 }
+            });
+        });
+
+        describe.skip('Misc: Nested From validation', () => {
+            it('should lookup validatorTrigger and trigger validation for nested form with Mirror', async () => {
+                const lessThanCurrencyField = (value: string) => (
+                    currentFieldName: string,
+                    values: ValueMap,
+                ): ValidatorData => {
+                    if (!value) {
+                        // TODO: value always undefined here, need further investigation
+                        return {
+                            context: ValidatorContext.Danger,
+                            message: `[currentFieldName]: ${values[currentFieldName]}, value: ${value}`,
+                        };
+                    }
+                    return Number(values[currentFieldName]) > Number(value)
+                        ? {
+                              context: ValidatorContext.Danger,
+                              message:
+                                  'secondAmount must be less than firstAmount',
+                          }
+                        : undefined;
+                };
+                const firstAmountNestedFormRef = React.createRef<NestedForm>();
+                const secondAmountNestedFormRef = React.createRef<NestedForm>();
+                const parentFromRef = React.createRef<Form>();
+                const wrapper = mount<Form<any>>(
+                    <Form
+                        initialValues={{
+                            firstAmount: { amount: '33', code: 'GBP' },
+                            secondAmount: { amount: '22', code: 'GBP' },
+                        }}
+                        ref={parentFromRef}
+                    >
+                        <NestedForm
+                            name="firstAmount"
+                            validatorTrigger="secondAmount"
+                            ref={firstAmountNestedFormRef}
+                        >
+                            <TextField name="amount" />
+                            <TextField name="code" required />
+                        </NestedForm>
+
+                        <Mirror name="firstAmount">
+                            {({ firstAmount }): React.ReactNode => (
+                                <NestedForm
+                                    name="secondAmount"
+                                    ref={secondAmountNestedFormRef}
+                                >
+                                    <TextField
+                                        name="amount"
+                                        validatorRules={{
+                                            minValue: 0,
+                                            custom: lessThanCurrencyField(
+                                                firstAmount?.value as string,
+                                            ),
+                                        }}
+                                    />
+                                    <TextField name="code" required />
+                                </NestedForm>
+                            )}
+                        </Mirror>
+                    </Form>,
+                );
+                await delay(10);
+
+                await parentFromRef.current.setValues({
+                    firstAmount: { amount: '11', code: 'GBP' },
+                });
+
+                const outerFormInstance = wrapper.instance();
+                await outerFormInstance.validate();
+                wrapper.update();
+
+                const values = outerFormInstance.getValues();
+                expect(values.firstAmount).toStrictEqual({
+                    amount: '11',
+                    code: 'GBP',
+                });
+                expect(values.secondAmount).toStrictEqual({
+                    amount: '22',
+                    code: 'GBP',
+                });
+
+                // TODO: Needs further investigation, seems the firstAmount.value always undefined
+                expect(
+                    wrapper
+                        .find({ name: 'secondAmount' })
+                        .find({ name: 'amount' }),
+                ).toHaveValidatorData({
+                    context: ValidatorContext.Danger,
+                    message: 'secondAmount must be less than firstAmount',
+                });
             });
         });
     });

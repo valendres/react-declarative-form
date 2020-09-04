@@ -6,12 +6,16 @@ import {
     FormComponentState,
     FormProps,
 } from '../Form';
-import { BoundComponent } from '../bind';
+import { ValidatorData } from '../../types';
+import { BoundComponent, BoundComponentProps } from '../bind';
 import { OutsideFormError } from '../../errors';
+import { isCallable } from '../../utils';
 
-export interface NestedFormProps {
+export interface NestedFormProps extends BoundComponentProps {
     name: string;
-    children: React.ReactNode;
+    children:
+        | React.ReactNode
+        | ((renderProps: { validatorData: ValidatorData }) => React.ReactNode);
     valueTransformer?: FormProps<any>['valuesTransformer'];
 }
 
@@ -55,7 +59,6 @@ export class NestedForm extends React.Component<NestedFormProps>
             <FormContext.Consumer>
                 {(api: FormApi) => {
                     this._parentFormApi = api;
-                    const initialValues = api && api.initialValues[name];
                     return (
                         <Form
                             ref={this._wrappedFormRef}
@@ -63,11 +66,18 @@ export class NestedForm extends React.Component<NestedFormProps>
                             onBlur={this._handleBlur}
                             onFocus={this._handleFocus}
                             onUpdate={this._handleUpdate}
-                            initialValues={initialValues}
+                            initialValues={api?.initialValues[name]}
                             valuesTransformer={valueTransformer}
                             virtual
                         >
-                            {children}
+                            {isCallable(children)
+                                ? (children as Function)({
+                                      validatorData: api?.getValidatorData(
+                                          name,
+                                          this.props,
+                                      ),
+                                  })
+                                : children}
                         </Form>
                     );
                 }}

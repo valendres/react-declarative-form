@@ -4,12 +4,15 @@ import {
     TextField,
     Select,
     CurrencyField,
+    Currency,
 } from '@react-declarative-form/material-ui';
 import { Typography, Grid } from '@material-ui/core';
 
 export interface TransformerFormFields {
     firstName: string;
     favFruit: string;
+    firstIncome: Currency;
+    secondIncome: Currency;
 }
 
 export interface TransformerFormProps extends FormProps<TransformerFormFields> {
@@ -51,7 +54,22 @@ export const TransformerForm: React.FC<TransformerFormProps> = ({
                 />
             </Grid>
             <Grid item xs={12}>
-                <CurrencyField name="income" label="Income" />
+                <CurrencyField
+                    name="firstIncome"
+                    label="First income"
+                    // TODO: uncomment this once it's working
+                    // validatorTrigger="secondIncome"
+                />
+            </Grid>
+            <Grid item xs={12}>
+                <CurrencyField
+                    name="secondIncome"
+                    label="Second income"
+                    validatorRules={{
+                        minValue: 100,
+                        gtCurrencyField: 'firstIncome',
+                    }}
+                />
             </Grid>
         </Grid>
     </Form>

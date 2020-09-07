@@ -25,7 +25,7 @@ export const TransformerForm: React.FC<TransformerFormProps> = ({
 }) => (
     <Form<TransformerFormFields>
         ref={formRef}
-        {...props}
+        // {...props}
         // tslint:disable-next-line: jsx-no-lambda
         valueTransformer={(componentName, value) =>
             componentName === 'firstName' && value === 'apple'
@@ -57,8 +57,7 @@ export const TransformerForm: React.FC<TransformerFormProps> = ({
                 <CurrencyField
                     name="firstIncome"
                     label="First income"
-                    // TODO: uncomment this once it's working
-                    // validatorTrigger="secondIncome"
+                    validatorTrigger="secondIncome"
                 />
             </Grid>
             <Grid item xs={12}>

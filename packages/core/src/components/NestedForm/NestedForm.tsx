@@ -206,6 +206,7 @@ export class NestedForm extends React.Component<NestedFormProps>
             true,
         );
 
+        // TODO: trigger the component to render if the validatorDate changes
         return Promise.resolve();
     };
 

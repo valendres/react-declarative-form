@@ -81,7 +81,6 @@ export interface CurrencyFieldProps
     name: string;
     label: string;
     onChange?: () => void;
-
     validatorRules?: {
         minValue?: number;
         gtCurrencyField?: string;
@@ -113,11 +112,18 @@ export class CurrencyField extends React.Component<CurrencyFieldProps> {
     ];
 
     render() {
-        const { name, label, validatorRules, validatorMessages } = this.props;
+        const {
+            name,
+            label,
+            validatorTrigger,
+            validatorRules,
+            validatorMessages,
+        } = this.props;
 
         return (
             <NestedForm
                 name={name}
+                validatorTrigger={validatorTrigger}
                 validatorRules={
                     // TODO: remove any cast once module augmentation issue is fixed
                     pick(
@@ -140,51 +146,54 @@ export class CurrencyField extends React.Component<CurrencyFieldProps> {
                 }
             >
                 {/* Use a render callback from the `NestedForm` to grab its validation data */}
-                {({ validatorData }) => (
-                    <Grid container spacing={2} alignItems="flex-end">
-                        <Grid item xs={9}>
-                            <TextField
-                                name="amount"
-                                type="number"
-                                label={label}
-                                validatorRules={pick(
-                                    validatorRules,
-                                    this.amountValidatorRuleKeys,
-                                )}
-                                validatorMessages={pick(
-                                    validatorMessages,
-                                    this.amountValidatorRuleKeys,
-                                )}
-                                /**
-                                 * If the validation on the nested form failed,
-                                 * override the validatorData on the amount field.
-                                 *
-                                 * Checking the context here is important because
-                                 * without it, we will pass through a Success object
-                                 * and override any failed `TextField` validation.
-                                 */
-                                validatorData={
-                                    [
-                                        ValidatorContext.Warning,
-                                        ValidatorContext.Danger,
-                                    ].includes(validatorData?.context) &&
-                                    validatorData
-                                }
-                            />
+                {({ validatorData }) => {
+                    console.log(`🟩🟩🟩 Rendering: ${name}`);
+                    return (
+                        <Grid container spacing={2} alignItems="flex-end">
+                            <Grid item xs={9}>
+                                <TextField
+                                    name="amount"
+                                    type="number"
+                                    label={label}
+                                    validatorRules={pick(
+                                        validatorRules,
+                                        this.amountValidatorRuleKeys,
+                                    )}
+                                    validatorMessages={pick(
+                                        validatorMessages,
+                                        this.amountValidatorRuleKeys,
+                                    )}
+                                    /**
+                                     * If the validation on the nested form failed,
+                                     * override the validatorData on the amount field.
+                                     *
+                                     * Checking the context here is important because
+                                     * without it, we will pass through a Success object
+                                     * and override any failed `TextField` validation.
+                                     */
+                                    validatorData={
+                                        [
+                                            ValidatorContext.Warning,
+                                            ValidatorContext.Danger,
+                                        ].includes(validatorData?.context) &&
+                                        validatorData
+                                    }
+                                />
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Select
+                                    name="code"
+                                    label="Currency"
+                                    options={CURRENCY_CODE_OPTIONS}
+                                    // tslint:disable-next-line: jsx-no-lambda
+                                    renderValue={(value) => value}
+                                    native={false}
+                                    fullWidth
+                                />
+                            </Grid>
                         </Grid>
-                        <Grid item xs={3}>
-                            <Select
-                                name="code"
-                                label="Currency"
-                                options={CURRENCY_CODE_OPTIONS}
-                                // tslint:disable-next-line: jsx-no-lambda
-                                renderValue={(value) => value}
-                                native={false}
-                                fullWidth
-                            />
-                        </Grid>
-                    </Grid>
-                )}
+                    );
+                }}
             </NestedForm>
         );
     }

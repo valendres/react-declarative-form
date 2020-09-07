@@ -299,18 +299,16 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     ): Promise<void[]> => {
         return Promise.all(
             this.getComponentNames(componentName).map(async (componentName) => {
-                /**
-                 * Recursive components don't have validation rules, therefore we rely on
-                 * recursively calling isValid on the form.
+                /** Recursive components require calling `validate` on them to
+                 * recursively trigger validation logic on their form components.
                  */
                 if (this.isRecursiveComponent(componentName)) {
                     await this.getComponentInstance(componentName).validate();
-                } else {
-                    await this.setValidatorData(
-                        componentName,
-                        this.executeValidator(componentName),
-                    );
                 }
+                await this.setValidatorData(
+                    componentName,
+                    this.executeValidator(componentName),
+                );
             }),
         );
     };

@@ -32,6 +32,7 @@ export const TransformerForm: React.FC<TransformerFormProps> = ({
                 ? 'pineapple'
                 : value
         }
+        debug
     >
         <Grid container>
             <Grid item xs={12}>
@@ -57,7 +58,7 @@ export const TransformerForm: React.FC<TransformerFormProps> = ({
                 <CurrencyField
                     name="firstIncome"
                     label="First income"
-                    validatorTrigger="secondIncome"
+                    // validatorTrigger="secondIncome"
                 />
             </Grid>
             <Grid item xs={12}>

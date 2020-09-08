@@ -147,7 +147,7 @@ export class CurrencyField extends React.Component<CurrencyFieldProps> {
             >
                 {/* Use a render callback from the `NestedForm` to grab its validation data */}
                 {({ validatorData }) => {
-                    console.log(`🟩🟩🟩 Rendering: ${name}`);
+                    console.log(`🟦 CurrencyField['${name}'].render`);
                     return (
                         <Grid container spacing={2} alignItems="flex-end">
                             <Grid item xs={9}>

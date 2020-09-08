@@ -17,7 +17,7 @@ export const CrossValidationForm: React.FC<CrossValidationFormProps> = ({
     formRef,
     ...props
 }) => (
-    <Form<CrossValidationFormFields> ref={formRef} {...props} debug>
+    <Form<CrossValidationFormFields> ref={formRef} {...props}>
         <Grid container>
             <Grid item xs={12}>
                 <Typography variant="h5">Cross-validation form</Typography>

@@ -1,3 +1,4 @@
+export * from './CrossValidationForm';
 export * from './DefaultValuesForm';
 export * from './InitialValuesForm';
 export * from './NestedValuesForm';

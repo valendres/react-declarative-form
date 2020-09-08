@@ -19,6 +19,7 @@ import {
     StickyValuesForm,
     TransformerForm,
     RegistrationForm,
+    CrossValidationForm,
 } from './forms';
 
 const forms: {
@@ -30,6 +31,11 @@ const forms: {
         }
     >;
 }[] = [
+    {
+        value: 'cross-validation-form',
+        label: 'Cross-validation form',
+        Form: CrossValidationForm,
+    },
     {
         value: 'default-values-form',
         label: 'Default values form',

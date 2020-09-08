@@ -11,8 +11,7 @@ import { Typography, Grid } from '@material-ui/core';
 export interface TransformerFormFields {
     firstName: string;
     favFruit: string;
-    firstIncome: Currency;
-    secondIncome: Currency;
+    income: Currency;
 }
 
 export interface TransformerFormProps extends FormProps<TransformerFormFields> {
@@ -25,14 +24,13 @@ export const TransformerForm: React.FC<TransformerFormProps> = ({
 }) => (
     <Form<TransformerFormFields>
         ref={formRef}
-        // {...props}
+        {...props}
         // tslint:disable-next-line: jsx-no-lambda
         valueTransformer={(componentName, value) =>
             componentName === 'firstName' && value === 'apple'
                 ? 'pineapple'
                 : value
         }
-        debug
     >
         <Grid container>
             <Grid item xs={12}>
@@ -55,21 +53,7 @@ export const TransformerForm: React.FC<TransformerFormProps> = ({
                 />
             </Grid>
             <Grid item xs={12}>
-                <CurrencyField
-                    name="firstIncome"
-                    label="First income"
-                    // validatorTrigger="secondIncome"
-                />
-            </Grid>
-            <Grid item xs={12}>
-                <CurrencyField
-                    name="secondIncome"
-                    label="Second income"
-                    validatorRules={{
-                        minValue: 100,
-                        gtCurrencyField: 'firstIncome',
-                    }}
-                />
+                <CurrencyField name="income" label="Income" />
             </Grid>
         </Grid>
     </Form>

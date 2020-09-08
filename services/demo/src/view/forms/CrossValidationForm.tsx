@@ -27,7 +27,7 @@ export const CrossValidationForm: React.FC<CrossValidationFormProps> = ({
             </Grid>
             <Grid item xs={12}>
                 <Mirror name="firstIncome">
-                    {(fields: CrossValidationFormFields) => (
+                    {({ firstIncome }: CrossValidationFormFields) => (
                         <CurrencyField
                             name="secondIncome"
                             label="Second income"
@@ -35,7 +35,7 @@ export const CrossValidationForm: React.FC<CrossValidationFormProps> = ({
                                 minValue: 100,
                                 gtCurrencyField: 'firstIncome',
                             }}
-                            fixedCurrencyCode={fields?.firstIncome?.code}
+                            fixedCurrencyCode={firstIncome?.code}
                         />
                     )}
                 </Mirror>

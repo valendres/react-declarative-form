@@ -27,7 +27,7 @@ const forms: {
     label: string;
     Form: React.ComponentType<
         FormProps<any> & {
-            formRef: React.RefObject<Form>;
+            formRef: React.RefObject<Form<any>>;
         }
     >;
 }[] = [
@@ -131,7 +131,7 @@ export const App = () => {
                         padding: 10,
                     }}
                 >
-                    <Form formRef={formRef} onChange={updateMirroredFormData} />
+                    <Form formRef={formRef} />
                 </Paper>
             </Grid>
             <Grid item xs={4}>

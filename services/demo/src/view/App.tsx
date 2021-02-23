@@ -75,7 +75,9 @@ export const App = () => {
     const [queryParams, setQueryParams] = useQueryParams({
         form: withDefault(StringParam, forms[0].value),
     });
-    const { Form } = forms.find((form) => form.value === queryParams.form);
+    const { Form: FormComponent } = forms.find(
+        (form) => form.value === queryParams.form,
+    );
 
     // Form data mirror
     const [mirroredFormData, setMirroredFormData] = React.useState({});
@@ -83,27 +85,23 @@ export const App = () => {
         setMirroredFormData(formRef.current?.getValues() ?? {});
     React.useEffect(updateMirroredFormData, [queryParams.form]);
 
+    const submitForm = () => formRef.current.submit();
+    const clearForm = () => formRef.current.clear();
+    const resetForm = () => formRef.current.reset();
+    const validateForm = () => formRef.current.validate();
+
     return (
         <Grid container spacing={2}>
             <Grid item xs={12}>
                 <Paper>
                     <Grid container justify="space-between">
                         <Grid item>
-                            <Button
-                                onClick={() => formRef.current.submit()}
-                                type="submit"
-                            >
+                            <Button onClick={submitForm} type="submit">
                                 Submit
                             </Button>
-                            <Button onClick={() => formRef.current.clear()}>
-                                Clear
-                            </Button>
-                            <Button onClick={() => formRef.current.reset()}>
-                                Reset
-                            </Button>
-                            <Button onClick={() => formRef.current.validate()}>
-                                Validate
-                            </Button>
+                            <Button onClick={clearForm}>Clear</Button>
+                            <Button onClick={resetForm}>Reset</Button>
+                            <Button onClick={validateForm}>Validate</Button>
                         </Grid>
                         <Grid item>
                             <Select
@@ -131,7 +129,10 @@ export const App = () => {
                         padding: 10,
                     }}
                 >
-                    <Form formRef={formRef} />
+                    <FormComponent
+                        formRef={formRef}
+                        onChange={updateMirroredFormData}
+                    />
                 </Paper>
             </Grid>
             <Grid item xs={4}>

@@ -1,18 +1,6 @@
 
 <h1 align="center">@react-declarative-form/core</h1>
 
-<div align="center">
-<img src="https://www.peterweller.com.au:9000/api/project_badges/measure?project=react-declarative-form&metric=alert_status"/>
-
-<img src="https://www.peterweller.com.au:9000/api/project_badges/measure?project=react-declarative-form&metric=coverage"/>
-
-<img src="https://www.peterweller.com.au:9000/api/project_badges/measure?project=react-declarative-form&metric=vulnerabilities"/>
-
-<img src="https://www.peterweller.com.au:9000/api/project_badges/measure?project=react-declarative-form&metric=sqale_rating"/>
-
-<span>For more info, see <a href="https://www.peterweller.com.au:9000/dashboard?id=react-declarative-form">SonarQube project stats</a>.</span>
-</div>
-
 ## Overview
 **@react-declarative-form/core** is the core of a simple-to-use declarative valadation library. It is designed to make building forms easy; allowing consumers to specify validator requirements on individual form components, and let the library do the heavy lifting.
 

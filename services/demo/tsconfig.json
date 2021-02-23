@@ -3,6 +3,10 @@
     "compilerOptions": {
         "baseUrl": "./",
         "outDir": "./dist",
+        "paths": {
+            "@react-declarative-form/core": ["../../packages/core/src"],
+            "@react-declarative-form/material-ui": ["../../packages/material-ui/src"]
+        },
     },
     "rootDirs": ["src"],
     "include": ["./src/**/*"],

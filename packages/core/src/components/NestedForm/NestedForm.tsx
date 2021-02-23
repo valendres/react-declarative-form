@@ -80,6 +80,7 @@ export class NestedForm extends React.Component<NestedFormProps>
                             onChange={this._handleChange}
                             onBlur={this._handleBlur}
                             onFocus={this._handleFocus}
+                            onUpdate={this._handleUpdate}
                             valuesTransformer={valueTransformer}
                             initialValues={api?.initialValues[name]}
                             debug={api?.debug}
@@ -211,6 +212,19 @@ export class NestedForm extends React.Component<NestedFormProps>
         }
 
         return this._parentFormApi.onComponentFocus(name, event);
+    };
+
+    _handleUpdate = (componentName: string) => {
+        this.logCall('_handleUpdate', { componentName });
+        const { name } = this.props;
+
+        if (!this._parentFormApi) {
+            throw new OutsideFormError(
+                `handle update for "${name}:${componentName}"`,
+            );
+        }
+
+        return this._parentFormApi.onComponentUpdate(name);
     };
 
     _update = async (componentState: FormComponentState) => {

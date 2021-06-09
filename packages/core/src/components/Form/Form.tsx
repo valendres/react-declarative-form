@@ -948,7 +948,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     ): (keyof FormComponents)[] => {
         // this.logCall('getComponentValidatorTriggers', { componentName });
         const props = this.getComponentProps(componentName);
-        const validatorTrigger = props.validatorTrigger || [];
+        const validatorTrigger = props?.validatorTrigger ?? [];
         return Array.isArray(validatorTrigger)
             ? validatorTrigger
             : [validatorTrigger];

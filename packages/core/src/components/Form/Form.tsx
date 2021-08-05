@@ -195,6 +195,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             debug,
             initialValues,
             sticky,
+            valueTransformer,
 
             // Injected
             ...restProps

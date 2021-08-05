@@ -39,7 +39,6 @@
         "@types/lodash.pick": "4.4.6",
         "@types/validator": "13.6.3",
         "delay": "5.0.0",
-        "jest-teamcity-reporter": "0.9.0",
         "markdown-toc": "1.2.0"
     },
     "peerDependencies": {
@@ -91,8 +90,7 @@
         "coverageDirectory": "./coverage",
         "modulePathIgnorePatterns": [
             "<rootDir>/coverage/"
-        ],
-        "testResultsProcessor": "jest-teamcity-reporter"
+        ]
     },
     "gitHead": "f4123eb4383492943c25229283c7fc4cf054c29d"
 }

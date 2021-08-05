@@ -21,8 +21,10 @@ export interface NestedFormProps extends BoundComponentProps {
     valueTransformer?: FormProps<any>['valuesTransformer'];
 }
 
-export class NestedForm extends React.Component<NestedFormProps>
-    implements BoundComponent {
+export class NestedForm
+    extends React.Component<NestedFormProps>
+    implements BoundComponent
+{
     //#region Private variables
     // tslint:disable:variable-name
     /**
@@ -240,7 +242,7 @@ export class NestedForm extends React.Component<NestedFormProps>
 
         // TODO: trigger the component to render if the validatorDate changes
         await new Promise((resolve) => {
-            this.forceUpdate(resolve);
+            this.forceUpdate(() => resolve(undefined));
         });
     };
 

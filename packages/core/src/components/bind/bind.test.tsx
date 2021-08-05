@@ -398,9 +398,7 @@ describe('module: bind', () => {
                 Title: string;
             }
 
-            class UnboundComponentWithStatics extends React.Component<
-                ComponentWithStaticsProps
-            > {
+            class UnboundComponentWithStatics extends React.Component<ComponentWithStaticsProps> {
                 static Title: string = 'Some static value';
 
                 render() {

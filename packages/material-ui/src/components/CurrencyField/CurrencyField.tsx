@@ -105,9 +105,8 @@ export interface CurrencyFieldProps
 }
 
 export class CurrencyField extends React.Component<CurrencyFieldProps> {
-    private nestedFormValidatorRuleKeys: CurrencyFieldNestedFormValidatorRuleKeys[] = [
-        'gtCurrencyField',
-    ];
+    private nestedFormValidatorRuleKeys: CurrencyFieldNestedFormValidatorRuleKeys[] =
+        ['gtCurrencyField'];
 
     private amountValidatorRuleKeys: CurrencyFieldAmountValidatorRuleKeys[] = [
         'minValue',

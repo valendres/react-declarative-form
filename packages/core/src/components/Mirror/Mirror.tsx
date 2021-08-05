@@ -16,12 +16,12 @@ export class Mirror extends React.Component<MirrorProps> {
 
     public componentDidMount() {
         if (this.isInsideForm()) {
-            this.getNames().forEach(name =>
+            this.getNames().forEach((name) =>
                 this.formApi.registerMirror(name, this),
             );
 
             // Defer an update so we can get loaded values
-            setImmediate(this.reflect);
+            setTimeout(this.reflect, 0);
         } else {
             console.error(
                 'Mirrors must be placed inside of a <Form/> component.',
@@ -35,17 +35,17 @@ export class Mirror extends React.Component<MirrorProps> {
 
         // Unregister names no longer included
         prevNames
-            .filter(name => !names.includes(name))
-            .forEach(name => this.formApi.unregisterMirror(name, this));
+            .filter((name) => !names.includes(name))
+            .forEach((name) => this.formApi.unregisterMirror(name, this));
         // Register names that were not included before
         names
-            .filter(name => !prevNames.includes(name))
-            .forEach(name => this.formApi.registerMirror(name, this));
+            .filter((name) => !prevNames.includes(name))
+            .forEach((name) => this.formApi.registerMirror(name, this));
     }
 
     public componentWillUnmount() {
         if (this.isInsideForm()) {
-            this.getNames().forEach(name =>
+            this.getNames().forEach((name) =>
                 this.formApi.unregisterMirror(name, this),
             );
         }
@@ -63,7 +63,7 @@ export class Mirror extends React.Component<MirrorProps> {
     }
 
     reflect = (): Promise<void> => {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             // Document check is done to prevent a jest unit test error where
             // the document may be cleaned up before forceUpdate is called
             typeof document !== 'undefined'

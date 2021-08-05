@@ -15,19 +15,19 @@
     "scripts": {
         "build": "tsc --sourceMap false",
         "clean": "rimraf dist",
+        "compile": "tsc --project ./tsconfig.json --noEmit",
+        "format": "prettier \"?(src|test)/**/*.ts?(x)\"",
         "lint": "tslint -c ./tslint.json ./src/**/*.ts --format stylish",
         "package": "cd ./dist && yarn pack",
         "prebuild": "yarn clean",
         "precommit": "lint-staged",
         "prepackage": "yarn build",
-        "prepublish": "yarn build",
-        "prettier": "prettier --write \"?(src|test)/**/*.ts?(x)\"",
-        "transpile": "tsc --project ./tsconfig.json --noEmit"
+        "prepublish": "yarn build"
     },
     "lint-staged": {
         "*.{ts,tsx,js,jsx}": [
-            "tslint --fix",
-            "prettier --write"
+            "lint --fix",
+            "format --write"
         ]
     },
     "dependencies": {

@@ -1300,21 +1300,20 @@ describe('Component: NestedForm', () => {
 
     describe('Misc: Nested From validation', () => {
         it('should allow cross-form validation via triggers with validation rules on the NestedForm component', async () => {
-            const lessThanCurrencyField = (targetFieldName: string) => (
-                currentFieldName: string,
-                values: ValueMap,
-            ): ValidatorData => {
-                const currentValue = values[currentFieldName];
-                const targetValue = values[targetFieldName];
+            const lessThanCurrencyField =
+                (targetFieldName: string) =>
+                (currentFieldName: string, values: ValueMap): ValidatorData => {
+                    const currentValue = values[currentFieldName];
+                    const targetValue = values[targetFieldName];
 
-                return Number(currentValue?.amount) >
-                    Number(targetValue?.amount)
-                    ? {
-                          context: ValidatorContext.Danger,
-                          message: `${currentFieldName} must be less than ${targetFieldName}`,
-                      }
-                    : undefined;
-            };
+                    return Number(currentValue?.amount) >
+                        Number(targetValue?.amount)
+                        ? {
+                              context: ValidatorContext.Danger,
+                              message: `${currentFieldName} must be less than ${targetFieldName}`,
+                          }
+                        : undefined;
+                };
             const firstIncomeNestedFormRef = React.createRef<NestedForm>();
             const secondIncomeNestedFormRef = React.createRef<NestedForm>();
             const parentFromRef = React.createRef<Form>();

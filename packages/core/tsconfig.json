@@ -9,7 +9,12 @@
             "@types": ["src/types/index"],
             "@utils": ["src/utils/index"],
             "@validator": ["src/validator/index"]
-        }
+        },
+        "typeRoots": [
+            "./src/typings",
+            "../typings/types",
+            "../../node_modules/@types"
+        ]
     },
     "rootDirs": ["src", "test"],
     "include": ["./src/**/*"],

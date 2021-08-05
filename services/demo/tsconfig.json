@@ -7,6 +7,10 @@
             "@react-declarative-form/core": ["../../packages/core/src"],
             "@react-declarative-form/material-ui": ["../../packages/material-ui/src"]
         },
+        "typeRoots": [
+            "../../packages/typings/types",
+            "../../node_modules/@types"
+        ]
     },
     "rootDirs": ["src"],
     "include": ["./src/**/*"],

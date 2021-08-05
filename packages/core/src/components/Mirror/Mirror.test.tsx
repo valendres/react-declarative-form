@@ -209,7 +209,7 @@ describe('Component: Mirror', () => {
                     <Mirror name="target">
                         {({ target }) => (
                             <Mirror name={target}>
-                                {mirroredValues => (
+                                {(mirroredValues) => (
                                     <React.Fragment>
                                         <div id="mirroredChild">
                                             {mirroredValues[target]}
@@ -258,7 +258,7 @@ describe('Component: Mirror', () => {
                     <Mirror name="targets">
                         {({ targets }) => (
                             <Mirror name={targets}>
-                                {mirroredValues => (
+                                {(mirroredValues) => (
                                     <React.Fragment>
                                         <div id="mirroredChildA">
                                             {mirroredValues[targets[0]]}
@@ -302,7 +302,7 @@ describe('Component: Mirror', () => {
             mount(
                 <Form>
                     <Mirror name="endDate">
-                        {mirroredValues => (
+                        {(mirroredValues) => (
                             <TextField
                                 name="startDate"
                                 value={undefined}
@@ -313,7 +313,7 @@ describe('Component: Mirror', () => {
                         )}
                     </Mirror>
                     <Mirror name="startDate">
-                        {mirroredValues => (
+                        {(mirroredValues) => (
                             <TextField
                                 name="endDate"
                                 value={new Date()}

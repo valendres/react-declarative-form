@@ -293,11 +293,8 @@ describe('component: Form', () => {
             wrapper.find({ name: 'firstName' }).find('input').simulate('blur');
 
             // Ensure handler has been called with current value
-            const [
-                componentName,
-                value,
-                event,
-            ] = (props.onBlur as any).mock.calls[0];
+            const [componentName, value, event] = (props.onBlur as any).mock
+                .calls[0];
             expect(componentName).toBe('firstName');
             expect(value).toBe(firstName);
             expect(event.type).toBe('blur');
@@ -320,11 +317,8 @@ describe('component: Form', () => {
             wrapper.find({ name: 'firstName' }).find('input').simulate('focus');
 
             // Ensure handler has been called with current value
-            const [
-                componentName,
-                value,
-                event,
-            ] = (props.onFocus as any).mock.calls[0];
+            const [componentName, value, event] = (props.onFocus as any).mock
+                .calls[0];
             expect(componentName).toBe('firstName');
             expect(value).toBe(firstName);
             expect(event.type).toBe('focus');

@@ -958,9 +958,8 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
         return componentNames.reduce(
             (dependencyMap: any, componentName: keyof FormComponents) => {
-                const validatorTrigger = this.getComponentValidatorTriggers(
-                    componentName,
-                );
+                const validatorTrigger =
+                    this.getComponentValidatorTriggers(componentName);
                 const namesToMap = validatorTrigger.filter(
                     (n: string) => !(n in mappedNames),
                 );
@@ -1041,9 +1040,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     ): Promise<void[]> => {
         this.logCall('reflectComponentMirrors', { componentName });
         return Promise.all(
-            this.getComponentMirrors(
-                componentName,
-            ).map((mirror: MirrorInstance) => mirror.reflect()),
+            this.getComponentMirrors(componentName).map(
+                (mirror: MirrorInstance) => mirror.reflect(),
+            ),
         );
     };
 

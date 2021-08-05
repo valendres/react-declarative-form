@@ -1,14 +1,11 @@
-const webpack = require('webpack');
 const path = require('path');
-const autoprefixer = require('autoprefixer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const OpenBrowserWebpackPlugin = require('open-browser-webpack-plugin');
 
 const packagePath = (relPath) => path.resolve(__dirname, relPath);
 const rootPath = (relPath) => path.resolve(__dirname, '../..', relPath);
 
 module.exports = {
-    devtool: 'cheap-module-eval-source-map',
+    devtool: 'eval-cheap-module-source-map',
     devServer: {
         port: '9000',
         hot: true,
@@ -32,10 +29,6 @@ module.exports = {
         },
     },
     plugins: [
-        new OpenBrowserWebpackPlugin({
-            url: 'http://localhost:9000',
-        }),
-        new webpack.NamedModulesPlugin(),
         new HtmlWebpackPlugin({
             title: 'React Declarative Form - Demo',
             template: packagePath('./src/index.ejs'),
@@ -59,7 +52,9 @@ module.exports = {
                     {
                         loader: 'postcss-loader',
                         options: {
-                            plugins: () => [autoprefixer()],
+                            postcssOptions: {
+                                plugins: [['autoprefixer']],
+                            },
                         },
                     },
                 ],
@@ -67,14 +62,7 @@ module.exports = {
             {
                 test: /\.tsx?$/,
                 exclude: [packagePath('dist'), packagePath('dist')],
-                loader: 'awesome-typescript-loader',
-                query: {
-                    useTranspileModule: true,
-                    useBabel: true,
-                    useCache: true,
-                    cacheDirectory: '.cache',
-                    reportFiles: ['src/**/*.{ts,tsx}'],
-                },
+                loader: 'ts-loader',
             },
             { enforce: 'pre', test: /\.js$/, loader: 'source-map-loader' },
         ],

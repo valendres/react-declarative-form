@@ -4,11 +4,11 @@ export enum ValidatorContext {
     Success = 'success',
 }
 
-export type ValidatorMessageGenerator = ((
+export type ValidatorMessageGenerator = (
     key: string,
     values: ValueMap,
     criteria?: any,
-) => string);
+) => string;
 
 export interface ValidatorMessages {
     readonly [name: string]: ValidatorMessageGenerator | string;

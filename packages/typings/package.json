@@ -1,0 +1,9 @@
+{
+    "name": "@react-declarative-form/typings",
+    "version": "1.0.0",
+    "description": "Typescript definitions for third party libraries which do not have them",
+    "private": true,
+    "scripts": {
+        "preinstall": "npx use-yarn -m 'Please use yarn!'"
+    }
+}

@@ -90,7 +90,7 @@ export interface BoundComponent extends React.Component<BoundComponentProps> {
 
 export function bind<
     WrappedComponentProps extends BoundComponentProps,
-    WrappedComponentStatics = {},
+    WrappedComponentStatics = {}
 >(
     WrappedComponent: React.ComponentClass<WrappedComponentProps>,
 ): WrappedComponentStatics & {
@@ -121,8 +121,7 @@ export function bind<
                 >;
             }
         >
-        implements BoundComponent
-    {
+        implements BoundComponent {
         //#region Private variables
         // tslint:disable:variable-name
         /**
@@ -202,8 +201,11 @@ export function bind<
                 <FormContext.Consumer>
                     {(api: FormApi) => {
                         this._formApi = api;
-                        const { value, pristine, validatorData } =
-                            this._getState();
+                        const {
+                            value,
+                            pristine,
+                            validatorData,
+                        } = this._getState();
 
                         return (
                             <WrappedComponent

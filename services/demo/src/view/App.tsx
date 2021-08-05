@@ -21,6 +21,7 @@ import {
     RegistrationForm,
     CrossValidationForm,
     IndividualComponentsForm,
+    CustomRulesForm,
 } from './forms';
 
 const forms: {
@@ -36,6 +37,11 @@ const forms: {
         value: 'cross-validation-form',
         label: 'Cross-validation form',
         Form: CrossValidationForm,
+    },
+    {
+        value: 'custom-rules-form',
+        label: 'Custom rules form',
+        Form: CustomRulesForm,
     },
     {
         value: 'default-values-form',
@@ -100,7 +106,7 @@ export const App = () => {
         <Grid container spacing={2}>
             <Grid item xs={12}>
                 <Paper>
-                    <Grid container justify="space-between">
+                    <Grid container justifyContent="space-between">
                         <Grid item>
                             <Button onClick={submitForm} type="submit">
                                 Submit

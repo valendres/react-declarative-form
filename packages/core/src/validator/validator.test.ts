@@ -149,4 +149,16 @@ describe('func: validate', () => {
         );
         expect(response.message).toEqual(customRequiredMessage);
     });
+
+    it('should auto-add the rule name if it was not included in the response of a custom validator', () => {
+        addValidatorRule('notZero', () => ({
+            // Note: this is intentionally omitted
+            // name: 'notZero',
+            context: ValidatorContext.Danger,
+            message: 'Must not be zero',
+        }));
+
+        const response = validate('age', { age: '0' }, { notZero: true });
+        expect(response.name).toEqual('notZero');
+    });
 });

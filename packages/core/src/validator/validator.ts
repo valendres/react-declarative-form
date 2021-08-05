@@ -79,17 +79,16 @@ export const validate = (
         if (response) return response;
     }
 
-    // Excute rest rules
+    // Execute rest rules
     let cachedValidatorData: ValidatorData;
     Object.keys(restRules).some(
         (ruleKey: keyof Omit<ValidatorRules, 'custom'>) => {
             const criteria = targetRules[ruleKey];
             if (ruleKey in validatorRules) {
-                const data = validatorRules[ruleKey](
-                    valueKey,
-                    values,
-                    criteria,
-                );
+                const data: ValidatorData = {
+                    name: ruleKey,
+                    ...validatorRules[ruleKey](valueKey, values, criteria),
+                };
 
                 // Break early if danger context is encountered
                 if (data && data.context === ValidatorContext.Danger) {

@@ -26,7 +26,7 @@ import { isDefined } from '../utils';
  * Note: `custom` is omitted because it is expected that consumers implement it.
  */
 export const validatorRules: {
-    [rule in keyof Required<Omit<ValidatorRules, 'custom'>>]: ValidatorRule;
+    [rule in keyof Omit<ValidatorRules, 'custom'>]: ValidatorRule;
 } = {
     required: (componentName: string, values: ValueMap) => {
         if (!isDefined(componentName, values)) {

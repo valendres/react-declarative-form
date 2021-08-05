@@ -343,7 +343,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     public isValid = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): boolean => {
-        // this._log('isValid', { componentName });
         const results = this.getComponentNames(componentName).map(
             (componentName) => {
                 /**
@@ -377,7 +376,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     public isPristine = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): boolean => {
-        // this._log('isPristine', { componentName });
         const results = this.getComponentNames(componentName).map(
             (componentName) => {
                 if (this.isRecursiveComponent(componentName)) {
@@ -422,7 +420,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             componentName,
         ),
     ): ValidatorData => {
-        // this._log('getValidatorData', { componentName });
         // Return user provided validatorData (if exists)
         if (componentProps.validatorData) {
             return componentProps.validatorData;
@@ -460,7 +457,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             componentName,
         ),
     ): any => {
-        // this._log('getValue', { componentName });
         const { valueTransformer } = this.props;
 
         /**
@@ -509,7 +505,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     public getValues = (
         componentNames?: (keyof FormComponents)[],
     ): FormComponents => {
-        // this._log('getValues', { componentNames });
         const values = this.getComponentNames(componentNames).reduce(
             (values: FormComponents, componentName: keyof FormComponents) => ({
                 ...values,
@@ -624,7 +619,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
 
     //#region Private helpers
     private isRecursiveComponent = (componentName: keyof FormComponents) => {
-        // this._log('isRecursiveComponent', { componentName });
         const instance = this.getComponentInstance(componentName);
         return instance && instance._isRecursive();
     };
@@ -875,7 +869,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     private getComponentMirrors = (
         componentName: keyof FormComponents,
     ): MirrorInstance[] => {
-        // this._log('getComponentMirrors', { componentName });
         return this.mirrors[componentName] || [];
     };
 
@@ -891,7 +884,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     private getComponentNames = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): (keyof FormComponents)[] => {
-        // this._log('getComponentNames', { componentName });
         // If no component name(s) was provided, return all component names
         if (!componentName) {
             return Object.keys(this.components);
@@ -920,7 +912,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     private getComponentInstance = (
         componentName: keyof FormComponents,
     ): BoundComponent => {
-        // this._log('getComponentInstance', { componentName });
         return componentName in this.components
             ? (this.components[componentName].instance as any)
             : undefined;
@@ -932,7 +923,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * @returns react component props
      */
     private getComponentProps = (componentName: keyof FormComponents) => {
-        // this._log('getComponentProps', { componentName });
         const instance = this.getComponentInstance(componentName);
         return instance ? instance.props : undefined;
     };
@@ -946,7 +936,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     private getComponentValidatorTriggers = (
         componentName: keyof FormComponents,
     ): (keyof FormComponents)[] => {
-        // this.logCall('getComponentValidatorTriggers', { componentName });
         const props = this.getComponentProps(componentName);
         const validatorTrigger = props?.validatorTrigger ?? [];
         return Array.isArray(validatorTrigger)
@@ -968,10 +957,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentNames: (keyof FormComponents)[],
         mappedNames: FormComponents = {} as any,
     ): (keyof FormComponents)[] => {
-        // this.logCall('getComponentDependencyMap', {
-        //     componentNames,
-        //     mappedNames,
-        // });
         // tslint:disable-next-line:no-parameter-reassignment
         mappedNames = componentNames.reduce(
             (names: any, name: string) => ({ ...names, [name]: true }),
@@ -1013,7 +998,6 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     private getRelatedComponentNames = (
         componentName: keyof FormComponents,
     ): (keyof FormComponents)[] => {
-        // this.logCall('getRelatedComponentNames', { componentName });
         const component = this.components[componentName];
         if (component) {
             return Object.keys(

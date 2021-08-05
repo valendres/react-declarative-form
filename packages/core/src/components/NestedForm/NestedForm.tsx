@@ -124,17 +124,14 @@ export class NestedForm extends React.Component<NestedFormProps>
     };
 
     isValid: BoundComponent['isValid'] = () => {
-        // this._log('isValid');
         return this._wrappedFormRef.current.isValid();
     };
 
     isPristine: BoundComponent['isPristine'] = () => {
-        // this._log('isPristine');
         return this._wrappedFormRef.current.isPristine();
     };
 
     getValue: BoundComponent['getValue'] = () => {
-        // this._log('getValue');
         return this._wrappedFormRef.current.getValues();
     };
 
@@ -148,7 +145,6 @@ export class NestedForm extends React.Component<NestedFormProps>
     };
 
     getValidatorData: BoundComponent['getValidatorData'] = () => {
-        // this._log('getValidatorData');
         const { name } = this.props;
 
         if (!this._parentFormApi) {

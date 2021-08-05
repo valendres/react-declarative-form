@@ -31,8 +31,11 @@
         ]
     },
     "dependencies": {
-        "@material-ui/core": "4.10.1",
+        "@material-ui/core": "4.12.3",
         "@react-declarative-form/core": "^2.0.0"
+    },
+    "devDependencies": {
+        "@react-declarative-form/typings": "*"
     },
     "peerDependencies": {
         "react": ">=0.16.3",

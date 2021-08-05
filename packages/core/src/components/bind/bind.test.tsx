@@ -421,7 +421,7 @@ describe('module: bind', () => {
             mount(<Component name="test" ref={boundComponentRef} />);
 
             const BoundClass = (boundComponentRef as any).current
-                ._reactInternalFiber.type;
+                ._reactInternals.type;
             expect(BoundClass.prototype.constructor.name).toBe(
                 'BoundComponent',
             );
@@ -432,7 +432,7 @@ describe('module: bind', () => {
             mount(<Component name="test" unboundRef={unboundComponentRef} />);
 
             const UnboundClass = (unboundComponentRef as any).current
-                ._reactInternalFiber.elementType;
+                ._reactInternals.elementType;
             expect(UnboundClass.prototype.constructor.name).toBe(
                 'UnboundComponent',
             );

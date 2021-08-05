@@ -577,22 +577,17 @@ describe('component: Form', () => {
             );
         });
 
-        it('should return a rejected promise if attempting to set a value of a component which does not exist', () => {
+        it('should do nothing if attempting to set a value of a component which does not exist', async () => {
             const props = mockProps();
-            const wrapper = mount(
+            const wrapper = mount<Form<any>>(
                 <Form {...props}>
                     <TextField name="firstName" />
                 </Form>,
             );
 
-            expect.assertions(1);
-            return (wrapper.instance() as Form<any>)
-                .setValue('lastName', 'abc')
-                .catch((error) => {
-                    expect(error).toMatchInlineSnapshot(
-                        `[UnknownComponentError: Failed to set value for "lastName" component. Not a descendant of this <Form/> component.]`,
-                    );
-                });
+            return expect(
+                wrapper.instance().setValue('lastName', 'abc'),
+            ).resolves.toBeUndefined();
         });
 
         it('should ignore initialValues if null', async () => {
@@ -1007,25 +1002,20 @@ describe('component: Form', () => {
             );
         });
 
-        it('should return a rejected promise if attempting to set validatorData for a component which does not exist', () => {
+        it('should do nothing if attempting to set validatorData for a component which does not exist', () => {
             const props = mockProps();
-            const wrapper = mount(
+            const wrapper = mount<Form<any>>(
                 <Form {...props}>
                     <TextField name="firstName" />
                 </Form>,
             );
 
-            expect.assertions(1);
-            return (wrapper.instance() as Form<any>)
-                .setValidatorData('lastName', {
+            return expect(
+                wrapper.instance().setValidatorData('lastName', {
                     context: ValidatorContext.Danger,
                     message: 'Something went wrong :(',
-                })
-                .catch((error) => {
-                    expect(error).toMatchInlineSnapshot(
-                        `[UnknownComponentError: Failed to set validatorData for "lastName" component. Not a descendant of this <Form/> component.]`,
-                    );
-                });
+                }),
+            ).resolves.toBeUndefined();
         });
     });
 

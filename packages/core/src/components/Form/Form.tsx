@@ -10,7 +10,6 @@ import {
 import { BoundComponent } from '../bind';
 import { MirrorInstance, Mirror } from '../Mirror';
 import { validate } from '../../validator';
-import { UnknownComponentError } from '../../errors';
 import { isCallable, getEnvironment } from '../../utils';
 
 export const FormContext = React.createContext(undefined as FormApi);
@@ -534,9 +533,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         this.logCall('setValidatorData', { componentName, data });
         // Don't set data if component is unknown
         if (!(componentName in this.components)) {
-            throw new UnknownComponentError(
-                `set validatorData for "${componentName}" component`,
-            );
+            return;
         }
 
         return this.updateComponent(componentName, {
@@ -568,9 +565,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         this.logCall('setValue', { componentName, value, pristine, internal });
         // Don't set value if component is unknown
         if (!(componentName in this.components)) {
-            throw new UnknownComponentError(
-                `set value for "${componentName}" component`,
-            );
+            return;
         }
 
         await this.updateComponent(componentName, {
@@ -899,10 +894,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         if (typeof componentName === 'string') {
             return [componentName];
         }
-
-        throw new UnknownComponentError(
-            `get component names from ${componentName}`,
-        );
+        return [];
     };
 
     /**
@@ -1026,9 +1018,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     ): Promise<void> => {
         this.logCall('updateComponent', { componentName, componentTransform });
         if (!(componentName in this.components)) {
-            throw new UnknownComponentError(
-                `Unable to update "${componentName}" component`,
-            );
+            return;
         }
 
         this.components = update(this.components, {

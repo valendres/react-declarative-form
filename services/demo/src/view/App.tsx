@@ -20,6 +20,7 @@ import {
     TransformerForm,
     RegistrationForm,
     CrossValidationForm,
+    IndividualComponentsForm,
 } from './forms';
 
 const forms: {
@@ -45,6 +46,11 @@ const forms: {
         value: 'initial-values-form',
         label: 'Initial values form',
         Form: InitialValuesForm,
+    },
+    {
+        value: 'individual-components-form',
+        label: 'Individual components form',
+        Form: IndividualComponentsForm,
     },
     {
         value: 'registration-form',

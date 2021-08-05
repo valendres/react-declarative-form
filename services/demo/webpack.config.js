@@ -8,7 +8,7 @@ const packagePath = (relPath) => path.resolve(__dirname, relPath);
 const rootPath = (relPath) => path.resolve(__dirname, '../..', relPath);
 
 module.exports = {
-    devtool: 'inline-source-map',
+    devtool: 'cheap-module-eval-source-map',
     devServer: {
         port: '9000',
         hot: true,

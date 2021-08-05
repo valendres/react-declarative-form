@@ -3,7 +3,8 @@ import { BoundComponentProps, bind, BoundComponent } from '../bind';
 import * as React from 'react';
 import { mount } from 'enzyme';
 import { Form } from '../Form';
-import { ValidatorContext } from '@types';
+import { ValidatorContext, ValueMap, ValidatorData } from '@types';
+const delay = require('delay');
 
 describe('Component: NestedForm', () => {
     interface TextFieldProps extends BoundComponentProps {
@@ -1293,6 +1294,107 @@ describe('Component: NestedForm', () => {
                         'Failed to handle focus for "currency:amount". Must be descendant of a <Form/> descendant.',
                     );
                 }
+            });
+        });
+    });
+
+    describe('Misc: Nested From validation', () => {
+        it('should allow cross-form validation via triggers with validation rules on the NestedForm component', async () => {
+            const lessThanCurrencyField = (targetFieldName: string) => (
+                currentFieldName: string,
+                values: ValueMap,
+            ): ValidatorData => {
+                const currentValue = values[currentFieldName];
+                const targetValue = values[targetFieldName];
+
+                return Number(currentValue?.amount) >
+                    Number(targetValue?.amount)
+                    ? {
+                          context: ValidatorContext.Danger,
+                          message: `${currentFieldName} must be less than ${targetFieldName}`,
+                      }
+                    : undefined;
+            };
+            const firstIncomeNestedFormRef = React.createRef<NestedForm>();
+            const secondIncomeNestedFormRef = React.createRef<NestedForm>();
+            const parentFromRef = React.createRef<Form>();
+            const wrapper = mount<Form<any>>(
+                <Form
+                    initialValues={{
+                        firstIncome: { amount: '33', code: 'GBP' },
+                        secondIncome: { amount: '22', code: 'GBP' },
+                    }}
+                    ref={parentFromRef}
+                >
+                    <NestedForm
+                        name="firstIncome"
+                        validatorTrigger="secondIncome"
+                        ref={firstIncomeNestedFormRef}
+                    >
+                        <TextField name="amount" />
+                        <TextField name="code" required />
+                    </NestedForm>
+                    <NestedForm
+                        name="secondIncome"
+                        validatorRules={{
+                            custom: lessThanCurrencyField('firstIncome'),
+                        }}
+                        ref={secondIncomeNestedFormRef}
+                    >
+                        {({ validatorData }) => (
+                            <React.Fragment>
+                                <TextField
+                                    name="amount"
+                                    validatorData={
+                                        validatorData?.context !==
+                                        ValidatorContext.Success
+                                            ? validatorData
+                                            : undefined
+                                    }
+                                    validatorRules={{
+                                        minValue: 0,
+                                    }}
+                                />
+                                <TextField name="code" required />
+                            </React.Fragment>
+                        )}
+                    </NestedForm>
+                </Form>,
+            );
+
+            await delay(10);
+
+            parentFromRef.current.submit();
+
+            await delay(10);
+
+            expect(
+                wrapper.find({ name: 'secondIncome' }).find({ name: 'amount' }),
+            ).toHaveValidatorData({});
+
+            await parentFromRef.current.setValues({
+                firstIncome: { amount: '11', code: 'GBP' },
+            });
+
+            const outerFormInstance = wrapper.instance();
+            await outerFormInstance.validate();
+            wrapper.update();
+
+            const values = outerFormInstance.getValues();
+            expect(values.firstIncome).toStrictEqual({
+                amount: '11',
+                code: 'GBP',
+            });
+            expect(values.secondIncome).toStrictEqual({
+                amount: '22',
+                code: 'GBP',
+            });
+
+            expect(
+                wrapper.find({ name: 'secondIncome' }).find({ name: 'amount' }),
+            ).toHaveValidatorData({
+                context: ValidatorContext.Danger,
+                message: 'secondIncome must be less than firstIncome',
             });
         });
     });

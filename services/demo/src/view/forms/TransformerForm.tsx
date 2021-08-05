@@ -4,12 +4,14 @@ import {
     TextField,
     Select,
     CurrencyField,
+    Currency,
 } from '@react-declarative-form/material-ui';
 import { Typography, Grid } from '@material-ui/core';
 
 export interface TransformerFormFields {
     firstName: string;
     favFruit: string;
+    income: Currency;
 }
 
 export interface TransformerFormProps extends FormProps<TransformerFormFields> {

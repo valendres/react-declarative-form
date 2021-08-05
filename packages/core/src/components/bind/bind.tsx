@@ -137,6 +137,7 @@ export function bind<
         //#endregion
 
         public componentDidMount() {
+            this.logCall('componentDidMount');
             const { name } = this.props;
             if (!this._formApi) {
                 console.error(
@@ -148,16 +149,19 @@ export function bind<
         }
 
         public componentWillUnmount() {
+            this.logCall('componentWillUnmount');
             const { name } = this.props;
             return this._formApi && this._formApi.onComponentUnmount(name);
         }
 
         public componentDidUpdate() {
+            this.logCall('componentDidUpdate');
             const { name } = this.props;
             return this._formApi && this._formApi.onComponentUpdate(name);
         }
 
         public shouldComponentUpdate(nextProps: WrappedComponentProps) {
+            this.logCall('shouldComponentUpdate');
             const prevProps = this.props;
             const prevState = this._state;
             const nextState = this._getState();
@@ -183,6 +187,7 @@ export function bind<
         }
 
         public render() {
+            this.logCall('render');
             const {
                 // Omit these
                 validatorRules,
@@ -225,6 +230,7 @@ export function bind<
          * @returns a promise which is resolved once the react component has been re-rendered
          */
         clear = () => {
+            this.logCall('clear');
             const { name } = this.props;
             if (!this._formApi) {
                 throw new OutsideFormError(`clear "${name}"`);
@@ -237,6 +243,7 @@ export function bind<
          * @returns a promise which is resolved once the react component has been re-rendered
          */
         reset = () => {
+            this.logCall('reset');
             const { name } = this.props;
             if (!this._formApi) {
                 throw new OutsideFormError(`reset "${name}"`);
@@ -250,6 +257,7 @@ export function bind<
          * @returns a promise which is resolved once the react component has been re-rendered.
          */
         validate = () => {
+            this.logCall('validate');
             const { name } = this.props;
             if (!this._formApi) {
                 throw new OutsideFormError(`validate "${name}"`);
@@ -337,6 +345,7 @@ export function bind<
          * @returns a promise which is resolved once the react component has been re-rendered.
          */
         setValidatorData = async (data: ValidatorData): Promise<void> => {
+            this.logCall('setValidatorData', { data });
             const { name } = this.props;
             if (!this._formApi) {
                 throw new OutsideFormError(`set validator data for "${name}"`);
@@ -353,6 +362,7 @@ export function bind<
          * @returns a promise which is resolved once the react component has been re-rendered.
          */
         setValue = async (value: any, pristine?: boolean) => {
+            this.logCall('setValue', { value, pristine });
             const { name } = this.props;
             if (!this._formApi) {
                 throw new OutsideFormError(`set value for "${name}"`);
@@ -364,6 +374,7 @@ export function bind<
         //#region Private functions
         // tslint:disable:variable-name
         _handleBlur = (event?: any) => {
+            this.logCall('_handleBlur', { event });
             const { name, onBlur } = this.props;
             if (!this._formApi) {
                 throw new OutsideFormError(`handle blur for "${name}"`);
@@ -377,6 +388,7 @@ export function bind<
         };
 
         _handleFocus = (event?: any) => {
+            this.logCall('_handleFocus', { event });
             const { name, onFocus } = this.props;
             if (!this._formApi) {
                 throw new OutsideFormError(`handle focus for "${name}"`);
@@ -417,6 +429,7 @@ export function bind<
         };
 
         _update = (state: BoundComponentDerivedState): Promise<void> => {
+            this.logCall('_update', { state });
             return new Promise((resolve) => {
                 this.forceUpdate(resolve);
             });
@@ -426,6 +439,25 @@ export function bind<
             return false;
         };
         // tslint:enable:variable-name
+
+        private logCall = (
+            functionName: string,
+            args?: {
+                [argName: string]: any;
+            },
+        ) => {
+            if (!this._formApi || !this._formApi.debug) {
+                return;
+            }
+
+            const logPrefix = `🟩 BoundComponent['${this.props.name}'].${functionName}`;
+
+            if (args) {
+                console.debug(`${logPrefix}:`, args);
+            } else {
+                console.debug(logPrefix);
+            }
+        };
         //#endregion
     }
 

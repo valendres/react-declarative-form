@@ -10,13 +10,11 @@ import {
 import { BoundComponent } from '../bind';
 import { MirrorInstance, Mirror } from '../Mirror';
 import { validate } from '../../validator';
-import { UnknownComponentError } from '../../errors';
 import { isCallable, getEnvironment } from '../../utils';
 
 export const FormContext = React.createContext(undefined as FormApi);
 
 export interface FormApi {
-    initialValues: any;
     clear: Form<any>['clear'];
     reset: Form<any>['reset'];
     validate: Form<any>['validate'];
@@ -35,6 +33,8 @@ export interface FormApi {
     onComponentFocus: Form<any>['handleComponentFocus'];
     registerMirror: Form<any>['registerMirror'];
     unregisterMirror: Form<any>['unregisterMirror'];
+    initialValues: FormProps<any>['initialValues'];
+    debug?: FormProps<any>['debug'];
 }
 
 export interface FormProps<FormFields extends ValueMap> {
@@ -140,6 +140,11 @@ export interface FormProps<FormFields extends ValueMap> {
      * updating the initialValues.
      */
     initialValues?: FormFields;
+
+    /**
+     * Whether the form and its descendent components should log debug messages.
+     */
+    debug?: boolean;
 }
 
 export interface FormComponentState {
@@ -173,6 +178,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     }
 
     render() {
+        this.logCall('render');
         const {
             children,
             withHiddenSubmit,
@@ -185,14 +191,17 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
             onSubmit,
             onValidSubmit,
             onInvalidSubmit,
+            debug,
             initialValues,
             sticky,
+            valueTransformer,
 
             // Injected
             ...restProps
         } = this.props;
 
         const api: FormApi = {
+            debug,
             initialValues,
             clear: this.clear,
             reset: this.reset,
@@ -244,6 +253,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      *  - values: all of the form values at the time of submission
      */
     public submit = () => {
+        this.logCall('submit');
         return this.handleFormSubmit();
     };
 
@@ -256,6 +266,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     public clear = async (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
+        this.logCall('clear', { componentName });
         return Promise.all(
             this.getComponentNames(componentName).map(async (componentName) => {
                 await this.setValue(componentName, null);
@@ -273,6 +284,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     public reset = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
+        this.logCall('reset', { componentName });
         return Promise.all(
             this.getComponentNames(componentName).map(async (componentName) => {
                 await this.updateComponent(componentName, {
@@ -297,20 +309,19 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     public validate = (
         componentName?: keyof FormComponents | (keyof FormComponents)[],
     ): Promise<void[]> => {
+        this.logCall('validate', { componentName });
         return Promise.all(
             this.getComponentNames(componentName).map(async (componentName) => {
-                /**
-                 * Recursive components don't have validation rules, therefore we rely on
-                 * recursively calling isValid on the form.
+                /** Recursive components require calling `validate` on them to
+                 * recursively trigger validation logic on their form components.
                  */
                 if (this.isRecursiveComponent(componentName)) {
                     await this.getComponentInstance(componentName).validate();
-                } else {
-                    await this.setValidatorData(
-                        componentName,
-                        this.executeValidator(componentName),
-                    );
                 }
+                await this.setValidatorData(
+                    componentName,
+                    this.executeValidator(componentName),
+                );
             }),
         );
     };
@@ -519,11 +530,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         data: ValidatorData,
     ): Promise<void> => {
+        this.logCall('setValidatorData', { componentName, data });
         // Don't set data if component is unknown
         if (!(componentName in this.components)) {
-            throw new UnknownComponentError(
-                `set validatorData for "${componentName}" component`,
-            );
+            return;
         }
 
         return this.updateComponent(componentName, {
@@ -552,11 +562,10 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         pristine: boolean = false,
         internal: boolean = false,
     ): Promise<void> => {
+        this.logCall('setValue', { componentName, value, pristine, internal });
         // Don't set value if component is unknown
         if (!(componentName in this.components)) {
-            throw new UnknownComponentError(
-                `set value for "${componentName}" component`,
-            );
+            return;
         }
 
         await this.updateComponent(componentName, {
@@ -590,6 +599,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         pristine?: boolean,
         internal?: boolean,
     ): Promise<void[]> => {
+        this.logCall('setValues', { values, pristine, internal });
         return Promise.all(
             Object.keys(values).map((componentName: string) =>
                 this.setValue(
@@ -621,6 +631,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         componentRef: BoundComponent,
     ) => {
+        this.logCall('registerComponent', { componentName, componentRef });
         // Return early if a ref has already been registered
         if (
             componentName in this.components &&
@@ -656,6 +667,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
      * @returns void
      */
     private unregisterComponent = (componentName: keyof FormComponents) => {
+        this.logCall('unregisterComponent', { componentName });
         if (
             !(componentName in this.components) ||
             !this.components[componentName].instance
@@ -684,17 +696,18 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     /**
      * Registers a mirror with the form, allowing it to reflect a component.
      * @param {string} componentName name of the component to mirror
-     * @param {object} mirror react mirror reference to be registered
+     * @param {object} mirrorRef react mirror reference to be registered
      * @returns void
      */
     private registerMirror = (
         componentName: keyof FormComponents,
-        mirror: Mirror,
+        mirrorRef: Mirror,
     ): void => {
+        this.logCall('registerMirror', { componentName, mirrorRef });
         if (componentName in this.mirrors) {
-            this.mirrors[componentName].push(mirror);
+            this.mirrors[componentName].push(mirrorRef);
         } else {
-            this.mirrors[componentName] = [mirror];
+            this.mirrors[componentName] = [mirrorRef];
         }
     };
 
@@ -708,6 +721,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         mirrorRef: Mirror,
     ): void => {
+        this.logCall('unregisterMirror', { componentName, mirrorRef });
         if (componentName in this.mirrors) {
             const index = this.mirrors[componentName].indexOf(mirrorRef);
             if (index > -1) {
@@ -722,6 +736,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         value: any,
     ) => {
+        this.logCall('handleFormChange', { componentName, value });
         const { onChange } = this.props;
         if (isCallable(onChange)) {
             onChange(componentName, value);
@@ -729,6 +744,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     };
 
     private handleFormSubmit = (event?: any) => {
+        this.logCall('handleFormSubmit', { event });
         if (event) {
             event.preventDefault();
         }
@@ -754,6 +770,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     };
 
     private handleFormValidSubmit = (values: FormComponents) => {
+        this.logCall('handleFormValidSubmit', { values });
         const { onValidSubmit } = this.props;
         if (isCallable(onValidSubmit)) {
             onValidSubmit(values);
@@ -761,6 +778,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     };
 
     private handleFormInvalidSubmit = (values: FormComponents) => {
+        this.logCall('handleFormInvalidSubmit', { values });
         const { onInvalidSubmit } = this.props;
         this.validate();
         if (isCallable(onInvalidSubmit)) {
@@ -772,6 +790,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         componentRef: BoundComponent,
     ) => {
+        this.logCall('handleComponentMount', { componentName, componentRef });
         this.registerComponent(componentName, componentRef);
         this.reflectComponentMirrors(componentName);
     };
@@ -779,6 +798,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     private handleComponentUnmount = async (
         componentName: keyof FormComponents,
     ) => {
+        this.logCall('handleComponentUnmount', { componentName });
         this.unregisterComponent(componentName);
         this.reflectComponentMirrors(componentName);
     };
@@ -786,6 +806,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     private handleComponentUpdate = async (
         componentName: keyof FormComponents,
     ) => {
+        this.logCall('handleComponentUpdate', { componentName });
         // Cross-validate if necessary
         await Promise.all(
             this.getRelatedComponentNames(componentName).map(
@@ -808,6 +829,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         event: any,
     ) => {
+        this.logCall('handleComponentBlur', { componentName, event });
         const value = this.getValue(componentName);
 
         const { onBlur } = this.props;
@@ -822,6 +844,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         event: any,
     ) => {
+        this.logCall('handleComponentFocus', { componentName, event });
         const value = this.getValue(componentName);
 
         const { onFocus } = this.props;
@@ -871,10 +894,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         if (typeof componentName === 'string') {
             return [componentName];
         }
-
-        throw new UnknownComponentError(
-            `get component names from ${componentName}`,
-        );
+        return [];
     };
 
     /**
@@ -910,7 +930,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
     ): (keyof FormComponents)[] => {
         const props = this.getComponentProps(componentName);
-        const validatorTrigger = props.validatorTrigger || [];
+        const validatorTrigger = props?.validatorTrigger ?? [];
         return Array.isArray(validatorTrigger)
             ? validatorTrigger
             : [validatorTrigger];
@@ -996,10 +1016,9 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         componentTransform: UpdateTransform,
     ): Promise<void> => {
+        this.logCall('updateComponent', { componentName, componentTransform });
         if (!(componentName in this.components)) {
-            throw new UnknownComponentError(
-                `Unable to update "${componentName}" component`,
-            );
+            return;
         }
 
         this.components = update(this.components, {
@@ -1020,6 +1039,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
     private reflectComponentMirrors = (
         componentName: keyof FormComponents,
     ): Promise<void[]> => {
+        this.logCall('reflectComponentMirrors', { componentName });
         return Promise.all(
             this.getComponentMirrors(
                 componentName,
@@ -1038,6 +1058,7 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         componentName: keyof FormComponents,
         value: any = this.getValue(componentName),
     ): ValidatorData => {
+        this.logCall('executeValidator', { componentName, value });
         const props = this.getComponentProps(componentName);
         return validate(
             componentName as string,
@@ -1057,4 +1078,26 @@ export class Form<FormComponents extends ValueMap = {}> extends React.Component<
         );
     };
     //#endregion
+
+    logCall = (
+        functionName: string,
+        args?: {
+            [argName: string]: any;
+        },
+    ) => {
+        // Return early if we're not debugging
+        if (!this.props.debug) {
+            return;
+        }
+
+        const logPrefix = this.props.virtual
+            ? `🟨 VirtualForm.${functionName}`
+            : `🟥 ParentForm.${functionName}`;
+
+        if (args) {
+            console.debug(`${logPrefix}:`, args);
+        } else {
+            console.debug(logPrefix);
+        }
+    };
 }

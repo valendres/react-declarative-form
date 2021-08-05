@@ -23,8 +23,7 @@
     "lint-staged": {
         "*.{ts,tsx,js,jsx}": [
             "tslint --fix",
-            "prettier --write",
-            "git add"
+            "prettier --write"
         ]
     },
     "resolutions": {

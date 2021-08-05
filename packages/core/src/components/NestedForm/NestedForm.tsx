@@ -6,12 +6,18 @@ import {
     FormComponentState,
     FormProps,
 } from '../Form';
-import { BoundComponent } from '../bind';
+import { ValidatorData } from '../../types';
+import { BoundComponent, BoundComponentProps } from '../bind';
 import { OutsideFormError } from '../../errors';
+import { isCallable } from '../../utils';
 
-export interface NestedFormProps {
+export type NestedFormChildrenRenderFunc = (renderProps: {
+    validatorData: ValidatorData;
+}) => React.ReactNode;
+
+export interface NestedFormProps extends BoundComponentProps {
     name: string;
-    children: React.ReactNode;
+    children: React.ReactNode | NestedFormChildrenRenderFunc;
     valueTransformer?: FormProps<any>['valuesTransformer'];
 }
 
@@ -32,6 +38,7 @@ export class NestedForm extends React.Component<NestedFormProps>
     //#endregion
 
     public componentDidMount() {
+        this.logCall('componentDidMount');
         const { name } = this.props;
         if (!this._parentFormApi) {
             console.error(
@@ -43,19 +50,30 @@ export class NestedForm extends React.Component<NestedFormProps>
     }
 
     public componentWillUnmount() {
+        this.logCall('componentWillUnmount');
         const { name } = this.props;
         return (
             this._parentFormApi && this._parentFormApi.onComponentUnmount(name)
         );
     }
 
+    renderChildren(children: NestedFormProps['children']) {
+        if (isCallable(children)) {
+            const validatorData = this.getValidatorData();
+            return (children as NestedFormChildrenRenderFunc)({
+                validatorData,
+            });
+        }
+        return children;
+    }
+
     render() {
+        this.logCall('render');
         const { name, children, valueTransformer } = this.props;
         return (
             <FormContext.Consumer>
                 {(api: FormApi) => {
                     this._parentFormApi = api;
-                    const initialValues = api && api.initialValues[name];
                     return (
                         <Form
                             ref={this._wrappedFormRef}
@@ -63,11 +81,12 @@ export class NestedForm extends React.Component<NestedFormProps>
                             onBlur={this._handleBlur}
                             onFocus={this._handleFocus}
                             onUpdate={this._handleUpdate}
-                            initialValues={initialValues}
                             valuesTransformer={valueTransformer}
+                            initialValues={api?.initialValues[name]}
+                            debug={api?.debug}
                             virtual
                         >
-                            {children}
+                            {this.renderChildren(children)}
                         </Form>
                     );
                 }}
@@ -76,6 +95,7 @@ export class NestedForm extends React.Component<NestedFormProps>
     }
 
     clear: BoundComponent['clear'] = async () => {
+        this.logCall('clear');
         const { name } = this.props;
 
         if (!this._parentFormApi) {
@@ -87,6 +107,7 @@ export class NestedForm extends React.Component<NestedFormProps>
     };
 
     reset: BoundComponent['reset'] = async () => {
+        this.logCall('reset');
         const { name } = this.props;
 
         if (!this._parentFormApi) {
@@ -98,6 +119,7 @@ export class NestedForm extends React.Component<NestedFormProps>
     };
 
     validate: BoundComponent['validate'] = async () => {
+        this.logCall('validate');
         await this._wrappedFormRef.current.validate();
     };
 
@@ -109,19 +131,12 @@ export class NestedForm extends React.Component<NestedFormProps>
         return this._wrappedFormRef.current.isPristine();
     };
 
-    getValidatorData: BoundComponent['getValidatorData'] = () => {
-        return undefined;
-    };
-
     getValue: BoundComponent['getValue'] = () => {
         return this._wrappedFormRef.current.getValues();
     };
 
-    setValidatorData: BoundComponent['setValidatorData'] = () => {
-        return Promise.resolve();
-    };
-
     setValue: BoundComponent['setValue'] = async (value, pristine) => {
+        this.logCall('setValue', { value, pristine });
         await this._wrappedFormRef.current.setValues(
             this._transformValue(value),
             pristine,
@@ -129,9 +144,31 @@ export class NestedForm extends React.Component<NestedFormProps>
         return undefined;
     };
 
+    getValidatorData: BoundComponent['getValidatorData'] = () => {
+        const { name } = this.props;
+
+        if (!this._parentFormApi) {
+            throw new OutsideFormError(`get validator data for for "${name}"`);
+        }
+
+        return this._parentFormApi.getValidatorData(name, this.props);
+    };
+
+    setValidatorData: BoundComponent['setValidatorData'] = (validatorData) => {
+        this.logCall('setValidatorData', { validatorData });
+        const { name } = this.props;
+
+        if (!this._parentFormApi) {
+            throw new OutsideFormError(`set validator data for for "${name}"`);
+        }
+
+        return this._parentFormApi.setValidatorData(name, validatorData);
+    };
+
     //#region Private functions
     // tslint:disable:variable-name
     _handleChange = async (componentName: string, value: any) => {
+        this.logCall('_handleChange', { componentName, value });
         const { name } = this.props;
 
         if (!this._parentFormApi) {
@@ -148,6 +185,7 @@ export class NestedForm extends React.Component<NestedFormProps>
     };
 
     _handleBlur = (componentName: string, event: any) => {
+        this.logCall('_handleBlur', { componentName, event });
         const { name } = this.props;
 
         if (!this._parentFormApi) {
@@ -160,6 +198,7 @@ export class NestedForm extends React.Component<NestedFormProps>
     };
 
     _handleFocus = (componentName: string, event: any) => {
+        this.logCall('_handleFocus', { componentName, event });
         const { name } = this.props;
 
         if (!this._parentFormApi) {
@@ -172,6 +211,7 @@ export class NestedForm extends React.Component<NestedFormProps>
     };
 
     _handleUpdate = (componentName: string) => {
+        this.logCall('_handleUpdate', { componentName });
         const { name } = this.props;
 
         if (!this._parentFormApi) {
@@ -183,7 +223,9 @@ export class NestedForm extends React.Component<NestedFormProps>
         return this._parentFormApi.onComponentUpdate(name);
     };
 
-    _update = async ({ value, pristine }: FormComponentState) => {
+    _update = async (componentState: FormComponentState) => {
+        this.logCall('_update', { componentState });
+        const { value, pristine } = componentState;
         const { name } = this.props;
 
         if (!this._parentFormApi) {
@@ -196,7 +238,10 @@ export class NestedForm extends React.Component<NestedFormProps>
             true,
         );
 
-        return Promise.resolve();
+        // TODO: trigger the component to render if the validatorDate changes
+        await new Promise((resolve) => {
+            this.forceUpdate(resolve);
+        });
     };
 
     _isRecursive = () => {
@@ -221,4 +266,22 @@ export class NestedForm extends React.Component<NestedFormProps>
     };
     // tslint:enable:variable-name
     //#endregion
+
+    logCall = (
+        functionName: string,
+        args?: {
+            [argName: string]: any;
+        },
+    ) => {
+        if (!this._parentFormApi || !this._parentFormApi.debug) {
+            return;
+        }
+        const logPrefix = `🟧 NestedForm['${this.props.name}'].${functionName}`;
+
+        if (args) {
+            console.debug(`${logPrefix}:`, args);
+        } else {
+            console.debug(logPrefix);
+        }
+    };
 }
